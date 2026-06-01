@@ -60,7 +60,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2000,
+        max_tokens: 3000,
         system: 'You are a resume parser. Extract all information from the resume document provided and return it as clean plain text, preserving all sections: contact info, summary, every work experience entry with company/title/dates/bullets, all education, certifications, and skills. Return ONLY the extracted text, no commentary.',
         messages: [{
           role: 'user',
