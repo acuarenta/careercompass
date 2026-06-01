@@ -1,9 +1,7 @@
 // netlify/functions/parse-resume.js
-// Accepts a base64-encoded PDF or DOCX file, returns extracted plain text.
-// Called by the CareerCompass upload handler in index.html.
-
-const pdfParse  = require('pdf-parse');
-const mammoth   = require('mammoth');
+// Sends the uploaded resume directly to Claude as a native document.
+// Claude reads PDF/DOCX natively — no third-party parsing libraries needed.
+// Returns structured JSON with all resume fields extracted.
 
 exports.handler = async (event) => {
   const headers = {
@@ -13,96 +11,84 @@ exports.handler = async (event) => {
     'Content-Type': 'application/json'
   };
 
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
-  }
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
+  if (event.httpMethod !== 'POST') return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
 
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return { statusCode: 500, headers, body: JSON.stringify({ error: 'API key not configured' }) };
 
   try {
-    const { fileData, fileType, fileName } = JSON.parse(event.body || '{}');
+    const { fileData, fileType, fileName, personalityContext } = JSON.parse(event.body || '{}');
 
-    if (!fileData) {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: 'No file data provided' }) };
-    }
-
-    // Decode base64 → Buffer
-    const buffer = Buffer.from(fileData, 'base64');
-    let text = '';
+    if (!fileData) return { statusCode: 400, headers, body: JSON.stringify({ error: 'No file data provided' }) };
 
     const type = (fileType || '').toLowerCase();
     const name = (fileName || '').toLowerCase();
 
+    // Determine media type for Claude's document API
+    let mediaType = null;
     if (type.includes('pdf') || name.endsWith('.pdf')) {
-      // ── PDF ──────────────────────────────────────────────────────
-      const result = await pdfParse(buffer);
-      text = result.text || '';
-
-    } else if (
-      type.includes('wordprocessingml') ||
-      type.includes('msword') ||
-      name.endsWith('.docx') ||
-      name.endsWith('.doc')
-    ) {
-      // ── DOCX / DOC ───────────────────────────────────────────────
-      const result = await mammoth.extractRawText({ buffer });
-      text = result.value || '';
-
+      mediaType = 'application/pdf';
     } else if (type.includes('text') || name.endsWith('.txt')) {
-      // ── Plain text ───────────────────────────────────────────────
-      text = buffer.toString('utf-8');
-
-    } else {
+      // For plain text, extract directly without Claude
+      const text = Buffer.from(fileData, 'base64').toString('utf-8').trim();
+      return { statusCode: 200, headers, body: JSON.stringify({ text, truncated: false }) };
+    } else if (
+      type.includes('wordprocessingml') || type.includes('msword') ||
+      name.endsWith('.docx') || name.endsWith('.doc')
+    ) {
+      // Word docs: Claude doesn't natively support these yet, return helpful message
       return {
-        statusCode: 400,
+        statusCode: 200,
         headers,
-        body: JSON.stringify({ error: 'Unsupported file type. Please upload a PDF, Word document, or .txt file.' })
+        body: JSON.stringify({
+          text: '',
+          warning: 'Word documents are not yet supported for direct reading. Please save your resume as a PDF and re-upload, or use the manual entry tab.'
+        })
       };
+    } else {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: 'Please upload a PDF or .txt file.' }) };
     }
 
-    // pdf-parse sometimes prepends its own source library code to the output.
-    // Strip everything before what looks like a real resume (name/address line).
-    // Heuristic: find the first line that looks like a person's name or address.
-    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-    let startIdx = 0;
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      // A real resume starts with a name line (short, no semicolons/braces/equals)
-      if (
-        line.length > 2 &&
-        line.length < 80 &&
-        !line.includes('{') &&
-        !line.includes(';') &&
-        !line.includes('=') &&
-        !line.includes('function') &&
-        !line.startsWith('var ') &&
-        !line.startsWith('const ') &&
-        !line.startsWith('let ') &&
-        !line.startsWith('exports') &&
-        !/^[^a-zA-Z]*$/.test(line) // must have letters
-      ) {
-        startIdx = i;
-        break;
-      }
-    }
-    text = lines.slice(startIdx).join('\n');
+    // Send PDF directly to Claude as a native document
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 2000,
+        system: 'You are a resume parser. Extract all information from the resume document provided and return it as clean plain text, preserving all sections: contact info, summary, every work experience entry with company/title/dates/bullets, all education, certifications, and skills. Return ONLY the extracted text, no commentary.',
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'document',
+              source: {
+                type: 'base64',
+                media_type: mediaType,
+                data: fileData
+              }
+            },
+            {
+              type: 'text',
+              text: 'Extract all text from this resume exactly as written. Preserve all names, dates, companies, job titles, bullet points, education, and certifications. Return clean plain text only.'
+            }
+          ]
+        }]
+      })
+    });
 
-    // Now clean up the real resume text
-    text = text
-      .replace(/P R O F E S S I O N A ?L/gi, 'PROFESSIONAL')
-      .replace(/E X P E R I E N C E/gi, 'EXPERIENCE')
-      .replace(/E D U C A ?T I O N/gi, 'EDUCATION')
-      .replace(/C E R T I F I C A ?T I O N S?/gi, 'CERTIFICATIONS')
-      .replace(/S U M M A R Y/gi, 'SUMMARY')
-      .replace(/C O M P E T E N C I E S/gi, 'COMPETENCIES')
-      .replace(/S K I L L S/gi, 'SKILLS')
-      .replace(/([A-Z]) ([A-Z]) ([A-Z])/g, '$1$2$3')
-      .replace(/([A-Z]) ([A-Z])/g, '$1$2')
-      .replace(/•/g, '\n•')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || 'Claude API error');
+    }
+
+    const text = (data.content || []).map(b => b.text || '').join('').trim();
 
     if (!text || text.length < 50) {
       return {
@@ -110,19 +96,15 @@ exports.handler = async (event) => {
         headers,
         body: JSON.stringify({
           text: '',
-          warning: 'Could not extract readable text from this file. It may be a scanned image or protected PDF. Try copying and pasting your resume text into the manual entry tab instead.'
+          warning: 'Could not extract text from this file. Try saving as a PDF with selectable text, or use the manual entry tab.'
         })
       };
     }
 
-    // Cap at 10000 chars — covers even heavily formatted long resumes
-    const truncated = text.length > 10000;
-    const finalText = truncated ? text.substring(0, 10000) + '\n[truncated for length]' : text;
-
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ text: finalText, truncated, charCount: text.length })
+      body: JSON.stringify({ text, truncated: false, charCount: text.length })
     };
 
   } catch (err) {
@@ -130,7 +112,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Failed to parse file: ' + err.message })
+      body: JSON.stringify({ error: 'Failed to read resume: ' + err.message })
     };
   }
 };
