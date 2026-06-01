@@ -1025,7 +1025,7 @@ async function runResumeFeedback() {
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
-        max_tokens:1500,
+        max_tokens:4000,
         system:'You are CareerCompass, a warm and encouraging career coach. Give specific, honest, actionable resume feedback. Never mention AI. Respond ONLY with valid JSON — no markdown fences, no preamble.',
         messages:[{role:'user',content:buildPrompt(ctx)}]
       })
@@ -1323,7 +1323,7 @@ async function runCoverLetter() {
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
+        max_tokens:1500,
         system:'You are CareerCompass, a expert cover letter writer. Write compelling, specific, human-sounding cover letters. Never mention AI. Respond ONLY with valid JSON.',
         messages:[{role:'user',content:prompt}]
       })
