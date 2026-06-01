@@ -62,22 +62,46 @@ exports.handler = async (event) => {
       };
     }
 
-    // Clean up extracted text
+    // pdf-parse sometimes prepends its own source library code to the output.
+    // Strip everything before what looks like a real resume (name/address line).
+    // Heuristic: find the first line that looks like a person's name or address.
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    let startIdx = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      // A real resume starts with a name line (short, no semicolons/braces/equals)
+      if (
+        line.length > 2 &&
+        line.length < 80 &&
+        !line.includes('{') &&
+        !line.includes(';') &&
+        !line.includes('=') &&
+        !line.includes('function') &&
+        !line.startsWith('var ') &&
+        !line.startsWith('const ') &&
+        !line.startsWith('let ') &&
+        !line.startsWith('exports') &&
+        !/^[^a-zA-Z]*$/.test(line) // must have letters
+      ) {
+        startIdx = i;
+        break;
+      }
+    }
+    text = lines.slice(startIdx).join('\n');
+
+    // Now clean up the real resume text
     text = text
-      .replace(/\r\n/g, '\n')                          // normalize line endings
-      .replace(/\r/g, '\n')
-      .replace(/[^\S\n]+/g, ' ')                       // collapse spaces/tabs (preserve newlines)
-      .replace(/P R O F E S S I O N A ?L/gi, 'PROFESSIONAL')  // fix spaced-out headers
+      .replace(/P R O F E S S I O N A ?L/gi, 'PROFESSIONAL')
       .replace(/E X P E R I E N C E/gi, 'EXPERIENCE')
       .replace(/E D U C A ?T I O N/gi, 'EDUCATION')
       .replace(/C E R T I F I C A ?T I O N S?/gi, 'CERTIFICATIONS')
       .replace(/S U M M A R Y/gi, 'SUMMARY')
       .replace(/C O M P E T E N C I E S/gi, 'COMPETENCIES')
       .replace(/S K I L L S/gi, 'SKILLS')
-      .replace(/([A-Z]) ([A-Z]) ([A-Z])/g, '$1$2$3')  // collapse remaining spaced capitals
+      .replace(/([A-Z]) ([A-Z]) ([A-Z])/g, '$1$2$3')
       .replace(/([A-Z]) ([A-Z])/g, '$1$2')
-      .replace(/•/g, '\n•')                            // ensure bullets start on new lines
-      .replace(/\n{3,}/g, '\n\n')                      // collapse excess blank lines
+      .replace(/•/g, '\n•')
+      .replace(/\n{3,}/g, '\n\n')
       .trim();
 
     if (!text || text.length < 50) {
