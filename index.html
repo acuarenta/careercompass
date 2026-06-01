@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f1f3d">
+<link rel="manifest" href="/manifest.json">
+<title>CareerCompass — Find Your Direction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #0f1f3d; --navy-mid: #162847; --navy-light: #1e3560;
+  --gold: #c9a55a; --gold-light: #e2c882; --gold-pale: #f5ecd4;
+  --cream: #faf7f2; --cream-dark: #f0ebe0;
+  --text-dark: #0f1f3d; --text-mid: #4a5568; --text-light: #8a9ab5;
+  --white: #ffffff; --success: #2d7d52; --danger: #c53030;
+  --radius: 16px; --radius-sm: 10px;
+  --shadow: 0 8px 40px rgba(15,31,61,0.12); --shadow-sm: 0 2px 12px rgba(15,31,61,0.08);
+}
+html { height: 100%; height: -webkit-fill-available; }
+body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sans', sans-serif; background: var(--navy); color: var(--text-dark); overflow: hidden; }
+#app { height: 100vh; height: 100dvh; height: var(--app-height, 100vh); display: flex; flex-direction: column; position: relative; overflow: hidden; }
+#app::before { content: ''; position: absolute; top: -120px; right: -120px; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(201,165,90,0.12) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+
+/* ── SCREENS ─────────────────────────────────────────────────────────────── */
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transition: opacity 0.4s ease, transform 0.4s ease; transform: translateX(30px); z-index: 1; }
+.screen.active { opacity: 1; pointer-events: all; transform: translateX(0); }
+.screen.exit { opacity: 0; transform: translateX(-30px); pointer-events: none; }
+
+/* ── WELCOME ─────────────────────────────────────────────────────────────── */
+#screen-welcome { background: var(--navy); justify-content: center; align-items: center; padding: 2rem; text-align: center; }
+.compass-ring { width: 80px; height: 80px; border-radius: 50%; border: 2px solid rgba(201,165,90,0.4); display: flex; align-items: center; justify-content: center; animation: spin-slow 20s linear infinite; margin: 0 auto 2rem; }
+.compass-needle { width: 3px; height: 32px; background: linear-gradient(to bottom, var(--gold) 50%, rgba(201,165,90,0.3) 50%); border-radius: 2px; animation: needle-sway 3s ease-in-out infinite; }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes needle-sway { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+.welcome-logo { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 500; color: var(--white); letter-spacing: -0.5px; margin-bottom: 4px; }
+.welcome-logo span { color: var(--gold); }
+.welcome-tagline { font-size: 13px; color: var(--text-light); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 2.5rem; }
+.welcome-desc { font-size: 15px; color: rgba(255,255,255,0.7); line-height: 1.7; max-width: 320px; margin: 0 auto 2.5rem; }
+.welcome-desc strong { color: var(--gold-light); font-weight: 500; }
+.welcome-note { margin-top: 1.5rem; font-size: 12px; color: rgba(255,255,255,0.35); }
+.tester-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(201,165,90,0.15); border: 1px solid rgba(201,165,90,0.3); color: var(--gold-light); font-size: 11px; padding: 5px 12px; border-radius: 50px; margin-bottom: 1rem; }
+
+/* ── BUTTONS ─────────────────────────────────────────────────────────────── */
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--gold); color: var(--navy); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; padding: 14px 32px; border-radius: 50px; border: none; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+.btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+.btn-primary:active { transform: scale(0.97); }
+.btn-back { background: transparent; border: 1.5px solid rgba(15,31,61,0.15); color: var(--text-mid); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 12px 20px; border-radius: 50px; cursor: pointer; transition: all 0.2s; }
+.btn-back:hover { border-color: var(--navy); color: var(--navy); }
+.btn-next { flex: 1; background: var(--navy); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; padding: 14px; border-radius: 50px; border: none; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-next:hover { background: var(--navy-light); }
+.btn-next:active { transform: scale(0.98); }
+.btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.btn-next.gold { background: var(--gold); color: var(--navy); }
+.btn-next.gold:hover { background: var(--gold-light); }
+
+/* ── QUIZ HEADER ─────────────────────────────────────────────────────────── */
+#screen-quiz { background: var(--cream); }
+.quiz-header { background: var(--navy); padding: 1rem 1.25rem 1.25rem; flex-shrink: 0; }
+.quiz-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.quiz-logo-sm { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; color: var(--white); }
+.quiz-logo-sm span { color: var(--gold); }
+.quiz-counter { font-size: 13px; color: var(--text-light); }
+.quiz-counter strong { color: var(--gold); }
+.progress-track { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--gold); border-radius: 2px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+.progress-sections { display: flex; justify-content: space-between; margin-top: 6px; }
+.progress-section-label { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.05em; }
+.progress-section-label.active { color: var(--gold); }
+
+/* ── QUIZ BODY ───────────────────────────────────────────────────────────── */
+.quiz-body { flex: 1; overflow-y: auto; padding: 1.5rem 1.25rem; -webkit-overflow-scrolling: touch; }
+.question-section-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--navy); color: var(--gold); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 12px; border-radius: 50px; margin-bottom: 1rem; }
+.question-text { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 500; color: var(--navy); line-height: 1.3; margin-bottom: 0.5rem; }
+.question-hint { font-size: 13px; color: var(--text-mid); margin-bottom: 1.75rem; line-height: 1.5; }
+.options-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+.option-card { background: var(--white); border: 1.5px solid rgba(15,31,61,0.08); border-radius: var(--radius-sm); padding: 14px 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; font-family: 'DM Sans', sans-serif; }
+.option-card:hover { border-color: var(--gold); background: var(--gold-pale); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.option-card.selected { border-color: var(--navy); background: var(--navy); color: var(--white); box-shadow: var(--shadow-sm); }
+.option-card.selected .option-letter { background: var(--gold); color: var(--navy); }
+.option-letter { width: 28px; height: 28px; border-radius: 50%; background: var(--cream-dark); color: var(--text-mid); font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+.option-text { font-size: 14px; line-height: 1.4; }
+.option-sub { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+.color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+.color-option { border-radius: var(--radius-sm); overflow: hidden; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
+.color-option.selected { border-color: var(--navy); box-shadow: 0 0 0 3px rgba(15,31,61,0.15); }
+.color-swatch { height: 60px; display: flex; gap: 4px; padding: 8px; }
+.color-swatch div { flex: 1; border-radius: 4px; }
+.color-name { background: var(--white); padding: 8px 12px; font-size: 12px; font-weight: 500; color: var(--text-dark); display: flex; justify-content: space-between; align-items: center; }
+.color-check { width: 18px; height: 18px; border-radius: 50%; background: var(--navy); color: white; font-size: 10px; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+.color-option.selected .color-check { opacity: 1; }
+.font-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+.font-option { background: var(--white); border: 1.5px solid rgba(15,31,61,0.08); border-radius: var(--radius-sm); padding: 14px 16px; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
+.font-option:hover { border-color: var(--gold); }
+.font-option.selected { border-color: var(--navy); background: var(--navy); }
+.font-option.selected .font-name, .font-option.selected .font-desc { color: var(--white); }
+.font-option.selected .font-sample { color: var(--gold); }
+.font-name { font-size: 13px; font-weight: 500; color: var(--text-dark); }
+.font-desc { font-size: 11px; color: var(--text-light); }
+.font-sample { font-size: 15px; color: var(--text-mid); }
+.text-input-wrap { margin-bottom: 1.5rem; }
+.text-input-wrap input, .text-input-wrap textarea { width: 100%; background: var(--white); border: 1.5px solid rgba(15,31,61,0.12); border-radius: var(--radius-sm); padding: 14px 16px; font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--navy); outline: none; transition: border-color 0.2s; resize: none; }
+.text-input-wrap input:focus, .text-input-wrap textarea:focus { border-color: var(--navy); }
+.text-input-wrap textarea { min-height: 110px; }
+.quiz-footer { padding: 1rem 1.25rem; padding-bottom: max(1rem, env(safe-area-inset-bottom)); background: var(--cream); border-top: 1px solid rgba(15,31,61,0.06); flex-shrink: 0; display: flex; gap: 10px; }
+
+/* ── RESULTS ──────────────────────────────────────────────────────────────── */
+#screen-results { background: var(--cream); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.results-header { background: var(--navy); padding: 2rem 1.5rem 2.5rem; position: relative; overflow: hidden; }
+.results-header::after { content: ''; position: absolute; bottom: -40px; left: 50%; transform: translateX(-50%); width: 80px; height: 80px; background: var(--cream); border-radius: 50%; }
+.results-greeting { font-size: 13px; color: var(--text-light); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.results-name { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 500; color: var(--white); margin-bottom: 0.5rem; }
+.results-name span { color: var(--gold); }
+.results-tagline { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.5; }
+.results-body { padding: 2.5rem 1.25rem 1.5rem; }
+.result-card { background: var(--white); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; box-shadow: var(--shadow-sm); }
+.result-card-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); margin-bottom: 8px; }
+.result-card-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 500; color: var(--navy); margin-bottom: 8px; }
+.result-card-body { font-size: 14px; color: var(--text-mid); line-height: 1.6; }
+.trait-bars { margin: 1rem 0; }
+.trait-row { margin-bottom: 12px; }
+.trait-label-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-mid); margin-bottom: 4px; }
+.trait-bar-track { height: 6px; background: var(--cream-dark); border-radius: 3px; overflow: hidden; }
+.trait-bar-fill { height: 100%; background: var(--navy); border-radius: 3px; transition: width 1s cubic-bezier(0.4,0,0.2,1); }
+.trait-bar-fill.gold { background: var(--gold); }
+.job-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.job-tag { background: var(--navy); color: var(--gold-light); font-size: 12px; padding: 5px 12px; border-radius: 50px; }
+.design-preview { display: flex; gap: 8px; margin-top: 10px; }
+.design-swatch { width: 28px; height: 28px; border-radius: 50%; }
+.results-cta { background: var(--navy); border-radius: var(--radius); padding: 1.5rem; text-align: center; margin-bottom: 1rem; }
+.results-cta-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--white); margin-bottom: 8px; }
+.results-cta-body { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 1.25rem; line-height: 1.5; }
+.results-cta-note { font-size: 11px; color: var(--text-light); margin-top: 10px; }
+
+/* ── RESUME SCREEN ────────────────────────────────────────────────────────── */
+#screen-resume { background: var(--cream); flex-direction: column; }
+.resume-header { background: var(--navy); padding: 1.25rem; flex-shrink: 0; display: flex; align-items: center; gap: 12px; }
+.resume-header-back { background: none; border: none; color: var(--gold); font-size: 20px; cursor: pointer; padding: 4px; line-height: 1; }
+.resume-header-info { flex: 1; }
+.resume-header-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; color: var(--white); }
+.resume-header-sub { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+.resume-body { flex: 1; overflow-y: auto; padding: 1.5rem 1.25rem; -webkit-overflow-scrolling: touch; }
+.resume-footer { padding: 1rem 1.25rem; padding-bottom: max(1rem, env(safe-area-inset-bottom)); background: var(--cream); border-top: 1px solid rgba(15,31,61,0.06); flex-shrink: 0; }
+.upload-zone { border: 2px dashed rgba(15,31,61,0.2); border-radius: var(--radius); padding: 2rem 1.5rem; text-align: center; background: var(--white); cursor: pointer; transition: all 0.2s; margin-bottom: 1rem; }
+.upload-zone:hover, .upload-zone.drag-over { border-color: var(--gold); background: var(--gold-pale); }
+.upload-zone.has-file { border-color: var(--success); border-style: solid; background: #f0fff8; }
+.upload-icon { font-size: 36px; margin-bottom: 12px; }
+.upload-title { font-size: 16px; font-weight: 500; color: var(--navy); margin-bottom: 4px; }
+.upload-sub { font-size: 13px; color: var(--text-mid); }
+.upload-file-name { font-size: 13px; color: var(--success); font-weight: 500; margin-top: 8px; }
+#file-input { display: none; }
+.or-divider { display: flex; align-items: center; gap: 12px; margin: 1.25rem 0; }
+.or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: rgba(15,31,61,0.1); }
+.or-divider span { font-size: 12px; color: var(--text-light); letter-spacing: 0.05em; text-transform: uppercase; }
+.form-section { margin-bottom: 1.5rem; }
+.form-section-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; color: var(--navy); margin-bottom: 1rem; padding-bottom: 8px; border-bottom: 1px solid rgba(15,31,61,0.08); }
+.field-group { margin-bottom: 1rem; }
+.field-label { font-size: 12px; font-weight: 500; color: var(--text-mid); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+.field-input { width: 100%; background: var(--white); border: 1.5px solid rgba(15,31,61,0.12); border-radius: var(--radius-sm); padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--navy); outline: none; transition: border-color 0.2s; }
+.field-input:focus { border-color: var(--navy); }
+.field-textarea { width: 100%; background: var(--white); border: 1.5px solid rgba(15,31,61,0.12); border-radius: var(--radius-sm); padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--navy); outline: none; transition: border-color 0.2s; resize: none; min-height: 90px; }
+.field-textarea:focus { border-color: var(--navy); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.entry-card { background: var(--white); border: 1px solid rgba(15,31,61,0.08); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 10px; position: relative; }
+.entry-card-title { font-size: 14px; font-weight: 500; color: var(--navy); margin-bottom: 2px; }
+.entry-card-sub { font-size: 12px; color: var(--text-mid); }
+.entry-card-remove { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--text-light); cursor: pointer; font-size: 16px; padding: 2px 6px; border-radius: 4px; transition: all 0.2s; }
+.entry-card-remove:hover { color: var(--danger); background: #fff5f5; }
+.btn-add-entry { width: 100%; background: transparent; border: 1.5px dashed rgba(15,31,61,0.2); border-radius: var(--radius-sm); padding: 12px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-mid); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.btn-add-entry:hover { border-color: var(--gold); color: var(--navy); background: var(--gold-pale); }
+.tab-bar { display: flex; gap: 4px; background: var(--cream-dark); border-radius: 50px; padding: 4px; margin-bottom: 1.5rem; }
+.tab-btn { flex: 1; padding: 9px 12px; border-radius: 50px; border: none; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--text-mid); }
+.tab-btn.active { background: var(--navy); color: var(--white); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── FEEDBACK SCREEN ─────────────────────────────────────────────────────── */
+#screen-feedback { background: var(--cream); flex-direction: column; }
+.feedback-spinner { width: 48px; height: 48px; border-radius: 50%; border: 3px solid var(--cream-dark); border-top-color: var(--gold); animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.feedback-card { background: var(--white); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; box-shadow: var(--shadow-sm); }
+.feedback-card-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); margin-bottom: 8px; }
+.feedback-card-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; color: var(--navy); margin-bottom: 8px; }
+.feedback-card-body { font-size: 14px; color: var(--text-mid); line-height: 1.7; }
+.feedback-card-body p { margin-bottom: 0.75rem; }
+.feedback-card-body p:last-child { margin-bottom: 0; }
+.feedback-card-body strong { color: var(--navy); font-weight: 500; }
+.feedback-card.positive { border-left: 3px solid var(--success); border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.feedback-card.improve { border-left: 3px solid var(--gold); border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.resume-doc { border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); background: var(--white); margin-bottom: 1rem; }
+.resume-doc-header { padding: 1.5rem 1.5rem 1rem; }
+.resume-doc-name { font-size: 26px; font-weight: 500; margin-bottom: 2px; }
+.resume-doc-contact { font-size: 12px; opacity: 0.75; margin-bottom: 0.75rem; }
+.resume-doc-divider { height: 2px; width: 40px; margin-bottom: 1rem; }
+.resume-doc-summary { font-size: 13px; line-height: 1.7; opacity: 0.9; }
+.resume-doc-section { padding: 0 1.5rem 1.25rem; }
+.resume-doc-section-title { font-size: 10px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.75rem; padding-bottom: 4px; border-bottom: 1px solid; }
+.resume-doc-entry { margin-bottom: 1rem; }
+.resume-doc-entry-title { font-size: 14px; font-weight: 500; margin-bottom: 1px; }
+.resume-doc-entry-meta { font-size: 12px; opacity: 0.65; margin-bottom: 6px; }
+.resume-doc-entry-body { font-size: 13px; line-height: 1.6; opacity: 0.85; }
+.resume-doc-entry-body ul { padding-left: 16px; }
+.resume-doc-entry-body li { margin-bottom: 3px; }
+.resume-doc-skills { display: flex; flex-wrap: wrap; gap: 6px; }
+.resume-doc-skill { font-size: 11px; padding: 4px 10px; border-radius: 50px; font-weight: 500; }
+
+/* ── PAYWALL SCREEN ───────────────────────────────────────────────────────── */
+#screen-paywall { background: var(--navy); justify-content: center; align-items: center; padding: 0; overflow: hidden; }
+.paywall-wrap { width: 100%; height: 100%; overflow-y: auto; padding: 2rem 1.5rem; display: flex; flex-direction: column; padding-bottom: max(2rem, env(safe-area-inset-bottom)); }
+.paywall-logo { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 500; color: var(--white); text-align: center; margin-bottom: 0.25rem; }
+.paywall-logo span { color: var(--gold); }
+.paywall-hl { font-size: 13px; color: var(--text-light); text-align: center; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2rem; }
+.paywall-heading { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--white); text-align: center; line-height: 1.2; margin-bottom: 1rem; }
+.paywall-heading span { color: var(--gold); }
+.paywall-sub { font-size: 14px; color: rgba(255,255,255,0.6); text-align: center; line-height: 1.6; margin-bottom: 2rem; }
+.paywall-plans { display: flex; flex-direction: column; gap: 12px; margin-bottom: 1.5rem; }
+.plan-card { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,255,255,0.12); border-radius: var(--radius); padding: 1.25rem; cursor: pointer; transition: all 0.2s; position: relative; }
+.plan-card:hover, .plan-card.selected { background: rgba(201,165,90,0.12); border-color: var(--gold); }
+.plan-card.featured { border-color: var(--gold); background: rgba(201,165,90,0.1); }
+.plan-badge { position: absolute; top: -10px; right: 16px; background: var(--gold); color: var(--navy); font-size: 10px; font-weight: 500; padding: 3px 10px; border-radius: 50px; letter-spacing: 0.05em; }
+.plan-name { font-size: 15px; font-weight: 500; color: var(--white); margin-bottom: 4px; }
+.plan-price { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--gold); margin-bottom: 8px; line-height: 1; }
+.plan-price span { font-family: 'DM Sans', sans-serif; font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 400; }
+.plan-features { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.plan-features li { font-size: 13px; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 6px; }
+.plan-features li::before { content: '✓'; color: var(--gold); font-weight: 500; flex-shrink: 0; }
+.paywall-cta { width: 100%; background: var(--gold); color: var(--navy); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; padding: 16px; border-radius: 50px; border: none; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
+.paywall-cta:hover { background: var(--gold-light); transform: translateY(-1px); }
+.paywall-skip { display: block; width: 100%; background: transparent; color: rgba(255,255,255,0.4); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 10px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s; text-align: center; margin-bottom: 1rem; }
+.paywall-skip:hover { color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.2); }
+.paywall-fine { font-size: 11px; color: rgba(255,255,255,0.25); text-align: center; line-height: 1.6; }
+.tester-note { background: rgba(201,165,90,0.1); border: 1px solid rgba(201,165,90,0.25); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 12px; color: var(--gold-light); text-align: center; margin-bottom: 1rem; }
+
+/* ── JOB MATCHING SCREEN ─────────────────────────────────────────────────── */
+#screen-jobs { background: var(--cream); flex-direction: column; }
+.jobs-header { background: var(--navy); padding: 1.25rem; flex-shrink: 0; }
+.jobs-header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
+.jobs-logo { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; color: var(--white); flex: 1; }
+.jobs-logo span { color: var(--gold); }
+.jobs-filter-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+.jobs-filter-row::-webkit-scrollbar { display: none; }
+.filter-chip { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); font-size: 12px; padding: 6px 14px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.15); cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; font-family: 'DM Sans', sans-serif; }
+.filter-chip.active { background: var(--gold); color: var(--navy); border-color: var(--gold); font-weight: 500; }
+.jobs-body { flex: 1; overflow-y: auto; padding: 1.25rem; -webkit-overflow-scrolling: touch; }
+.section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-light); margin: 0 0 0.75rem; }
+.job-card { background: var(--white); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 12px; box-shadow: var(--shadow-sm); border: 1px solid rgba(15,31,61,0.05); transition: all 0.2s; cursor: pointer; }
+.job-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.job-card-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+.job-logo { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.job-title { font-size: 15px; font-weight: 500; color: var(--navy); margin-bottom: 2px; line-height: 1.3; }
+.job-company { font-size: 13px; color: var(--text-mid); }
+.job-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.job-meta-tag { font-size: 11px; color: var(--text-mid); background: var(--cream); padding: 3px 10px; border-radius: 50px; }
+.job-desc { font-size: 13px; color: var(--text-mid); line-height: 1.5; margin-bottom: 12px; }
+.job-card-footer { display: flex; align-items: center; justify-content: space-between; }
+.match-score { display: flex; align-items: center; gap: 6px; }
+.match-label { font-size: 11px; color: var(--text-light); }
+.match-bar { width: 60px; height: 4px; background: var(--cream-dark); border-radius: 2px; overflow: hidden; }
+.match-fill { height: 100%; border-radius: 2px; }
+.match-pct { font-size: 12px; font-weight: 500; }
+.apply-btn { background: var(--navy); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; padding: 8px 18px; border-radius: 50px; border: none; cursor: pointer; transition: all 0.2s; }
+.apply-btn:hover { background: var(--gold); color: var(--navy); }
+.feedback-banner { background: var(--white); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.25rem; box-shadow: var(--shadow-sm); border-left: 4px solid var(--gold); }
+.feedback-banner-title { font-size: 14px; font-weight: 500; color: var(--navy); margin-bottom: 4px; }
+.feedback-banner-body { font-size: 13px; color: var(--text-mid); line-height: 1.5; }
+.feedback-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.feedback-btn { background: var(--navy); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; padding: 8px 16px; border-radius: 50px; border: none; cursor: pointer; transition: all 0.2s; }
+.feedback-btn:hover { background: var(--navy-light); }
+.feedback-btn.outline { background: transparent; color: var(--navy); border: 1.5px solid rgba(15,31,61,0.2); }
+.feedback-btn.outline:hover { border-color: var(--navy); background: var(--cream-dark); }
+.jobs-loading { display: flex; flex-direction: column; align-items: center; padding: 3rem 1.5rem; text-align: center; }
+
+/* ── JOB DETAIL SCREEN ───────────────────────────────────────────────────── */
+#screen-jobdetail { background: var(--cream); flex-direction: column; }
+.jobdetail-header { background: var(--navy); padding: 1.25rem; flex-shrink: 0; display: flex; align-items: center; gap: 12px; }
+.jobdetail-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.jobdetail-hero { background: var(--navy); padding: 1.5rem 1.25rem 2rem; }
+.jobdetail-logo-lg { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 1rem; }
+.jobdetail-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 500; color: var(--white); line-height: 1.2; margin-bottom: 4px; }
+.jobdetail-company { font-size: 15px; color: var(--gold); margin-bottom: 1rem; }
+.jobdetail-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.jobdetail-tag { font-size: 12px; color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.08); padding: 4px 12px; border-radius: 50px; }
+.jobdetail-section { padding: 1.25rem; border-bottom: 1px solid rgba(15,31,61,0.06); }
+.jobdetail-section-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 500; color: var(--navy); margin-bottom: 10px; }
+.jobdetail-body-text { font-size: 14px; color: var(--text-mid); line-height: 1.7; }
+.jobdetail-match-bar { height: 8px; background: var(--cream-dark); border-radius: 4px; overflow: hidden; margin: 8px 0; }
+.jobdetail-match-fill { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+.jobdetail-footer { padding: 1rem 1.25rem; padding-bottom: max(1rem, env(safe-area-inset-bottom)); background: var(--cream); border-top: 1px solid rgba(15,31,61,0.06); flex-shrink: 0; display: flex; gap: 10px; }
+.btn-apply-lg { flex: 1; background: var(--gold); color: var(--navy); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; padding: 14px; border-radius: 50px; border: none; cursor: pointer; transition: all 0.2s; }
+.btn-apply-lg:hover { background: var(--gold-light); }
+.btn-cover { flex: 1; background: var(--navy); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; padding: 14px; border-radius: 50px; border: none; cursor: pointer; transition: all 0.2s; }
+.btn-cover:hover { background: var(--navy-light); }
+
+/* ── COVER LETTER SCREEN ────────────────────────────────────────────────── */
+#screen-cover { background: var(--cream); flex-direction: column; }
+.cover-body { flex: 1; overflow-y: auto; padding: 1.5rem 1.25rem; -webkit-overflow-scrolling: touch; }
+.cover-loading { display: flex; flex-direction: column; align-items: center; padding: 3rem 1.5rem; text-align: center; }
+.cover-doc { background: var(--white); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 1rem; }
+.cover-doc p { font-size: 14px; color: var(--text-dark); line-height: 1.85; margin-bottom: 1rem; }
+.cover-doc p:last-child { margin-bottom: 0; }
+.cover-doc .cover-salutation { font-weight: 500; }
+.cover-doc .cover-closing { margin-top: 1.5rem; }
+.cover-actions { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+.cover-footer { padding: 1rem 1.25rem; padding-bottom: max(1rem, env(safe-area-inset-bottom)); background: var(--cream); border-top: 1px solid rgba(15,31,61,0.06); flex-shrink: 0; display: flex; gap: 10px; }
+
+/* ── MODALS ───────────────────────────────────────────────────────────────── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,31,61,0.7); z-index: 100; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-sheet { background: var(--cream); border-radius: 24px 24px 0 0; padding: 1.5rem 1.25rem 2rem; width: 100%; max-width: 480px; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+.modal-handle { width: 36px; height: 4px; background: rgba(15,31,61,0.15); border-radius: 2px; margin: 0 auto 1.25rem; }
+.modal-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 500; color: var(--navy); margin-bottom: 8px; }
+.modal-body { font-size: 14px; color: var(--text-mid); line-height: 1.6; margin-bottom: 1.25rem; }
+.modal-actions { display: flex; flex-direction: column; gap: 10px; }
+.modal-btn-primary { width: 100%; background: var(--navy); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; padding: 14px; border-radius: 50px; border: none; cursor: pointer; transition: all 0.2s; }
+.modal-btn-primary:hover { background: var(--navy-light); }
+.modal-btn-secondary { width: 100%; background: transparent; color: var(--text-mid); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 12px; border-radius: 50px; border: 1.5px solid rgba(15,31,61,0.15); cursor: pointer; transition: all 0.2s; }
+.modal-btn-secondary:hover { border-color: var(--navy); color: var(--navy); }
+
+/* ── TOAST ────────────────────────────────────────────────────────────────── */
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--navy); color: var(--white); font-size: 13px; padding: 10px 20px; border-radius: 50px; z-index: 200; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; box-shadow: var(--shadow); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── MISC ─────────────────────────────────────────────────────────────────── */
+.paywall-card { background: var(--navy); border-radius: var(--radius); padding: 1.5rem; text-align: center; margin: 1.25rem 0; position: relative; overflow: hidden; }
+.paywall-card::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(201,165,90,0.15) 0%, transparent 70%); }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: fadeUp 0.5s ease forwards; }
+.delay-1 { animation-delay: 0.1s; opacity: 0; }
+.delay-2 { animation-delay: 0.2s; opacity: 0; }
+.delay-3 { animation-delay: 0.3s; opacity: 0; }
+.delay-4 { animation-delay: 0.4s; opacity: 0; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(15,31,61,0.15); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ═══════════ WELCOME ═══════════ -->
+<div id="screen-welcome" class="screen active">
+  <div class="compass-ring animate-in"><div class="compass-needle"></div></div>
+  <div class="welcome-logo animate-in delay-1">Career<span>Compass</span></div>
+  <div class="welcome-tagline animate-in delay-2">Find your direction</div>
+  <div class="tester-badge animate-in delay-2">🧪 Beta Tester Access</div>
+  <p class="welcome-desc animate-in delay-3">
+    Answer a few questions and we'll map out your ideal career path — then help you build a <strong>resume that gets noticed</strong>. If you already have a resume, make sure you have access to it on this device.
+  </p>
+  <button class="btn-primary animate-in delay-4" onclick="startQuiz()">
+    Begin Your Assessment
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <p class="welcome-note animate-in delay-4">Free · Takes about 5 minutes · Your information stays on your device</p>
+</div>
+
+<!-- ═══════════ QUIZ ═══════════ -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-header">
+    <div class="quiz-header-top">
+      <div class="quiz-logo-sm">Career<span>Compass</span></div>
+      <div class="quiz-counter">Question <strong id="q-current">1</strong> of <strong id="q-total">28</strong></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:4%"></div></div>
+    <div class="progress-sections">
+      <span class="progress-section-label active" id="sec-about">About You</span>
+      <span class="progress-section-label" id="sec-work">Work Style</span>
+      <span class="progress-section-label" id="sec-values">Values</span>
+      <span class="progress-section-label" id="sec-design">Your Resume</span>
+    </div>
+  </div>
+  <div class="quiz-body" id="quiz-body"></div>
+  <div class="quiz-footer">
+    <button class="btn-back" id="btn-back" onclick="prevQuestion()">← Back</button>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Continue <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+</div>
+
+<!-- ═══════════ RESULTS ═══════════ -->
+<div id="screen-results" class="screen">
+  <div class="results-header">
+    <div class="results-greeting">Your CareerCompass Results</div>
+    <div class="results-name">Hello, <span id="result-name">Friend</span></div>
+    <div class="results-tagline" id="result-tagline">Based on your responses, here's what we found.</div>
+  </div>
+  <div class="results-body">
+    <div class="result-card animate-in delay-1">
+      <div class="result-card-label">Your profile type</div>
+      <div class="result-card-title" id="result-type">The Connector</div>
+      <div class="result-card-body" id="result-desc"></div>
+    </div>
+    <div class="result-card animate-in delay-2">
+      <div class="result-card-label">Your natural strengths</div>
+      <div class="trait-bars" id="result-traits"></div>
+    </div>
+    <div class="result-card animate-in delay-3">
+      <div class="result-card-label">Roles that match your profile</div>
+      <div class="job-tags" id="result-jobs"></div>
+    </div>
+    <div class="result-card animate-in delay-4">
+      <div class="result-card-label">Your resume style</div>
+      <div class="result-card-body">You chose the <strong id="result-color-name">Classic Navy</strong> scheme with <strong id="result-font-name">Refined Serif</strong> typography.</div>
+      <div class="design-preview" id="result-colors"></div>
+    </div>
+    <div class="result-card animate-in delay-4" id="feedback-section">
+      <div class="result-card-label">How do these feel to you?</div>
+      <div class="result-card-body" style="margin-bottom:1rem;">Do these recommendations feel like a good match?</div>
+      <div style="display:flex; flex-direction:column; gap:8px;" id="feedback-options">
+        <button class="option-card" onclick="selectFeedback('yes',this)"><div class="option-letter">👍</div><div><div class="option-text">Yes, these feel right</div><div class="option-sub">Let's move forward</div></div></button>
+        <button class="option-card" onclick="selectFeedback('partial',this)"><div class="option-letter">🤔</div><div><div class="option-text">Partially — some fit, some don't</div><div class="option-sub">Good enough to continue</div></div></button>
+        <button class="option-card" onclick="selectFeedback('no',this)"><div class="option-letter">✏️</div><div><div class="option-text">Not quite — let me adjust</div><div class="option-sub">I want to revisit a few answers</div></div></button>
+      </div>
+    </div>
+    <div class="results-cta animate-in delay-4" id="results-cta-block" style="display:none;">
+      <div class="results-cta-title">Ready to build your resume?</div>
+      <div class="results-cta-body">Upload your existing resume or enter your experience and we'll show you exactly how to improve it.</div>
+      <button class="btn-primary" style="width:100%; justify-content:center;" onclick="goToResume()">Continue to Resume →</button>
+      <div class="results-cta-note" style="color:rgba(255,255,255,0.4); margin-top:10px;">Free — no credit card needed</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ RESUME ═══════════ -->
+<div id="screen-resume" class="screen">
+  <div class="resume-header">
+    <button class="resume-header-back" onclick="showScreen('results')">←</button>
+    <div class="resume-header-info">
+      <div class="resume-header-title">Your Resume</div>
+      <div class="resume-header-sub">Upload or enter your experience</div>
+    </div>
+    <div class="quiz-logo-sm" style="flex-shrink:0;">Career<span style="color:var(--gold);">Compass</span></div>
+  </div>
+  <div class="resume-body">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('upload',this)">Upload Resume</button>
+      <button class="tab-btn" onclick="switchTab('manual',this)">Enter Manually</button>
+    </div>
+    <div id="tab-upload" class="tab-panel active">
+      <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault(); this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
+        <div class="upload-icon" id="upload-icon">📄</div>
+        <div class="upload-title" id="upload-title">Tap to upload your resume</div>
+        <div class="upload-sub" id="upload-sub">PDF or Word document</div>
+        <div class="upload-file-name" id="upload-file-name"></div>
+      </div>
+      <input type="file" id="file-input" accept=".pdf,.doc,.docx,.txt" onchange="handleFileSelect(this)">
+      <div style="background:var(--white); border-radius:var(--radius-sm); padding:1rem; margin-bottom:1rem;">
+        <div style="font-size:13px; font-weight:500; color:var(--navy); margin-bottom:6px;">🔒 Your privacy matters</div>
+        <div style="font-size:12px; color:var(--text-mid); line-height:1.6;">Your resume is processed only to give you feedback. It is never shared, sold, or stored beyond your session.</div>
+      </div>
+    </div>
+    <div id="tab-manual" class="tab-panel">
+      <div class="form-section">
+        <div class="form-section-title">Contact Information</div>
+        <div class="field-row">
+          <div class="field-group"><label class="field-label">First Name</label><input class="field-input" type="text" id="m-fname" placeholder="First name"></div>
+          <div class="field-group"><label class="field-label">Last Name</label><input class="field-input" type="text" id="m-lname" placeholder="Last name"></div>
+        </div>
+        <div class="field-group"><label class="field-label">City &amp; State</label><input class="field-input" type="text" id="m-location" placeholder="e.g. Fort Lauderdale, FL"></div>
+        <div class="field-row">
+          <div class="field-group"><label class="field-label">Phone</label><input class="field-input" type="tel" id="m-phone" placeholder="(000) 000-0000"></div>
+          <div class="field-group"><label class="field-label">Email</label><input class="field-input" type="email" id="m-email" placeholder="you@email.com"></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Professional Summary</div>
+        <div class="field-group"><label class="field-label">In your own words</label><textarea class="field-textarea" id="m-summary" placeholder="What makes you great at what you do? Write 2–3 sentences..."></textarea></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Work Experience</div>
+        <div id="exp-list"></div>
+        <button class="btn-add-entry" onclick="addEntry('exp')">+ Add a position</button>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Education</div>
+        <div id="edu-list"></div>
+        <button class="btn-add-entry" onclick="addEntry('edu')">+ Add education</button>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Key Skills</div>
+        <div class="field-group"><label class="field-label">List your top skills</label><textarea class="field-textarea" id="m-skills" placeholder="e.g. Training & Development, Sales Leadership, Team Building..."></textarea></div>
+      </div>
+    </div>
+  </div>
+  <div class="resume-footer">
+    <button class="btn-next gold" onclick="goToFeedback()" style="width:100%;">Get My Resume Feedback →</button>
+  </div>
+</div>
+
+<!-- ═══════════ FEEDBACK ═══════════ -->
+<div id="screen-feedback" class="screen">
+  <div class="resume-header">
+    <button class="resume-header-back" onclick="showScreen('resume')">←</button>
+    <div class="resume-header-info">
+      <div class="resume-header-title">Your Resume Review</div>
+      <div class="resume-header-sub" id="feedback-header-sub">Reviewing your profile...</div>
+    </div>
+    <div class="quiz-logo-sm" style="flex-shrink:0;">Career<span style="color:var(--gold);">Compass</span></div>
+  </div>
+  <div class="resume-body" id="feedback-body">
+    <div id="feedback-loading" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem 1.5rem; text-align:center;">
+      <div class="feedback-spinner"></div>
+      <div style="font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:500; color:var(--navy); margin-top:1.5rem; margin-bottom:8px;" id="loading-title">Reviewing your resume...</div>
+      <div style="font-size:13px; color:var(--text-mid); line-height:1.6; max-width:280px;" id="loading-sub">Comparing your experience against your personality profile.</div>
+    </div>
+    <div id="feedback-content" style="display:none;">
+      <div id="feedback-cards"></div>
+      <div style="margin-bottom:1.25rem;">
+        <div style="font-size:11px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-light); margin-bottom:0.75rem;">Your rewritten resume</div>
+        <div id="resume-preview-wrap"></div>
+      </div>
+      <div style="display:flex; gap:10px; margin-bottom:1.5rem;">
+        <button class="btn-next gold" style="flex:1;" onclick="goToPaywall()">Find Matching Jobs →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PAYWALL ═══════════ -->
+<div id="screen-paywall" class="screen">
+  <div class="paywall-wrap">
+    <div class="paywall-logo">Career<span>Compass</span></div>
+    <div class="paywall-hl">You're almost there</div>
+    <div class="paywall-heading">Find jobs that match<br><span>your new resume</span></div>
+    <div class="paywall-sub">Search live listings from Indeed, LinkedIn, and more — filtered to your personality type, location, and salary range. Get a tailored cover letter for every role.</div>
+
+    <div class="tester-note">🧪 Beta tester? Tap "Continue as Tester" below to skip payment and explore the full app.</div>
+
+    <div class="paywall-plans" id="paywall-plans">
+      <div class="plan-card featured selected" onclick="selectPlanCard(this,'starter')" id="plan-starter">
+        <div class="plan-name">Starter Pack</div>
+        <div class="plan-price">$9.99 <span>one-time</span></div>
+        <ul class="plan-features">
+          <li>Live job search — 25 matched listings</li>
+          <li>AI cover letter writer (3 letters)</li>
+          <li>Resume download (PDF)</li>
+          <li>7-day follow-up reminders</li>
+        </ul>
+      </div>
+      <div class="plan-card" onclick="selectPlanCard(this,'pro')" id="plan-pro">
+        <div class="plan-badge">BEST VALUE</div>
+        <div class="plan-name">Pro Pack</div>
+        <div class="plan-price">$24.99 <span>one-time</span></div>
+        <ul class="plan-features">
+          <li>Everything in Starter</li>
+          <li>Unlimited cover letters</li>
+          <li>LinkedIn profile rewrite</li>
+          <li>Application tracker</li>
+          <li>Priority job matching (150 listings)</li>
+        </ul>
+      </div>
+    </div>
+
+    <button class="paywall-cta" onclick="handlePaywallCTA()">Get Started →</button>
+    <button class="paywall-skip" onclick="continueAsTester()">🧪 Continue as Tester (skip payment)</button>
+    <div class="paywall-fine">Credits never expire · Secure checkout via Stripe · Cancel any time</div>
+  </div>
+</div>
+
+<!-- ═══════════ JOBS ═══════════ -->
+<div id="screen-jobs" class="screen">
+  <div class="jobs-header">
+    <div class="jobs-header-top">
+      <button style="background:none;border:none;color:var(--gold);font-size:20px;cursor:pointer;" onclick="showScreen('feedback')">←</button>
+      <div class="jobs-logo">Career<span>Compass</span></div>
+      <div style="font-size:12px; color:var(--text-light);" id="jobs-match-count">Loading...</div>
+    </div>
+    <div class="jobs-filter-row">
+      <button class="filter-chip active" onclick="filterJobs('all',this)">All Matches</button>
+      <button class="filter-chip" onclick="filterJobs('remote',this)">Remote Only</button>
+      <button class="filter-chip" onclick="filterJobs('nearby',this)">Within 25 mi</button>
+      <button class="filter-chip" onclick="filterJobs('training',this)">Training</button>
+      <button class="filter-chip" onclick="filterJobs('sales',this)">Sales</button>
+      <button class="filter-chip" onclick="filterJobs('leadership',this)">Leadership</button>
+    </div>
+  </div>
+  <div class="jobs-body" id="jobs-body">
+    <div class="jobs-loading">
+      <div class="feedback-spinner"></div>
+      <div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--navy); margin-top:1.25rem; margin-bottom:6px;">Searching live listings...</div>
+      <div style="font-size:13px; color:var(--text-mid);">Matching roles to your profile</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ JOB DETAIL ═══════════ -->
+<div id="screen-jobdetail" class="screen">
+  <div class="jobdetail-header">
+    <button class="resume-header-back" onclick="showScreen('jobs')">←</button>
+    <div class="resume-header-info">
+      <div class="resume-header-title" id="jd-header-title">Job Details</div>
+      <div class="resume-header-sub" id="jd-header-sub"></div>
+    </div>
+  </div>
+  <div class="jobdetail-body" id="jobdetail-body">
+    <!-- Rendered by openJob() -->
+  </div>
+  <div class="jobdetail-footer" id="jobdetail-footer">
+    <!-- Rendered by openJob() -->
+  </div>
+</div>
+
+<!-- ═══════════ COVER LETTER ═══════════ -->
+<div id="screen-cover" class="screen">
+  <div class="resume-header">
+    <button class="resume-header-back" id="cover-back-btn" onclick="showScreen('jobdetail')">←</button>
+    <div class="resume-header-info">
+      <div class="resume-header-title">Cover Letter</div>
+      <div class="resume-header-sub" id="cover-header-sub">Writing your letter...</div>
+    </div>
+    <div class="quiz-logo-sm" style="flex-shrink:0;">Career<span style="color:var(--gold);">Compass</span></div>
+  </div>
+  <div class="cover-body" id="cover-body">
+    <div class="cover-loading" id="cover-loading">
+      <div class="feedback-spinner"></div>
+      <div style="font-family:'Cormorant Garamond',serif; font-size:24px; color:var(--navy); margin-top:1.25rem; margin-bottom:8px;" id="cover-loading-title">Writing your cover letter...</div>
+      <div style="font-size:13px; color:var(--text-mid); max-width:280px; text-align:center;" id="cover-loading-sub">Tailoring it to this specific role and your profile.</div>
+    </div>
+    <div id="cover-content" style="display:none;">
+      <div class="cover-doc" id="cover-doc">
+        <!-- Cover letter rendered here -->
+      </div>
+      <div class="cover-actions">
+        <button class="btn-next gold" onclick="copyCoverLetter()">📋 Copy to Clipboard</button>
+        <button class="btn-next" style="background:transparent; color:var(--navy); border:1.5px solid rgba(15,31,61,0.2);" onclick="regenerateCoverLetter()">🔄 Regenerate</button>
+      </div>
+    </div>
+  </div>
+  <div class="cover-footer">
+    <button class="btn-next" onclick="showScreen('jobs')" style="background:transparent; color:var(--navy); border:1.5px solid rgba(15,31,61,0.15); flex:0 0 auto; padding:14px 20px;">← Back to Jobs</button>
+    <button class="btn-next gold" style="flex:1;" onclick="applyWithCoverLetter()">Apply with This Letter →</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODALS ═══════════ -->
+<div class="modal-overlay" id="reminder-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Set a follow-up reminder?</div>
+    <div class="modal-body" id="reminder-modal-body">We'll send you a push notification in 7 days to follow up on this application.</div>
+    <div class="modal-actions">
+      <button class="modal-btn-primary" onclick="setReminder(true)">Yes, remind me in 7 days</button>
+      <button class="modal-btn-secondary" onclick="setReminder(false)">No reminder needed</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</div><!-- end #app -->
+
+<script>
+'use strict';
+
+// ─────────────────────────────────────────────────────────────────
+// CONSTANTS
+// ─────────────────────────────────────────────────────────────────
+const IS_TESTER = true; // Set to false for production
+const API_BASE = '/api'; // Routes to Netlify function
+
+const COLOR_SCHEMES = [
+  { id:'navy', name:'Classic Navy', swatches:['#0f1f3d','#c9a55a','#faf7f2','#4a5568'] },
+  { id:'slate', name:'Modern Slate', swatches:['#2d3748','#4299e1','#f7fafc','#718096'] },
+  { id:'forest', name:'Forest Green', swatches:['#1a3a2a','#68d391','#f0fff4','#4a5568'] },
+  { id:'burgundy', name:'Warm Burgundy', swatches:['#6b2737','#c9a55a','#fff8f5','#4a5568'] }
+];
+const FONTS = [
+  { id:'serif', name:'Refined Serif', sample:'Cormorant Garamond', desc:'Classic & distinguished' },
+  { id:'modern', name:'Clean Modern', sample:'DM Sans', desc:'Clear & approachable' },
+  { id:'editorial', name:'Editorial', sample:'Playfair Display', desc:'Expressive & bold' },
+  { id:'minimal', name:'Minimal', sample:'Nunito Sans', desc:'Simple & direct' }
+];
+
+const QUESTIONS = [
+  { id:1, section:'about', sectionLabel:'About You', type:'text', q:"What's your first name?", hint:"We'll personalize your results just for you.", placeholder:"Enter your first name" },
+  { id:2, section:'about', sectionLabel:'About You', type:'single', q:"Where are you in your career journey right now?", hint:"Choose the option that feels most like you today.", options:[{letter:'A',text:'Starting out',sub:'Looking for my first or second role'},{letter:'B',text:'Growing professionally',sub:'5–15 years in, ready for the next level'},{letter:'C',text:'Changing direction',sub:'Pivoting to something new'},{letter:'D',text:'Returning to work',sub:'Coming back after a gap'}] },
+  { id:3, section:'about', sectionLabel:'About You', type:'single', q:"Which best describes how you prefer to spend your workday?", hint:"Go with your gut — there's no right answer.", options:[{letter:'A',text:'Working with people',sub:'Meetings, collaboration, relationship-building'},{letter:'B',text:'Working with ideas',sub:'Strategy, analysis, problem-solving'},{letter:'C',text:'Working with systems',sub:'Processes, data, tools, and structure'},{letter:'D',text:'A mix of all three',sub:'Variety is what keeps me energized'}] },
+  { id:4, section:'about', sectionLabel:'About You', type:'single', q:"When you do your best work, the environment usually looks like:", hint:"Think about a time you felt most productive and fulfilled.", options:[{letter:'A',text:'Fast-moving and dynamic',sub:'Energy, change, and new challenges daily'},{letter:'B',text:'Collaborative and team-focused',sub:'We win together or not at all'},{letter:'C',text:'Independent and self-directed',sub:'Give me a goal and let me run with it'},{letter:'D',text:'Structured with clear goals',sub:'I thrive when expectations are clear'}] },
+  { id:5, section:'about', sectionLabel:'About You', type:'single', q:"How do people who know you professionally describe you?", hint:"Pick the one that comes up most often.", options:[{letter:'A',text:'The connector',sub:'People trust me and I bring others together'},{letter:'B',text:'The problem solver',sub:'I find solutions where others see obstacles'},{letter:'C',text:'The organizer',sub:'I bring structure and make things happen'},{letter:'D',text:'The visionary',sub:'I see the big picture and inspire others'}] },
+  { id:6, section:'about', sectionLabel:'About You', type:'single', q:"How important is helping others in your work?", hint:"Choose the statement that best reflects your values.", options:[{letter:'A',text:'It\'s everything to me',sub:'Helping others is why I go to work'},{letter:'B',text:'Very important',sub:'It\'s a core part of what I want in a role'},{letter:'C',text:'Somewhat important',sub:'I like it but it\'s not the whole picture'},{letter:'D',text:'Nice to have',sub:'I value impact in other ways more'}] },
+  { id:7, section:'about', sectionLabel:'About You', type:'single', q:"Which setting sounds most appealing to you?", hint:"Imagine yourself thriving — where are you?", options:[{letter:'A',text:'Corporate or enterprise',sub:'Structure, scale, and career ladders'},{letter:'B',text:'Small business or startup',sub:'Scrappy, nimble, wear many hats'},{letter:'C',text:'Nonprofit or education',sub:'Mission-driven, purpose-first'},{letter:'D',text:'Remote or self-employed',sub:'Flexibility and independence above all'}] },
+  { id:8, section:'work', sectionLabel:'Work Style', type:'single', q:"When a new challenge lands on your plate, your first instinct is to:", hint:"Be honest — this is about your natural wiring.", options:[{letter:'A',text:'Jump in and figure it out',sub:'Action first, adjust as I go'},{letter:'B',text:'Research and plan first',sub:'I want to understand before I act'},{letter:'C',text:'Talk to others and gather input',sub:'Other perspectives help me see clearly'},{letter:'D',text:'Break it into smaller steps',sub:'Big problems become manageable in pieces'}] },
+  { id:9, section:'work', sectionLabel:'Work Style', type:'single', q:"How do you prefer to communicate at work?", hint:"Think about the mode that feels most natural for you.", options:[{letter:'A',text:'In person or on calls',sub:'Real-time conversation gets things done'},{letter:'B',text:'Written messages or email',sub:'I express myself better in writing'},{letter:'C',text:'Presentations and workshops',sub:'I like sharing ideas with a group'},{letter:'D',text:'One-on-one conversations',sub:'Depth matters more than breadth to me'}] },
+  { id:10, section:'work', sectionLabel:'Work Style', type:'single', q:"How comfortable are you leading others?", hint:"Think about your natural comfort level.", options:[{letter:'A',text:'Very comfortable — I love to lead',sub:'Leadership is where I do my best work'},{letter:'B',text:'Comfortable when needed',sub:'I can step up but don\'t need the spotlight'},{letter:'C',text:'Prefer to contribute as part of a team',sub:'I thrive as a strong team member'},{letter:'D',text:'I\'d rather work independently',sub:'I do my best work on my own'}] },
+  { id:11, section:'work', sectionLabel:'Work Style', type:'single', q:"When you get feedback on your work, you tend to:", hint:"Pick the response closest to how you genuinely react.", options:[{letter:'A',text:'Use it to improve right away',sub:'Feedback is a gift — I act on it fast'},{letter:'B',text:'Think it over before responding',sub:'I need time to process and consider it'},{letter:'C',text:'Discuss it to understand better',sub:'Context helps me make sense of it'},{letter:'D',text:'Feel it deeply then move forward',sub:'It lands hard but I bounce back'}] },
+  { id:12, section:'work', sectionLabel:'Work Style', type:'single', q:"What energizes you most during a busy week?", hint:"This often reveals where your real strengths lie.", options:[{letter:'A',text:'Closing something — a deal, a project',sub:'Completion gives me momentum'},{letter:'B',text:'A great conversation or connection',sub:'People give me energy'},{letter:'C',text:'Learning something new',sub:'Growth keeps me engaged'},{letter:'D',text:'Solving a problem nobody else could',sub:'I love being the person who figures it out'}] },
+  { id:13, section:'work', sectionLabel:'Work Style', type:'single', q:"How much variety do you want in your day-to-day work?", hint:"Some people love routine; others need constant change.", options:[{letter:'A',text:'I love variety — every day should be different',sub:'Routine drains me'},{letter:'B',text:'A good mix',sub:'Familiar patterns with some fresh challenges'},{letter:'C',text:'Mostly consistent with occasional change',sub:'Predictability helps me perform'},{letter:'D',text:'I prefer a clear routine',sub:'I work best when I know what to expect'}] },
+  { id:14, section:'work', sectionLabel:'Work Style', type:'single', q:"When working on a team, your natural role tends to be:", hint:"Think about group projects throughout your career.", options:[{letter:'A',text:'The motivator',sub:'I keep energy and morale high'},{letter:'B',text:'The executor',sub:'I get things done and follow through'},{letter:'C',text:'The strategist',sub:'I set direction and see the big picture'},{letter:'D',text:'The bridge',sub:'I connect people and ideas'}] },
+  { id:15, section:'work', sectionLabel:'Work Style', type:'single', q:"Your ideal job would measure your success by:", hint:"What metric would make you feel truly proud?", options:[{letter:'A',text:'The impact I had on people',sub:'Lives changed, relationships built'},{letter:'B',text:'Results and numbers',sub:'Revenue, performance, measurable outcomes'},{letter:'C',text:'Quality of the work itself',sub:'Craft, excellence, and execution'},{letter:'D',text:'Growth and innovation',sub:'New things built, problems solved'}] },
+  { id:16, section:'work', sectionLabel:'Work Style', type:'single', q:"How important is work-life balance to you?", hint:"Be honest — this shapes which roles will fit you best.", options:[{letter:'A',text:'Balance is essential',sub:'I need clear separation to do my best work'},{letter:'B',text:'Important but flexible',sub:'I can push hard when needed'},{letter:'C',text:'Work is a big priority for me',sub:'I don\'t mind if work bleeds into life'},{letter:'D',text:'I thrive when I\'m fully immersed',sub:'Deep focus and long hours don\'t bother me'}] },
+  { id:17, section:'values', sectionLabel:'Your Values', type:'single', q:"Which of these matters most to you in a role?", hint:"If you could only have one, which would you choose?", options:[{letter:'A',text:'Meaningful work',sub:'I need to feel like it matters'},{letter:'B',text:'Competitive compensation',sub:'Being paid what I\'m worth comes first'},{letter:'C',text:'Growth and learning',sub:'I want to keep getting better'},{letter:'D',text:'Stability and security',sub:'Knowing my position is solid matters to me'}] },
+  { id:18, section:'values', sectionLabel:'Your Values', type:'single', q:"When you think about your dream career, the first word that comes to mind is:", hint:"Don't overthink it — gut response wins here.", options:[{letter:'A',text:'Purpose',sub:'What I do makes a difference'},{letter:'B',text:'Freedom',sub:'I control my time and direction'},{letter:'C',text:'Excellence',sub:'I\'m known for being very good at what I do'},{letter:'D',text:'Connection',sub:'The relationships I build are the reward'}] },
+  { id:19, section:'values', sectionLabel:'Your Values', type:'single', q:"How important is a clear path for advancement?", hint:"Some people want a clear ladder; others prefer to create their own path.", options:[{letter:'A',text:'Very important — I want to know where I\'m headed',sub:'Clear milestones motivate me'},{letter:'B',text:'Important but not the top priority',sub:'I\'d like it but can work without it'},{letter:'C',text:'I\'d rather create my own path',sub:'I don\'t need a ladder — I\'ll build my own'},{letter:'D',text:'Not a priority for me right now',sub:'I\'m focused on the work itself'}] },
+  { id:20, section:'values', sectionLabel:'Your Values', type:'single', q:"What's your relationship with learning new skills?", hint:"This shapes what kind of role and culture will keep you engaged.", options:[{letter:'A',text:'I actively seek it out',sub:'Always taking courses, reading, improving'},{letter:'B',text:'I learn when the role requires it',sub:'Practical learning in context works best'},{letter:'C',text:'I prefer mastering what I know',sub:'Depth over breadth is my style'},{letter:'D',text:'I love teaching others what I know',sub:'Sharing knowledge is how I grow'}] },
+  { id:21, section:'values', sectionLabel:'Your Values', type:'single', q:"Which scenario sounds most like you at your best?", hint:"Picture a workday where you left feeling great.", options:[{letter:'A',text:'I helped someone solve a tough problem',sub:'One-on-one impact, deeply satisfying'},{letter:'B',text:'I presented to a room and nailed it',sub:'Group energy and visible results'},{letter:'C',text:'I finished something really well done',sub:'Quality output I\'m genuinely proud of'},{letter:'D',text:'I built something from scratch',sub:'Created or launched something new'}] },
+  { id:22, section:'values', sectionLabel:'Your Values', type:'single', q:"How much does company culture matter to you?", hint:"Culture fit vs. compensation — where do you land?", options:[{letter:'A',text:'Culture is everything',sub:'I\'d take less money for the right environment'},{letter:'B',text:'Culture matters a lot',sub:'It\'s near the top of my list'},{letter:'C',text:'It matters but so does pay',sub:'I need both to be right'},{letter:'D',text:'Compensation comes first',sub:'I can adapt to most cultures if the pay is right'}] },
+  { id:23, section:'design', sectionLabel:'Your Resume', type:'single', q:"How would you describe your work history?", hint:"This helps us frame your story the right way.", options:[{letter:'A',text:'One clear path',sub:'Same industry or function throughout'},{letter:'B',text:'Diverse experience',sub:'Different industries or roles over time'},{letter:'C',text:'Career change',sub:'Pivoting to something meaningfully different'},{letter:'D',text:'Gaps or non-traditional',sub:'Time off, freelance, caregiving, or other'}] },
+  { id:24, section:'design', sectionLabel:'Your Resume', type:'single', q:"What's the biggest challenge your resume faces right now?", hint:"Be honest — we'll help you fix it.", options:[{letter:'A',text:'It doesn\'t reflect who I am now',sub:'Outdated or misaligned'},{letter:'B',text:'I don\'t know what to highlight',sub:'Too much or too little included'},{letter:'C',text:'It\'s not getting responses',sub:'Submitting but not hearing back'},{letter:'D',text:'I don\'t really have one yet',sub:'Starting from scratch'}] },
+  { id:25, section:'design', sectionLabel:'Your Resume', type:'single', q:"When an employer reads your resume, what do you most want them to feel?", hint:"The emotion behind a resume matters as much as the facts.", options:[{letter:'A',text:'"This person gets results"',sub:'Proven, measurable impact'},{letter:'B',text:'"This person is trustworthy"',sub:'Reliability, consistency, character'},{letter:'C',text:'"This person will fit right in"',sub:'Culture match, team player'},{letter:'D',text:'"This person is exactly what we need"',sub:'Precise match to the role'}] },
+  { id:26, section:'design', sectionLabel:'Your Resume', type:'colorpicker', q:"Choose a color scheme for your resume.", hint:"This reflects your professional personality. You can change it any time." },
+  { id:27, section:'design', sectionLabel:'Your Resume', type:'fontpicker', q:"Choose a typography style for your resume.", hint:"The right font communicates your style before they read a single word." },
+  { id:28, section:'design', sectionLabel:'Your Resume', type:'textarea', q:"In your own words, what makes you great at what you do?", hint:"Write 2–3 sentences. Don't be modest — this becomes the foundation of your professional summary.", placeholder:"e.g. I have a gift for building trust quickly with people from all walks of life. I've spent decades helping teams grow, customers succeed, and organizations improve how they develop their people..." }
+];
+
+// ─────────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────────
+let currentQ = 0;
+let answers = {};
+let expEntries = [];
+let eduEntries = [];
+let currentFilter = 'all';
+let selectedJobForReminder = null;
+let currentJobData = null; // currently viewed job detail
+let coverLetterText = '';
+let allJobs = [];
+let selectedPlan = 'starter';
+let pushRegistration = null;
+let uploadedFileContent = ''; // extracted text from uploaded resume
+
+// ─────────────────────────────────────────────────────────────────
+// LOCAL STORAGE
+// ─────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'cc_answers_v1';
+const STORAGE_Q   = 'cc_question_v1';
+function saveProgress() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(answers)); localStorage.setItem(STORAGE_Q, currentQ); } catch(e) {} }
+function loadProgress() { try { const s = localStorage.getItem(STORAGE_KEY); const q = localStorage.getItem(STORAGE_Q); if(s) answers=JSON.parse(s); if(q) currentQ=parseInt(q,10)||0; return !!s; } catch(e) { return false; } }
+function clearProgress() { try { localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(STORAGE_Q); } catch(e) {} }
+
+// ─────────────────────────────────────────────────────────────────
+// SCREEN MANAGEMENT
+// ─────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active','exit'); s.classList.add('exit'); });
+  setTimeout(() => {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('exit'));
+    const el = document.getElementById('screen-'+id);
+    if(el) el.classList.add('active');
+  }, 50);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────────────────────────────
+function showToast(msg, dur=2800) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// QUIZ
+// ─────────────────────────────────────────────────────────────────
+function startQuiz() {
+  const hasSaved = loadProgress();
+  if (hasSaved && currentQ > 0) {
+    const name = answers[1] ? ', ' + answers[1].split(' ')[0] : '';
+    const resume = confirm('Welcome back'+name+'! You were on question '+(currentQ+1)+' of '+QUESTIONS.length+'. Continue where you left off?');
+    if (!resume) { currentQ = 0; answers = {}; clearProgress(); }
+  }
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  const total = QUESTIONS.length;
+  const pct = Math.round(((currentQ+1)/total)*100);
+  document.getElementById('q-current').textContent = currentQ+1;
+  document.getElementById('q-total').textContent = total;
+  document.getElementById('progress-fill').style.width = pct+'%';
+  ['about','work','values','design'].forEach(s => document.getElementById('sec-'+s).classList.remove('active'));
+  document.getElementById('sec-'+q.section).classList.add('active');
+  document.getElementById('btn-back').style.display = currentQ===0 ? 'none' : 'flex';
+  const isLast = currentQ===QUESTIONS.length-1;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.className = 'btn-next'+(isLast?' gold':'');
+  nextBtn.innerHTML = isLast
+    ? 'See My Results <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2l6 6-6 6M2 8h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    : 'Continue <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const body = document.getElementById('quiz-body');
+  body.scrollTop = 0;
+  let html = `<div class="question-section-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.2"/><circle cx="5" cy="5" r="1.5" fill="currentColor"/></svg>${q.sectionLabel}</div>
+  <div class="question-text">${q.q}</div>
+  <div class="question-hint">${q.hint}</div>`;
+  if (q.type==='single') {
+    html += `<div class="options-grid">`;
+    q.options.forEach(opt => { const sel=answers[q.id]===opt.letter?'selected':''; html+=`<button class="option-card ${sel}" onclick="selectOption(${q.id},'${opt.letter}',this)"><div class="option-letter">${opt.letter}</div><div><div class="option-text">${opt.text}</div><div class="option-sub">${opt.sub}</div></div></button>`; });
+    html += `</div>`;
+  } else if (q.type==='text') {
+    html += `<div class="text-input-wrap"><input type="text" id="text-answer" placeholder="${q.placeholder}" value="${answers[q.id]||''}" oninput="answers[${q.id}]=this.value; updateNext();"/></div>`;
+  } else if (q.type==='textarea') {
+    html += `<div class="text-input-wrap"><textarea id="text-answer" placeholder="${q.placeholder}" oninput="answers[${q.id}]=this.value; updateNext();">${answers[q.id]||''}</textarea></div>`;
+  } else if (q.type==='colorpicker') {
+    html += `<div class="color-grid">`;
+    COLOR_SCHEMES.forEach(c => { const sel=answers[q.id]===c.id?'selected':''; html+=`<div class="color-option ${sel}" onclick="selectColor('${c.id}',this)"><div class="color-swatch" style="background:#f5f5f5;">${c.swatches.map(s=>`<div style="background:${s}"></div>`).join('')}</div><div class="color-name">${c.name}<div class="color-check">✓</div></div></div>`; });
+    html += `</div>`;
+  } else if (q.type==='fontpicker') {
+    html += `<div class="font-grid">`;
+    FONTS.forEach(f => { const sel=answers[q.id]===f.id?'selected':''; html+=`<div class="font-option ${sel}" onclick="selectFont('${f.id}',this)"><div><div class="font-name">${f.name}</div><div class="font-desc">${f.desc}</div></div><div class="font-sample" style="font-family:'${f.sample}',serif;">${f.sample}</div></div>`; });
+    html += `</div>`;
+  }
+  body.innerHTML = html;
+  updateNext();
+}
+
+function selectOption(qId, letter, el) { answers[qId]=letter; saveProgress(); document.querySelectorAll('.option-card').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); updateNext(); setTimeout(()=>nextQuestion(),300); }
+function selectColor(id, el) { answers[QUESTIONS[currentQ].id]=id; saveProgress(); document.querySelectorAll('.color-option').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); updateNext(); }
+function selectFont(id, el) { answers[QUESTIONS[currentQ].id]=id; saveProgress(); document.querySelectorAll('.font-option').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); updateNext(); }
+
+function updateNext() {
+  const q = QUESTIONS[currentQ];
+  let ok = false;
+  if (q.type==='single') ok=!!answers[q.id];
+  else if (q.type==='text') ok=(answers[q.id]||'').trim().length>0;
+  else if (q.type==='textarea') ok=(answers[q.id]||'').trim().length>10;
+  else if (q.type==='colorpicker') ok=!!answers[q.id];
+  else if (q.type==='fontpicker') ok=!!answers[q.id];
+  document.getElementById('btn-next').disabled = !ok;
+}
+
+function nextQuestion() {
+  if (document.getElementById('btn-next').disabled) return;
+  if (currentQ<QUESTIONS.length-1) { currentQ++; saveProgress(); renderQuestion(); }
+  else { clearProgress(); showResults(); }
+}
+function prevQuestion() { if(currentQ>0){currentQ--;renderQuestion();}else showScreen('welcome'); }
+
+// ─────────────────────────────────────────────────────────────────
+// RESULTS
+// ─────────────────────────────────────────────────────────────────
+function showResults() { computeResults(); showScreen('results'); setTimeout(()=>{ document.querySelectorAll('.trait-bar-fill').forEach(b=>b.style.width=b.dataset.target); },400); }
+
+function computeResults() {
+  const name=(answers[1]||'Friend').split(' ')[0];
+  document.getElementById('result-name').textContent=name;
+  const types={A:'The Connector',B:'The Problem Solver',C:'The Organizer',D:'The Visionary'};
+  const descs={A:`${name}, you have a natural gift for building trust and bringing people together. Roles where you can coach, guide, sell, or train others will bring out your best.`,B:`${name}, you're wired to tackle challenges head-on. You shine in analytical, strategic, or consultative roles.`,C:`${name}, you're the person who makes things actually happen. Operations, project management, and training coordination are your sweet spot.`,D:`${name}, you see possibilities where others see problems. Leadership, strategy, and business development let you operate at your best.`};
+  const q5=answers[5]||'A';
+  document.getElementById('result-type').textContent=types[q5];
+  document.getElementById('result-desc').textContent=descs[q5];
+  const helpVal=({A:1,B:0.85,C:0.6,D:0.35}[answers[6]]||0.7);
+  const leadVal=({A:1,B:0.75,C:0.5,D:0.3}[answers[10]]||0.6);
+  const varVal=({A:1,B:0.75,C:0.5,D:0.25}[answers[13]]||0.6);
+  const traits=[{label:'People & relationships',pct:Math.round((helpVal*0.6+(q5==='A'?0.9:0.4)*0.4)*100),gold:true},{label:'Leadership & influence',pct:Math.round((leadVal*0.7+(q5==='D'?0.9:0.5)*0.3)*100)},{label:'Adaptability',pct:Math.round((varVal*0.65+0.35)*100)},{label:'Structured thinking',pct:Math.round(((1-varVal)*0.5+(q5==='C'?0.9:0.4)*0.5)*100)}];
+  document.getElementById('result-traits').innerHTML=traits.map(t=>{const pct=Math.min(96,Math.max(20,t.pct));return`<div class="trait-row"><div class="trait-label-row"><span>${t.label}</span><span>${pct}%</span></div><div class="trait-bar-track"><div class="trait-bar-fill${t.gold?' gold':''}" style="width:0" data-target="${pct}%"></div></div></div>`;}).join('');
+  const jobMap={A:['Training & Development','Sales Leadership','Customer Success','Corporate Trainer','Career Coaching'],B:['Business Analyst','Operations Manager','Consultant','Product Manager'],C:['Project Manager','Operations Director','Program Coordinator','Training Coordinator'],D:['VP of Sales','Business Development','Marketing Director','Executive Coach']};
+  document.getElementById('result-jobs').innerHTML=(jobMap[q5]||jobMap['A']).map(j=>`<span class="job-tag">${j}</span>`).join('');
+  const colorId=answers[26]||'navy';
+  const fontId=answers[27]||'serif';
+  const scheme=COLOR_SCHEMES.find(c=>c.id===colorId)||COLOR_SCHEMES[0];
+  const font=FONTS.find(f=>f.id===fontId)||FONTS[0];
+  document.getElementById('result-color-name').textContent=scheme.name;
+  document.getElementById('result-font-name').textContent=font.name;
+  document.getElementById('result-colors').innerHTML=scheme.swatches.map(s=>`<div class="design-swatch" style="background:${s};border:1px solid rgba(0,0,0,0.1);"></div>`).join('');
+  const envMap={A:'corporate environments',B:'small businesses and startups',C:'mission-driven organizations',D:'remote and flexible roles'};
+  document.getElementById('result-tagline').textContent=`You're well-suited for ${envMap[answers[7]]||'roles that match your strengths'}. Here's what your assessment revealed.`;
+}
+
+function selectFeedback(val, el) {
+  document.querySelectorAll('#feedback-options .option-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  setTimeout(()=>{
+    if(val==='no'){currentQ=0;showScreen('quiz');renderQuestion();return;}
+    document.getElementById('feedback-section').style.display='none';
+    document.getElementById('results-cta-block').style.display='block';
+    document.getElementById('results-cta-block').scrollIntoView({behavior:'smooth'});
+  },400);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// RESUME
+// ─────────────────────────────────────────────────────────────────
+function goToResume() { showScreen('resume'); }
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+function handleFileSelect(input) {
+  if (input.files && input.files[0]) {
+    const f = input.files[0];
+    const zone = document.getElementById('upload-zone');
+    zone.classList.add('has-file');
+    document.getElementById('upload-icon').textContent='✅';
+    document.getElementById('upload-title').textContent='Resume uploaded!';
+    document.getElementById('upload-sub').textContent=f.name;
+    document.getElementById('upload-file-name').textContent='Ready to review · '+(f.size/1024).toFixed(0)+' KB';
+    // Try to read text content for .txt files
+    if (f.type==='text/plain') {
+      const reader = new FileReader();
+      reader.onload = e => { uploadedFileContent = e.target.result; };
+      reader.readAsText(f);
+    } else {
+      uploadedFileContent = f.name; // For PDF/docx, pass filename — Claude will infer
+    }
+  }
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag-over');
+  if (e.dataTransfer.files.length) handleFileSelect({files:e.dataTransfer.files});
+}
+
+function addEntry(type) {
+  const id = Date.now();
+  if (type==='exp') { expEntries.push({id,title:'',company:'',dates:'',bullets:''}); }
+  else { eduEntries.push({id,degree:'',school:'',year:''}); }
+  renderEntries();
+  setTimeout(()=>{ const el=document.getElementById(type==='exp'?'exp-title-'+id:'edu-degree-'+id); if(el)el.focus(); },50);
+}
+function removeEntry(type, id) { if(type==='exp') expEntries=expEntries.filter(e=>e.id!==id); else eduEntries=eduEntries.filter(e=>e.id!==id); renderEntries(); }
+function renderEntries() {
+  const expList=document.getElementById('exp-list');
+  if(expList) expList.innerHTML=expEntries.map(e=>`<div class="entry-card"><button class="entry-card-remove" onclick="removeEntry('exp',${e.id})">✕</button><div class="field-row" style="margin-bottom:8px;"><div class="field-group"><label class="field-label">Job Title</label><input class="field-input" id="exp-title-${e.id}" placeholder="e.g. Training Manager" value="${e.title}" oninput="updateEntry('exp',${e.id},'title',this.value)"></div><div class="field-group"><label class="field-label">Company</label><input class="field-input" placeholder="Company name" value="${e.company}" oninput="updateEntry('exp',${e.id},'company',this.value)"></div></div><div class="field-group"><label class="field-label">Dates</label><input class="field-input" placeholder="e.g. Jan 2018 – May 2026" value="${e.dates}" oninput="updateEntry('exp',${e.id},'dates',this.value)"></div><div class="field-group"><label class="field-label">Key accomplishments</label><textarea class="field-textarea" placeholder="What did you achieve? Include numbers when you can." oninput="updateEntry('exp',${e.id},'bullets',this.value)">${e.bullets}</textarea></div></div>`).join('');
+  const eduList=document.getElementById('edu-list');
+  if(eduList) eduList.innerHTML=eduEntries.map(e=>`<div class="entry-card"><button class="entry-card-remove" onclick="removeEntry('edu',${e.id})">✕</button><div class="field-row" style="margin-bottom:8px;"><div class="field-group"><label class="field-label">Degree / Program</label><input class="field-input" id="edu-degree-${e.id}" placeholder="e.g. Associate in Arts" value="${e.degree}" oninput="updateEntry('edu',${e.id},'degree',this.value)"></div><div class="field-group"><label class="field-label">School</label><input class="field-input" placeholder="Institution name" value="${e.school}" oninput="updateEntry('edu',${e.id},'school',this.value)"></div></div><div class="field-group"><label class="field-label">Year completed</label><input class="field-input" placeholder="e.g. 1995 or In Progress" value="${e.year}" oninput="updateEntry('edu',${e.id},'year',this.value)" style="max-width:180px;"></div></div>`).join('');
+}
+function updateEntry(type, id, field, val) { const list=type==='exp'?expEntries:eduEntries; const e=list.find(e=>e.id===id); if(e)e[field]=val; }
+
+// ─────────────────────────────────────────────────────────────────
+// RESUME FEEDBACK (Claude API via Netlify proxy)
+// ─────────────────────────────────────────────────────────────────
+function goToFeedback() {
+  showScreen('feedback');
+  document.getElementById('feedback-loading').style.display='flex';
+  document.getElementById('feedback-content').style.display='none';
+  runResumeFeedback();
+}
+
+function buildResumeContext() {
+  const q5=answers[5]||'A';
+  const typeMap={A:'Connector / People Leader',B:'Problem Solver / Analyst',C:'Organizer / Executor',D:'Visionary / Leader'};
+  const envMap={A:'Corporate / Enterprise',B:'Small Business / Startup',C:'Nonprofit / Education',D:'Remote / Self-Employed'};
+  const valMap={A:'Meaningful work',B:'Competitive pay',C:'Growth & learning',D:'Stability & security'};
+  const name=answers[1]||'';
+  const fname=(document.getElementById('m-fname')||{}).value||name||'';
+  const lname=(document.getElementById('m-lname')||{}).value||'';
+  const location=(document.getElementById('m-location')||{}).value||'';
+  const phone=(document.getElementById('m-phone')||{}).value||'';
+  const email=(document.getElementById('m-email')||{}).value||'';
+  const summary=(document.getElementById('m-summary')||{}).value||answers[28]||'';
+  const skills=(document.getElementById('m-skills')||{}).value||'';
+  const expText=expEntries.map(e=>e.title+' at '+e.company+' ('+e.dates+'): '+e.bullets).join('\n');
+  const eduText=eduEntries.map(e=>e.degree+' — '+e.school+' ('+e.year+')').join('\n');
+  const hasUpload=uploadedFileContent.length>0;
+  return {
+    name:fname?(fname+' '+lname).trim():name,
+    location,phone,email,summary,skills,
+    experience:expText,education:eduText,
+    hasUpload,uploadedFileContent:uploadedFileContent.substring(0,3000),
+    personalityType:typeMap[q5]||typeMap['A'],
+    preferredEnv:envMap[answers[7]]||envMap['A'],
+    topValue:valMap[answers[17]]||valMap['A'],
+    workStyle:answers[3]==='A'?'People-focused':answers[3]==='B'?'Ideas-focused':answers[3]==='C'?'Systems-focused':'Variety-focused',
+    teamRole:answers[14]==='A'?'Motivator':answers[14]==='B'?'Executor':answers[14]==='C'?'Strategist':'Bridge/Connector',
+    resumeChallenge:{A:'Resume feels outdated',B:'Unsure what to highlight',C:'Not getting responses',D:'Starting from scratch'}[answers[24]]||'',
+    desiredImpression:{A:'Gets results',B:'Trustworthy',C:'Culture fit',D:'Exact match'}[answers[25]]||'',
+    colorScheme:answers[26]||'navy',
+    fontChoice:answers[27]||'serif',
+  };
+}
+
+function buildPrompt(ctx) {
+  const resumeSection = ctx.hasUpload && ctx.uploadedFileContent.length>50
+    ? 'UPLOADED RESUME TEXT:\n'+ctx.uploadedFileContent
+    : ctx.hasUpload
+      ? 'The user uploaded a resume file. Use their personality profile to generate feedback as if you reviewed it.'
+      : 'RESUME CONTENT:\nName: '+(ctx.name||'Not provided')+'\nLocation: '+(ctx.location||'Not provided')+'\nSummary: '+(ctx.summary||'Not provided')+'\nExperience: '+(ctx.experience||'Not provided')+'\nEducation: '+(ctx.education||'Not provided')+'\nSkills: '+(ctx.skills||'Not provided');
+  return 'Generate resume feedback and a rewritten resume for this person.\n\nPERSONALITY PROFILE:\n- Type: '+ctx.personalityType+'\n- Preferred environment: '+ctx.preferredEnv+'\n- Top career value: '+ctx.topValue+'\n- Work style: '+ctx.workStyle+'\n- Natural team role: '+ctx.teamRole+'\n- Resume challenge: '+ctx.resumeChallenge+'\n- Desired employer impression: "'+ctx.desiredImpression+'"\n\n'+resumeSection+'\n\nRespond with ONLY this JSON (no markdown, no extra text):\n{"strengths":"2-3 sentences about genuine strengths. Be specific and encouraging.","improvements":"2-3 specific actionable improvements referencing their personality type.","keywords":"comma-separated list of 8-10 keywords they should add","summary":"A rewritten 3-sentence professional summary. Warm, confident, specific. No clichés.","experience":[{"title":"Job title","company":"Company","dates":"Date range","bullets":["bullet 1","bullet 2","bullet 3"]}],"education":[{"degree":"Degree","school":"School","year":"Year"}],"skills":["Skill 1","Skill 2","Skill 3","Skill 4","Skill 5","Skill 6","Skill 7","Skill 8"]}\n\nIf user provided real data, use and improve it. If not, create realistic placeholders matching their profile. Use name "'+(ctx.name||'Your Name')+'" in the output.';
+}
+
+async function runResumeFeedback() {
+  const ctx = buildResumeContext();
+  const msgs=[{title:'Reading your experience...',sub:'Mapping your background against your personality profile.'},{title:'Checking your language...',sub:'Looking for impact statements and keywords that get noticed.'},{title:'Crafting your rewrite...',sub:'Building your new resume in your chosen style.'}];
+  let mi=0;
+  const iv=setInterval(()=>{mi=(mi+1)%msgs.length;const t=document.getElementById('loading-title');const s=document.getElementById('loading-sub');if(t)t.textContent=msgs[mi].title;if(s)s.textContent=msgs[mi].sub;},2800);
+  try {
+    const res = await fetch(API_BASE+'/claude', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1500,
+        system:'You are CareerCompass, a warm and encouraging career coach. Give specific, honest, actionable resume feedback. Never mention AI. Respond ONLY with valid JSON — no markdown fences, no preamble.',
+        messages:[{role:'user',content:buildPrompt(ctx)}]
+      })
+    });
+    clearInterval(iv);
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    const raw = data.content.map(b=>b.text||'').join('');
+    let parsed;
+    try { parsed=JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) { parsed=buildFallback(ctx); }
+    renderFeedback(parsed, ctx);
+  } catch(err) {
+    clearInterval(iv);
+    console.error('API error:',err);
+    renderFeedback(buildFallback(ctx), ctx);
+  }
+}
+
+function buildFallback(ctx) {
+  const isConn=(answers[5]||'A')==='A';
+  const name=ctx.name||'Your Name';
+  return {
+    strengths:'Your background shows a natural ability to '+(isConn?'build relationships and guide others':'solve complex problems and deliver results')+'. The combination of your people skills and experience in '+(ctx.preferredEnv||'your field').toLowerCase()+' environments is a genuine differentiator.',
+    improvements:'1. Quantify your impact — add numbers wherever possible (team size, revenue, percentages). 2. Lead every bullet with a strong action verb (Led, Built, Grew, Designed, Delivered). 3. Add keywords from job descriptions you are targeting so your resume gets found.',
+    keywords:'Leadership, Training & Development, Team Building, Performance Management, Strategic Planning, Stakeholder Engagement, Process Improvement, Cross-functional Collaboration',
+    summary:(isConn?'A people-first professional with a proven track record of building high-performing teams and delivering measurable results through coaching, training, and relationship-driven leadership.':'A results-oriented professional with expertise in turning complex challenges into clear solutions through strategic thinking and collaborative execution.')+' Brings a genuine commitment to doing great work.',
+    experience:[{title:'Senior Training & Development Specialist',company:'Example Organization',dates:'2020 – Present',bullets:['Designed and delivered training programs for 150+ employees, reducing time-to-productivity by 25%','Partnered with department heads to identify gaps and create targeted learning solutions','Managed a team of 3 trainers and an annual L&D budget of $200K']},{title:'Training Coordinator',company:'Previous Employer',dates:'2016 – 2020',bullets:['Facilitated weekly workshops on sales methodology, product knowledge, and customer service','Developed a peer-coaching program that improved team retention by 18%','Created a digital resource library used by 300+ staff across 4 locations']}],
+    education:[{degree:'Associate in Arts',school:'Your Institution',year:'Year Completed'}],
+    skills:['Training & Development','Sales Leadership','Team Coaching','Curriculum Design','Performance Management','Stakeholder Communication','Adult Learning','Program Management']
+  };
+}
+
+function renderFeedback(data, ctx) {
+  document.getElementById('feedback-loading').style.display='none';
+  document.getElementById('feedback-header-sub').textContent='Here is what we found';
+  document.getElementById('feedback-content').style.display='block';
+  const cards='<div class="feedback-card positive animate-in"><div class="feedback-card-label">What is working for you</div><div class="feedback-card-title">Your strengths</div><div class="feedback-card-body"><p>'+data.strengths+'</p></div></div><div class="feedback-card improve animate-in delay-1"><div class="feedback-card-label">What to sharpen</div><div class="feedback-card-title">Suggested improvements</div><div class="feedback-card-body"><p>'+data.improvements.replace(/([123])\./g,'<br><strong>$1.</strong>')+'</p></div></div><div class="feedback-card animate-in delay-2"><div class="feedback-card-label">Keywords to add</div><div class="feedback-card-title">Terms that get you found</div><div class="feedback-card-body">'+data.keywords.split(',').map(k=>'<span style="display:inline-block;background:var(--cream-dark);color:var(--navy);font-size:11px;padding:3px 10px;border-radius:50px;margin:3px 3px 3px 0;">'+k.trim()+'</span>').join('')+'</div></div>';
+  document.getElementById('feedback-cards').innerHTML=cards;
+  const scheme=COLOR_SCHEMES.find(c=>c.id===ctx.colorScheme)||COLOR_SCHEMES[0];
+  const fontMap={serif:"'Cormorant Garamond',serif",modern:"'DM Sans',sans-serif",editorial:"'Cormorant Garamond',serif",minimal:"'DM Sans',sans-serif"};
+  const font=fontMap[ctx.fontChoice]||fontMap['serif'];
+  const accent=scheme.swatches[0];
+  const accentLight=scheme.swatches[2];
+  const contact=[ctx.location,ctx.phone,ctx.email].filter(Boolean).join('  ·  ')||'Fort Lauderdale, FL  ·  your@email.com';
+  const expHtml=(data.experience||[]).map(e=>'<div class="resume-doc-entry"><div class="resume-doc-entry-title" style="font-family:'+font+';color:'+accent+';">'+e.title+'</div><div class="resume-doc-entry-meta">'+e.company+' &nbsp;·&nbsp; '+e.dates+'</div><div class="resume-doc-entry-body"><ul>'+(e.bullets||[]).map(b=>'<li>'+b+'</li>').join('')+'</ul></div></div>').join('');
+  const eduHtml=(data.education||[]).map(e=>'<div class="resume-doc-entry"><div class="resume-doc-entry-title" style="font-family:'+font+';color:'+accent+';">'+e.degree+'</div><div class="resume-doc-entry-meta">'+e.school+' &nbsp;·&nbsp; '+e.year+'</div></div>').join('');
+  const skillsHtml=(data.skills||[]).map(s=>'<span class="resume-doc-skill" style="background:'+accentLight+';color:'+accent+';">'+s+'</span>').join('');
+  document.getElementById('resume-preview-wrap').innerHTML='<div class="resume-doc animate-in delay-3"><div class="resume-doc-header" style="background:'+accent+';"><div class="resume-doc-name" style="font-family:'+font+';color:#fff;">'+(ctx.name||'Your Name')+'</div><div class="resume-doc-contact" style="color:rgba(255,255,255,0.8);">'+contact+'</div><div class="resume-doc-divider" style="background:rgba(255,255,255,0.4);"></div><div class="resume-doc-summary" style="color:rgba(255,255,255,0.92);font-family:'+font+';">'+data.summary+'</div></div><div class="resume-doc-section" style="padding-top:1.25rem;"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Experience</div>'+expHtml+'</div><div class="resume-doc-section"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Education</div>'+eduHtml+'</div><div class="resume-doc-section"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Skills</div><div class="resume-doc-skills">'+skillsHtml+'</div></div></div>';
+  document.getElementById('feedback-body').scrollTop=0;
+  // Store resume data for cover letter use
+  window._resumeData = data;
+  window._resumeCtx = ctx;
+}
+
+// ─────────────────────────────────────────────────────────────────
+// PAYWALL
+// ─────────────────────────────────────────────────────────────────
+function goToPaywall() { showScreen('paywall'); }
+
+function selectPlanCard(el, plan) {
+  selectedPlan = plan;
+  document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function handlePaywallCTA() {
+  // Stripe integration placeholder — in production connect to Stripe Checkout
+  showToast('💳 Stripe checkout coming soon!', 3000);
+}
+
+function continueAsTester() {
+  showToast('🧪 Tester access granted — enjoy the full app!', 3000);
+  loadAndShowJobs();
+}
+
+// ─────────────────────────────────────────────────────────────────
+// JOB MATCHING (live search via Netlify function)
+// ─────────────────────────────────────────────────────────────────
+async function loadAndShowJobs() {
+  showScreen('jobs');
+  document.getElementById('jobs-body').innerHTML=`<div class="jobs-loading"><div class="feedback-spinner"></div><div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--navy); margin-top:1.25rem; margin-bottom:6px;">Searching live listings...</div><div style="font-size:13px; color:var(--text-mid);">Matching roles to your profile</div></div>`;
+
+  try {
+    const q5=answers[5]||'A';
+    const queryMap={A:'Training Manager OR Corporate Trainer OR L&D Manager',B:'Business Analyst OR Operations Manager',C:'Project Manager OR Program Coordinator',D:'Director OR VP OR Business Development'};
+    const loc=((document.getElementById('m-location')||{}).value)||'Fort Lauderdale, FL';
+    const resp = await fetch(API_BASE+'/jobs', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ query:queryMap[q5]||queryMap['A'], location:loc })
+    });
+    const data = await resp.json();
+    allJobs = data.results || [];
+    if(allJobs.length===0) allJobs = getLocalJobs();
+  } catch(e) {
+    console.error('Jobs fetch error:',e);
+    allJobs = getLocalJobs();
+  }
+  renderJobs('all');
+}
+
+function getLocalJobs() {
+  return [
+    { id:'j1', title:'Senior Training & Development Manager', company:'AmeriHealth Caritas', location:'Fort Lauderdale, FL', type:'Hybrid', salary:'$85K – $105K', match:94, category:['training','leadership'], logo:'🏥', bg:'#e8f4fd', desc:'Lead enterprise-wide training programs. Ideal for someone who combines coaching skills with measurable program outcomes.', url:'https://www.indeed.com/jobs?q=training+development+manager&l=Fort+Lauderdale%2C+FL', posted:'2 days ago' },
+    { id:'j2', title:'Corporate Trainer — Sales & Service', company:'Marriott International', location:'Miami, FL (18 mi)', type:'On-site', salary:'$78K – $95K', match:91, category:['training','sales'], logo:'🏨', bg:'#fff3e0', desc:'Develop and facilitate sales training across multiple properties. Work closely with GMs to build high-performance teams.', url:'https://www.indeed.com/jobs?q=corporate+trainer&l=Miami%2C+FL', posted:'4 days ago' },
+    { id:'j3', title:'Director of Learning & Development', company:'AutoNation', location:'Fort Lauderdale, FL', type:'Hybrid', salary:'$95K – $120K', match:89, category:['training','leadership'], logo:'🚗', bg:'#f3e5f5', desc:'Own the full L&D strategy for one of the nation\'s largest automotive retailers.', url:'https://www.indeed.com/jobs?q=director+learning+development&l=Fort+Lauderdale%2C+FL', posted:'1 week ago' },
+    { id:'j4', title:'Remote Training Specialist — Financial Services', company:'Fidelity Investments', location:'Remote (US)', type:'Remote', salary:'$80K – $98K', match:87, category:['training','remote'], logo:'📈', bg:'#e8f5e9', desc:'Create and deliver training for financial advisors nationwide. Financial sales background is a significant advantage.', url:'https://www.indeed.com/jobs?q=training+specialist+financial&remotejob=1', posted:'3 days ago' },
+    { id:'j5', title:'People Development Partner', company:'Spirit Airlines', location:'Miramar, FL (12 mi)', type:'Hybrid', salary:'$82K – $100K', match:85, category:['training','leadership'], logo:'✈️', bg:'#fffde7', desc:'Build training initiatives and succession programs across the airline. Industry knowledge highly valued.', url:'https://www.indeed.com/jobs?q=people+development+airline&l=Miramar%2C+FL', posted:'5 days ago' },
+    { id:'j6', title:'Sales Enablement Manager', company:'Chewy', location:'Plantation, FL (8 mi)', type:'Hybrid', salary:'$90K – $110K', match:83, category:['sales','leadership'], logo:'🐾', bg:'#fce4ec', desc:'Build tools, content, and training programs that help a high-growth sales team perform at its best.', url:'https://www.indeed.com/jobs?q=sales+enablement+manager&l=Plantation%2C+FL', posted:'1 week ago' },
+    { id:'j7', title:'Instructional Designer — Remote', company:'LinkedIn Learning', location:'Remote (US)', type:'Remote', salary:'$85K – $105K', match:81, category:['training','remote'], logo:'💼', bg:'#e3f2fd', desc:'Create compelling learning experiences for professionals worldwide.', url:'https://www.indeed.com/jobs?q=instructional+designer+remote', posted:'2 weeks ago' },
+    { id:'j8', title:'Regional Training Manager', company:'Bank of America', location:'Boca Raton, FL (22 mi)', type:'On-site', salary:'$88K – $108K', match:79, category:['training','sales','leadership'], logo:'🏦', bg:'#e8f4fd', desc:'Oversee training delivery for a multi-branch region. Financial services track record preferred.', url:'https://www.indeed.com/jobs?q=regional+training+manager&l=Boca+Raton%2C+FL', posted:'1 week ago' }
+  ];
+}
+
+function renderJobs(filter) {
+  filter = filter || currentFilter;
+  currentFilter = filter;
+  const name=(answers[1]||'').split(' ')[0]||'you';
+  const q5=answers[5]||'A';
+  const typeLabels={A:'connector and people-leader',B:'analytical problem-solver',C:'organized executor',D:'visionary leader'};
+  let filtered = allJobs.filter(j => {
+    if(filter==='all') return true;
+    if(filter==='remote') return j.type==='Remote';
+    if(filter==='nearby') return j.location.includes('FL')||j.type==='Remote';
+    return (j.category||[]).includes(filter);
+  });
+  document.getElementById('jobs-match-count').textContent=filtered.length+' matches';
+  let html=`<div class="feedback-banner"><div class="feedback-banner-title">Here's what we found for you, ${name}</div><div class="feedback-banner-body">Based on your profile as a ${typeLabels[q5]}, we matched you to ${filtered.length} roles. Each score reflects how well the role aligns with your strengths and values.</div><div class="feedback-actions"><button class="feedback-btn" onclick="writeCoverLetter(null)">✍️ Write a cover letter</button><button class="feedback-btn outline" onclick="showScreen('feedback')">📄 Back to my resume</button></div></div>
+  <div class="section-label">Matched roles — sorted by fit</div>`;
+  filtered.forEach(job => {
+    const mc=job.match>=90?'#2d7d52':job.match>=80?'#c9a55a':'#4a5568';
+    html+=`<div class="job-card" onclick="openJob('${job.id}')"><div class="job-card-top"><div class="job-logo" style="background:${job.bg||'#f0f0f0'};">${job.logo||'💼'}</div><div><div class="job-title">${job.title}</div><div class="job-company">${job.company}</div></div></div><div class="job-meta"><span class="job-meta-tag">📍 ${job.location}</span><span class="job-meta-tag">💼 ${job.type}</span><span class="job-meta-tag">💰 ${job.salary||'Competitive'}</span><span class="job-meta-tag">🕐 ${job.posted||'Recently'}</span></div><div class="job-desc">${job.desc}</div><div class="job-card-footer"><div class="match-score"><span class="match-label">Match</span><div class="match-bar"><div class="match-fill" style="width:${job.match||75}%; background:${mc};"></div></div><span class="match-pct" style="color:${mc};">${job.match||75}%</span></div><button class="apply-btn" onclick="event.stopPropagation(); applyToJob('${job.id}')">Apply →</button></div></div>`;
+  });
+  if(filtered.length===0) html+='<div style="text-align:center;padding:3rem 1rem;"><div style="font-size:32px;margin-bottom:12px;">🔍</div><div style="font-family:\'Cormorant Garamond\',serif;font-size:22px;color:var(--navy);margin-bottom:8px;">No matches for this filter</div><div style="font-size:13px;color:var(--text-mid);">Try "All Matches" to see everything we found.</div></div>';
+  document.getElementById('jobs-body').innerHTML=html;
+}
+
+function filterJobs(filter, btn) {
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  renderJobs(filter);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// JOB DETAIL
+// ─────────────────────────────────────────────────────────────────
+function openJob(id) {
+  const job = allJobs.find(j=>j.id===id)||getLocalJobs().find(j=>j.id===id);
+  if(!job) return;
+  currentJobData = job;
+  document.getElementById('jd-header-title').textContent = job.title;
+  document.getElementById('jd-header-sub').textContent = job.company;
+  const mc=job.match>=90?'#2d7d52':job.match>=80?'#c9a55a':'#4a5568';
+  document.getElementById('jobdetail-body').innerHTML=`
+    <div class="jobdetail-hero">
+      <div class="jobdetail-logo-lg" style="background:${job.bg||'#f0f0f0'}">${job.logo||'💼'}</div>
+      <div class="jobdetail-title">${job.title}</div>
+      <div class="jobdetail-company">${job.company}</div>
+      <div class="jobdetail-tags">
+        <span class="jobdetail-tag">📍 ${job.location}</span>
+        <span class="jobdetail-tag">💼 ${job.type}</span>
+        <span class="jobdetail-tag">💰 ${job.salary||'Competitive'}</span>
+        <span class="jobdetail-tag">🕐 Posted ${job.posted||'recently'}</span>
+      </div>
+    </div>
+    <div class="jobdetail-section">
+      <div class="jobdetail-section-title">About this role</div>
+      <div class="jobdetail-body-text">${job.desc}</div>
+    </div>
+    <div class="jobdetail-section">
+      <div class="jobdetail-section-title">Your match score</div>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+        <div style="font-family:'Cormorant Garamond',serif; font-size:42px; font-weight:500; color:${mc};">${job.match||75}%</div>
+        <div style="font-size:13px; color:var(--text-mid); line-height:1.5;">Based on your personality type,<br>work style, and values.</div>
+      </div>
+      <div class="jobdetail-match-bar"><div class="jobdetail-match-fill" style="width:0; background:${mc};" data-target="${job.match||75}%"></div></div>
+    </div>
+    <div class="jobdetail-section">
+      <div class="jobdetail-section-title">Why this fits you</div>
+      <div class="jobdetail-body-text">${getMatchReason(job)}</div>
+    </div>
+    <div style="height:20px;"></div>
+  `;
+  document.getElementById('jobdetail-footer').innerHTML=`
+    <button class="btn-cover" onclick="writeCoverLetter('${job.id}')">✍️ Cover Letter</button>
+    <button class="btn-apply-lg" onclick="applyNow('${job.id}')">Apply Now →</button>
+  `;
+  showScreen('jobdetail');
+  setTimeout(()=>{ const bar=document.querySelector('.jobdetail-match-fill'); if(bar)bar.style.width=bar.dataset.target; },500);
+}
+
+function getMatchReason(job) {
+  const q5=answers[5]||'A';
+  const reasons={
+    A:'Your natural ability to build relationships and guide others is exactly what this role calls for. The people-first environment matches your collaborative work style and your history of bringing out the best in teams.',
+    B:'Your analytical mindset and problem-solving instincts align well with the complexity this role demands. You thrive in environments where thinking drives outcomes — and this one delivers that.',
+    C:'Your reputation for making things happen, executing well, and bringing structure to ambiguous situations is a perfect match for the expectations here.',
+    D:'Your big-picture thinking and ability to inspire others positions you to do your best work in this kind of leadership-facing role.'
+  };
+  return reasons[q5]||reasons['A'];
+}
+
+// ─────────────────────────────────────────────────────────────────
+// COVER LETTER (Claude API)
+// ─────────────────────────────────────────────────────────────────
+function writeCoverLetter(jobId) {
+  const job = jobId ? (allJobs.find(j=>j.id===jobId)||getLocalJobs().find(j=>j.id===jobId)||currentJobData) : currentJobData;
+  if(!job && !jobId) {
+    // No specific job — write a general letter
+    currentJobData = { title:'your target role', company:'the hiring team', desc:'', type:'', location:'' };
+  } else if(job) {
+    currentJobData = job;
+  }
+  showScreen('cover');
+  document.getElementById('cover-loading').style.display='flex';
+  document.getElementById('cover-content').style.display='none';
+  document.getElementById('cover-header-sub').textContent=currentJobData.company ? `For ${currentJobData.company}` : 'Tailoring to your profile';
+  runCoverLetter();
+}
+
+async function runCoverLetter() {
+  const job = currentJobData || {};
+  const ctx = window._resumeCtx || buildResumeContext();
+  const resumeData = window._resumeData;
+  const name = ctx.name || (answers[1]||'');
+  const loadMsgs=[{t:'Studying the job description...',s:'Identifying what this employer really wants.'},{t:'Matching your story to the role...',s:'Connecting your experience to their needs.'},{t:'Writing your letter...',s:'Making it warm, specific, and memorable.'}];
+  let mi=0;
+  const iv=setInterval(()=>{mi=(mi+1)%loadMsgs.length;const t=document.getElementById('cover-loading-title');const s=document.getElementById('cover-loading-sub');if(t)t.textContent=loadMsgs[mi].t;if(s)s.textContent=loadMsgs[mi].s;},2500);
+  const prompt=`Write a tailored cover letter for this person applying to a specific job.\n\nCANDIDATE PROFILE:\n- Name: ${name||'[Candidate]'}\n- Personality type: ${ctx.personalityType}\n- Work style: ${ctx.workStyle}\n- Top value: ${ctx.topValue}\n- Team role: ${ctx.teamRole}\n- Professional summary: ${resumeData?resumeData.summary:ctx.summary||'Experienced professional seeking new opportunities'}\n- Key skills: ${resumeData?resumeData.skills.join(', '):ctx.skills||'Leadership, Training, Communication'}\n\nTARGET JOB:\n- Title: ${job.title||'Training Manager'}\n- Company: ${job.company||'the company'}\n- Type: ${job.type||''}\n- Description: ${job.desc||''}\n\nWrite a warm, specific, compelling cover letter. 3–4 short paragraphs. Opening that hooks. Middle that connects experience to role. Closing with clear call to action. No clichés like "I am writing to express my interest." No fluff. Sound like a real person.\n\nRespond with ONLY valid JSON (no markdown):\n{"date":"${new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}","greeting":"Dear Hiring Manager,","body":["paragraph 1","paragraph 2","paragraph 3","paragraph 4"],"closing":"Sincerely,","name":"${name||'[Your Name]'}"}`;
+  try {
+    const res = await fetch(API_BASE+'/claude', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:'You are CareerCompass, a expert cover letter writer. Write compelling, specific, human-sounding cover letters. Never mention AI. Respond ONLY with valid JSON.',
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    clearInterval(iv);
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    const raw=data.content.map(b=>b.text||'').join('');
+    let parsed;
+    try { parsed=JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) { parsed=buildFallbackCoverLetter(job,name); }
+    renderCoverLetter(parsed, job);
+  } catch(err) {
+    clearInterval(iv);
+    console.error('Cover letter error:',err);
+    renderCoverLetter(buildFallbackCoverLetter(job,name), job);
+  }
+}
+
+function buildFallbackCoverLetter(job, name) {
+  const q5=answers[5]||'A';
+  const intro={A:'Throughout my career, I have built a reputation for something that cannot be taught: the ability to earn trust quickly, connect with people at every level, and turn that connection into results.',B:'I have always believed that the best solutions come from asking the right questions before assuming you have the answers.',C:'I have built my career on one principle: if something is worth doing, it is worth doing well — and finished on time.',D:'What drives me is not just getting things done, but changing how they get done. I look for roles where that kind of thinking is an asset, not a complication.'};
+  return {
+    date:new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}),
+    greeting:`Dear ${job.company||'Hiring Team'} Hiring Manager,`,
+    body:[
+      intro[q5],
+      `The ${job.title||'open position'} at ${job.company||'your organization'} immediately caught my attention because it aligns closely with the work I have done throughout my career — specifically, the intersection of people development, performance improvement, and organizational impact.`,
+      `In my most recent roles, I have had the opportunity to design programs that actually change behavior, not just check a box. I measure success by the difference it makes: reduced turnover, improved performance metrics, and teams that feel genuinely equipped to do their best work.`,
+      `I would welcome the opportunity to bring that same energy and track record to ${job.company||'your team'}. I am happy to share specific examples and discuss how my background fits your current priorities.`
+    ],
+    closing:'Sincerely,',
+    name:name||'[Your Name]'
+  };
+}
+
+function renderCoverLetter(data, job) {
+  coverLetterText = [data.date,'',data.greeting,'',...data.body,'',data.closing,data.name].join('\n');
+  document.getElementById('cover-loading').style.display='none';
+  document.getElementById('cover-header-sub').textContent=job.company?`For ${job.company}`:'Your cover letter';
+  document.getElementById('cover-content').style.display='block';
+  document.getElementById('cover-doc').innerHTML=`
+    <p style="font-size:12px; color:var(--text-light); margin-bottom:1.5rem;">${data.date}</p>
+    <p class="cover-salutation">${data.greeting}</p>
+    ${data.body.map(p=>`<p>${p}</p>`).join('')}
+    <div class="cover-closing">
+      <p>${data.closing}</p>
+      <p style="margin-top:4px;"><strong>${data.name}</strong></p>
+    </div>
+  `;
+}
+
+function copyCoverLetter() {
+  if(navigator.clipboard && coverLetterText) {
+    navigator.clipboard.writeText(coverLetterText).then(()=>showToast('✅ Copied to clipboard!')).catch(()=>showToast('Copy failed — try selecting the text manually'));
+  } else { showToast('📋 Select the letter text above to copy'); }
+}
+
+function regenerateCoverLetter() {
+  document.getElementById('cover-loading').style.display='flex';
+  document.getElementById('cover-content').style.display='none';
+  runCoverLetter();
+}
+
+function applyWithCoverLetter() {
+  copyCoverLetter();
+  if(currentJobData && currentJobData.url) {
+    setTimeout(()=>{ window.open(currentJobData.url,'_blank'); },800);
+  }
+  applyToJob(currentJobData?currentJobData.id:null);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// APPLY + NOTIFICATIONS
+// ─────────────────────────────────────────────────────────────────
+function applyToJob(id) {
+  const job = id ? (allJobs.find(j=>j.id===id)||getLocalJobs().find(j=>j.id===id)) : currentJobData;
+  if(job && job.url) window.open(job.url,'_blank');
+  selectedJobForReminder = id||'general';
+  const modal = document.getElementById('reminder-modal');
+  document.getElementById('reminder-modal-body').textContent = job ? `We'll remind you in 7 days to follow up on your application to ${job.company}.` : 'We\'ll remind you in 7 days to follow up on this application.';
+  modal.classList.add('open');
+}
+
+function applyNow(id) { applyToJob(id); }
+
+async function setReminder(yes) {
+  document.getElementById('reminder-modal').classList.remove('open');
+  if(!yes) return;
+  const granted = await requestPushPermission();
+  if(granted) {
+    scheduleLocalReminder(selectedJobForReminder);
+    showToast('✅ Reminder set for 7 days from now!');
+  } else {
+    showToast('📅 Reminder noted — check back in a week!',3500);
+  }
+}
+
+async function requestPushPermission() {
+  if(!('Notification' in window)) return false;
+  if(Notification.permission==='granted') return true;
+  if(Notification.permission==='denied') return false;
+  const result = await Notification.requestPermission();
+  return result==='granted';
+}
+
+function scheduleLocalReminder(jobId) {
+  // Store reminder in localStorage — service worker reads on next visit
+  try {
+    const reminders = JSON.parse(localStorage.getItem('cc_reminders')||'[]');
+    const job = allJobs.find(j=>j.id===jobId)||getLocalJobs().find(j=>j.id===jobId)||{title:'your application'};
+    reminders.push({ id:jobId, company:job.company||'', title:job.title||'', due:Date.now()+(7*24*60*60*1000), set:Date.now() });
+    localStorage.setItem('cc_reminders', JSON.stringify(reminders));
+  } catch(e) {}
+  // Also register service worker sync if available
+  if(pushRegistration && pushRegistration.sync) {
+    pushRegistration.sync.register('reminder-'+jobId).catch(()=>{});
+  }
+}
+
+// Check for due reminders on load
+function checkReminders() {
+  if(Notification.permission!=='granted') return;
+  try {
+    const reminders = JSON.parse(localStorage.getItem('cc_reminders')||'[]');
+    const now = Date.now();
+    const due = reminders.filter(r=>r.due<=now);
+    due.forEach(r=>{
+      new Notification('CareerCompass Reminder 🎯',{body:`Time to follow up on your application to ${r.company||r.title}!`,tag:'reminder-'+r.id});
+    });
+    const remaining = reminders.filter(r=>r.due>now);
+    localStorage.setItem('cc_reminders', JSON.stringify(remaining));
+  } catch(e){}
+}
+
+// ─────────────────────────────────────────────────────────────────
+// SERVICE WORKER + PWA
+// ─────────────────────────────────────────────────────────────────
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(reg=>{
+    pushRegistration=reg;
+  }).catch(()=>{});
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MOBILE VIEWPORT HEIGHT
+// ─────────────────────────────────────────────────────────────────
+function setAppHeight() { document.documentElement.style.setProperty('--app-height', window.innerHeight+'px'); }
+setAppHeight();
+window.addEventListener('resize', setAppHeight);
+window.addEventListener('orientationchange', ()=>setTimeout(setAppHeight,150));
+
+// Check reminders on load
+setTimeout(checkReminders, 2000);
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "CareerCompass",
+  "short_name": "CareerCompass",
+  "description": "Find your direction. Build a resume that gets noticed.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1f3d",
+  "theme_color": "#0f1f3d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%230f1f3d'/><circle cx='96' cy='96' r='60' fill='none' stroke='%23c9a55a' stroke-width='4'/><rect x='94' y='36' width='4' height='50' rx='2' fill='%23c9a55a'/><rect x='94' y='106' width='4' height='50' rx='2' fill='rgba(201,165,90,0.4)'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%230f1f3d'/><circle cx='256' cy='256' r='160' fill='none' stroke='%23c9a55a' stroke-width='10'/><rect x='250' y='96' width='12' height='130' rx='6' fill='%23c9a55a'/><rect x='250' y='286' width='12' height='130' rx='6' fill='rgba(201,165,90,0.4)'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "screenshots": []
+}
