@@ -80,9 +80,9 @@ exports.handler = async (event) => {
       };
     }
 
-    // Cap at 4000 chars — plenty for Claude, avoids token bloat
-    const truncated = text.length > 4000;
-    const finalText = truncated ? text.substring(0, 4000) + '\n[truncated for length]' : text;
+    // Cap at 8000 chars — covers even long resumes comfortably
+    const truncated = text.length > 8000;
+    const finalText = truncated ? text.substring(0, 8000) + '\n[truncated for length]' : text;
 
     return {
       statusCode: 200,
