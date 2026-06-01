@@ -720,7 +720,9 @@ let coverLetterText = '';
 let allJobs = [];
 let selectedPlan = 'starter';
 let pushRegistration = null;
-let uploadedFileContent = ''; // extracted text from uploaded resume
+let uploadedFileContent = ''; // extracted text (txt files)
+let uploadedFileBase64 = ''; // raw base64 PDF for direct Claude document input
+let uploadedFileType = ''; // mime type of uploaded file
 
 // ─────────────────────────────────────────────────────────────────
 // LOCAL STORAGE
