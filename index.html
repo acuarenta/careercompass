@@ -1013,7 +1013,7 @@ async function callClaude(systemPrompt, userPrompt, maxTokens) {
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
-      model:'claude-haiku-4-5',
+      model:'claude-haiku-4-5-20251001',
       max_tokens: maxTokens,
       system: systemPrompt,
       messages:[{role:'user', content: userPrompt}]
@@ -1059,16 +1059,40 @@ async function runResumeFeedback() {
     if(lt) lt.textContent='Rewriting your experience...';
     if(ls) ls.textContent='Strengthening every bullet point for every role.';
 
-    // CALL 2: Full experience rewrite — all jobs
-    const prompt2 = 'RESUME:\n'+resumeText+'\n\nRewrite EVERY job listed in this resume. Do not skip any position. For each job, write 3-4 strong impact-focused bullets. Keep real employer names, titles, and dates exactly as written.\n\nRespond with ONLY valid JSON, no markdown:\n{"experience":[{"title":"exact job title","company":"exact company name","dates":"exact date range","bullets":["strong bullet 1","strong bullet 2","strong bullet 3"]}]}';
+    // CALL 2: Full experience rewrite in plain text (avoids JSON truncation)
+    const prompt2 = 'RESUME:\n'+resumeText+'\n\nRewrite EVERY job listed in this resume. Include ALL positions — do not skip any. For each job, write 3-5 strong impact-focused bullets.\n\nFormat your response EXACTLY like this for each job (no JSON, no markdown):\n\nJOB_START\nTITLE: [exact job title]\nCOMPANY: [exact company name]\nDATES: [exact date range]\nBULLET: [bullet 1]\nBULLET: [bullet 2]\nBULLET: [bullet 3]\nJOB_END\n\nRepeat JOB_START...JOB_END for every single job. Do not stop until all jobs are listed.';
 
-    const part2 = await callClaude(
-      'You are CareerCompass, a resume writer. Rewrite work experience bullets. Include EVERY job listed — do not stop early. Respond ONLY with valid JSON, no markdown.',
-      prompt2, 3000
-    );
+    const res2 = await fetch(API_BASE+'/claude', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-haiku-4-5-20251001',
+        max_tokens: 4000,
+        system: 'You are CareerCompass, a resume writer. Rewrite work experience for every job listed. Use the exact JOB_START/JOB_END format requested. Include ALL jobs.',
+        messages:[{role:'user', content: prompt2}]
+      })
+    });
+    const raw2 = await res2.json();
+    if(raw2.error) throw new Error(raw2.error);
+    const text2 = (raw2.content||[]).map(b=>b.text||'').join('');
+
+    // Parse the plain-text pipe format — works even if response is partially cut off
+    const experience = [];
+    const jobBlocks = text2.split('JOB_START').slice(1);
+    for (const block of jobBlocks) {
+      const lines = block.split('\n');
+      const job = { title:'', company:'', dates:'', bullets:[] };
+      for (const line of lines) {
+        if (line.startsWith('TITLE:')) job.title = line.replace('TITLE:','').trim();
+        else if (line.startsWith('COMPANY:')) job.company = line.replace('COMPANY:','').trim();
+        else if (line.startsWith('DATES:')) job.dates = line.replace('DATES:','').trim();
+        else if (line.startsWith('BULLET:')) job.bullets.push(line.replace('BULLET:','').trim());
+      }
+      if (job.title && job.company) experience.push(job);
+    }
 
     clearInterval(iv);
-    const merged = Object.assign({}, part1, { experience: part2.experience || [] });
+    const merged = Object.assign({}, part1, { experience });
     renderFeedback(merged, ctx);
 
   } catch(err) {
@@ -1358,7 +1382,7 @@ async function runCoverLetter() {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-haiku-4-5',
+        model:'claude-haiku-4-5-20251001',
         max_tokens:1500,
         system:'You are CareerCompass, a expert cover letter writer. Write compelling, specific, human-sounding cover letters. Never mention AI. Respond ONLY with valid JSON.',
         messages:[{role:'user',content:prompt}]
