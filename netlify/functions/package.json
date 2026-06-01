@@ -1,0 +1,9 @@
+{
+  "name": "careercompass-functions",
+  "version": "1.0.0",
+  "description": "Netlify serverless functions for CareerCompass",
+  "dependencies": {
+    "mammoth": "^1.8.0",
+    "pdf-parse": "^1.1.1"
+  }
+}
