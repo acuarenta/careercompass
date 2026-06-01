@@ -1,4 +1,5 @@
 // netlify/functions/claude.js
+// Secure proxy for Anthropic API — keeps your API key off the client
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -31,7 +32,7 @@ exports.handler = async (event) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: 'claude-haiku-4-5',
         max_tokens: body.max_tokens || 4000,
         system: body.system || '',
         messages: body.messages || []
