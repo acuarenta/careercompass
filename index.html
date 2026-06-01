@@ -659,7 +659,7 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────
 const IS_TESTER = true; // Set to false for production
-const API_BASE = '/api'; // Routes to Netlify function
+const API_BASE = '/.netlify/functions'; // Direct function calls — no redirect needed
 
 const COLOR_SCHEMES = [
   { id:'navy', name:'Classic Navy', swatches:['#0f1f3d','#c9a55a','#faf7f2','#4a5568'] },
@@ -884,24 +884,55 @@ function switchTab(tab, btn) {
   document.getElementById('tab-'+tab).classList.add('active');
 }
 
-function handleFileSelect(input) {
-  if (input.files && input.files[0]) {
-    const f = input.files[0];
-    const zone = document.getElementById('upload-zone');
-    zone.classList.add('has-file');
-    document.getElementById('upload-icon').textContent='✅';
-    document.getElementById('upload-title').textContent='Resume uploaded!';
-    document.getElementById('upload-sub').textContent=f.name;
-    document.getElementById('upload-file-name').textContent='Ready to review · '+(f.size/1024).toFixed(0)+' KB';
-    // Try to read text content for .txt files
-    if (f.type==='text/plain') {
-      const reader = new FileReader();
-      reader.onload = e => { uploadedFileContent = e.target.result; };
-      reader.readAsText(f);
-    } else {
-      uploadedFileContent = f.name; // For PDF/docx, pass filename — Claude will infer
+async function handleFileSelect(input) {
+  if (!input.files || !input.files[0]) return;
+  const f = input.files[0];
+  const zone = document.getElementById('upload-zone');
+  zone.classList.add('has-file');
+  document.getElementById('upload-icon').textContent='⏳';
+  document.getElementById('upload-title').textContent='Reading your resume...';
+  document.getElementById('upload-sub').textContent=f.name;
+  document.getElementById('upload-file-name').textContent='Extracting text — please wait';
+  try {
+    const base64 = await readFileAsBase64(f);
+    const resp = await fetch('/.netlify/functions/parse-resume', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ fileData:base64, fileType:f.type, fileName:f.name })
+    });
+    const result = await resp.json();
+    if (result.error) throw new Error(result.error);
+    if (result.warning || !result.text) {
+      document.getElementById('upload-icon').textContent='⚠️';
+      document.getElementById('upload-title').textContent='Could not read this file';
+      document.getElementById('upload-sub').textContent=result.warning||'Try the manual entry tab instead';
+      document.getElementById('upload-file-name').textContent='';
+      uploadedFileContent='';
+      return;
     }
+    uploadedFileContent=result.text;
+    document.getElementById('upload-icon').textContent='✅';
+    document.getElementById('upload-title').textContent='Resume ready!';
+    document.getElementById('upload-sub').textContent=f.name;
+    document.getElementById('upload-file-name').textContent='Text extracted · '+(f.size/1024).toFixed(0)+' KB'+(result.truncated?' · trimmed for length':'');
+  } catch(err) {
+    console.error('Upload error:',err);
+    document.getElementById('upload-icon').textContent='❌';
+    document.getElementById('upload-title').textContent='Upload failed';
+    document.getElementById('upload-sub').textContent=err.message||'Try the manual entry tab instead';
+    document.getElementById('upload-file-name').textContent='';
+    uploadedFileContent='';
+    zone.classList.remove('has-file');
   }
+}
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = () => reject(new Error('Could not read file'));
+    reader.readAsDataURL(file);
+  });
 }
 
 function handleDrop(e) {
