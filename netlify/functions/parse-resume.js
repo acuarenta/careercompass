@@ -64,9 +64,20 @@ exports.handler = async (event) => {
 
     // Clean up extracted text
     text = text
-      .replace(/\r\n/g, '\n')        // normalize line endings
-      .replace(/\n{3,}/g, '\n\n')    // collapse excess blank lines
-      .replace(/[ \t]{2,}/g, ' ')    // collapse excess spaces
+      .replace(/\r\n/g, '\n')                          // normalize line endings
+      .replace(/\r/g, '\n')
+      .replace(/[^\S\n]+/g, ' ')                       // collapse spaces/tabs (preserve newlines)
+      .replace(/P R O F E S S I O N A ?L/gi, 'PROFESSIONAL')  // fix spaced-out headers
+      .replace(/E X P E R I E N C E/gi, 'EXPERIENCE')
+      .replace(/E D U C A ?T I O N/gi, 'EDUCATION')
+      .replace(/C E R T I F I C A ?T I O N S?/gi, 'CERTIFICATIONS')
+      .replace(/S U M M A R Y/gi, 'SUMMARY')
+      .replace(/C O M P E T E N C I E S/gi, 'COMPETENCIES')
+      .replace(/S K I L L S/gi, 'SKILLS')
+      .replace(/([A-Z]) ([A-Z]) ([A-Z])/g, '$1$2$3')  // collapse remaining spaced capitals
+      .replace(/([A-Z]) ([A-Z])/g, '$1$2')
+      .replace(/•/g, '\n•')                            // ensure bullets start on new lines
+      .replace(/\n{3,}/g, '\n\n')                      // collapse excess blank lines
       .trim();
 
     if (!text || text.length < 50) {
@@ -80,9 +91,9 @@ exports.handler = async (event) => {
       };
     }
 
-    // Cap at 8000 chars — covers even long resumes comfortably
-    const truncated = text.length > 8000;
-    const finalText = truncated ? text.substring(0, 8000) + '\n[truncated for length]' : text;
+    // Cap at 10000 chars — covers even heavily formatted long resumes
+    const truncated = text.length > 10000;
+    const finalText = truncated ? text.substring(0, 10000) + '\n[truncated for length]' : text;
 
     return {
       statusCode: 200,
