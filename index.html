@@ -1001,42 +1001,76 @@ function buildResumeContext() {
   };
 }
 
-function buildPrompt(ctx) {
+function buildResumeText(ctx) {
   const hasRealResume = ctx.hasUpload && ctx.uploadedFileContent.length > 50;
-  const resumeSection = hasRealResume
-    ? 'UPLOADED RESUME TEXT (extract ALL details from this — name, address, phone, email, every job, every education entry, all skills):\n'+ctx.uploadedFileContent
-    : 'RESUME CONTENT:\nName: '+(ctx.name||'Not provided')+'\nLocation: '+(ctx.location||'Not provided')+'\nSummary: '+(ctx.summary||'Not provided')+'\nExperience: '+(ctx.experience||'Not provided')+'\nEducation: '+(ctx.education||'Not provided')+'\nSkills: '+(ctx.skills||'Not provided');
+  return hasRealResume
+    ? ctx.uploadedFileContent
+    : 'Name: '+(ctx.name||'Not provided')+'\nLocation: '+(ctx.location||'Not provided')+'\nSummary: '+(ctx.summary||'Not provided')+'\nExperience: '+(ctx.experience||'Not provided')+'\nEducation: '+(ctx.education||'Not provided')+'\nSkills: '+(ctx.skills||'Not provided');
+}
 
-  const nameInstruction = hasRealResume
-    ? 'CRITICAL: Extract the person\'s full name, full address, phone, and email directly from the resume text above. Do not use a first name from anywhere else. Use whatever name appears on the resume exactly as written.'
-    : 'Use name "'+(ctx.name||'Your Name')+'" in the output.';
-
-  return 'Generate resume feedback and a rewritten resume for this person.\n\nPERSONALITY PROFILE:\n- Type: '+ctx.personalityType+'\n- Preferred environment: '+ctx.preferredEnv+'\n- Top career value: '+ctx.topValue+'\n- Work style: '+ctx.workStyle+'\n- Natural team role: '+ctx.teamRole+'\n- Resume challenge: '+ctx.resumeChallenge+'\n- Desired employer impression: "'+ctx.desiredImpression+'"\n\n'+resumeSection+'\n\n'+nameInstruction+'\n\nRespond with ONLY this JSON (no markdown, no extra text):\n{"name":"Full name from resume","location":"Full address from resume","phone":"Phone from resume","email":"Email from resume","strengths":"2-3 sentences about genuine strengths. Be specific and encouraging.","improvements":"2-3 specific actionable improvements referencing their personality type.","keywords":"comma-separated list of 8-10 keywords they should add","summary":"A rewritten 3-sentence professional summary. Warm, confident, specific. No clichés.","experience":[{"title":"Job title","company":"Company","dates":"Date range","bullets":["bullet 1","bullet 2","bullet 3"]}],"education":[{"degree":"Degree","school":"School","year":"Year"}],"skills":["Skill 1","Skill 2","Skill 3","Skill 4","Skill 5","Skill 6","Skill 7","Skill 8"]}\n\nIf a real resume was uploaded, extract and use EVERY job and EVERY education entry from it accurately. Do not invent or omit anything. Improve the bullet points but keep the real employers, titles, dates, and schools.';
+async function callClaude(systemPrompt, userPrompt, maxTokens) {
+  const res = await fetch(API_BASE+'/claude', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-haiku-4-5',
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages:[{role:'user', content: userPrompt}]
+    })
+  });
+  const data = await res.json();
+  if(data.error) throw new Error(data.error);
+  const raw = (data.content||[]).map(b=>b.text||'').join('').trim();
+  return JSON.parse(raw.replace(/```json|```/g,'').trim());
 }
 
 async function runResumeFeedback() {
   const ctx = buildResumeContext();
-  const msgs=[{title:'Reading your experience...',sub:'Mapping your background against your personality profile.'},{title:'Checking your language...',sub:'Looking for impact statements and keywords that get noticed.'},{title:'Crafting your rewrite...',sub:'Building your new resume in your chosen style.'}];
+  const resumeText = buildResumeText(ctx);
+  const profile = 'Personality: '+ctx.personalityType+' | Environment: '+ctx.preferredEnv+' | Value: '+ctx.topValue+' | Style: '+ctx.workStyle+' | Role: '+ctx.teamRole+' | Challenge: '+ctx.resumeChallenge+' | Impression: '+ctx.desiredImpression;
+
+  const msgs=[
+    {title:'Reading your experience...',sub:'Mapping your background against your personality profile.'},
+    {title:'Checking your language...',sub:'Looking for impact statements and keywords that get noticed.'},
+    {title:'Crafting your summary...',sub:'Building your professional story.'},
+    {title:'Rewriting your experience...',sub:'Strengthening every bullet point.'}
+  ];
   let mi=0;
-  const iv=setInterval(()=>{mi=(mi+1)%msgs.length;const t=document.getElementById('loading-title');const s=document.getElementById('loading-sub');if(t)t.textContent=msgs[mi].title;if(s)s.textContent=msgs[mi].sub;},2800);
+  const iv=setInterval(()=>{
+    mi=(mi+1)%msgs.length;
+    const t=document.getElementById('loading-title');
+    const s=document.getElementById('loading-sub');
+    if(t) t.textContent=msgs[mi].title;
+    if(s) s.textContent=msgs[mi].sub;
+  },2500);
+
   try {
-    const res = await fetch(API_BASE+'/claude', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:4000,
-        system:'You are CareerCompass, a warm and encouraging career coach. Give specific, honest, actionable resume feedback. Never mention AI. Respond ONLY with valid JSON — no markdown fences, no preamble.',
-        messages:[{role:'user',content:buildPrompt(ctx)}]
-      })
-    });
+    // CALL 1: Feedback + contact + summary + education + skills
+    const prompt1 = 'RESUME:\n'+resumeText+'\n\nPROFILE:\n'+profile+'\n\nRespond with ONLY valid JSON, no markdown:\n{"name":"full name from resume","location":"full address","phone":"phone","email":"email","strengths":"2-3 sentences on genuine strengths, specific and encouraging","improvements":"2-3 specific actionable improvements","keywords":"8-10 comma-separated keywords to add","summary":"rewritten 3-sentence professional summary, warm and specific, no clichés","education":[{"degree":"degree","school":"school","year":"year"}],"certifications":["cert 1","cert 2"],"skills":["skill 1","skill 2","skill 3","skill 4","skill 5","skill 6","skill 7","skill 8"]}';
+
+    const part1 = await callClaude(
+      'You are CareerCompass, a career coach. Extract contact info and write feedback. Respond ONLY with valid JSON, no markdown.',
+      prompt1, 1500
+    );
+
+    const lt=document.getElementById('loading-title');
+    const ls=document.getElementById('loading-sub');
+    if(lt) lt.textContent='Rewriting your experience...';
+    if(ls) ls.textContent='Strengthening every bullet point for every role.';
+
+    // CALL 2: Full experience rewrite — all jobs
+    const prompt2 = 'RESUME:\n'+resumeText+'\n\nRewrite EVERY job listed in this resume. Do not skip any position. For each job, write 3-4 strong impact-focused bullets. Keep real employer names, titles, and dates exactly as written.\n\nRespond with ONLY valid JSON, no markdown:\n{"experience":[{"title":"exact job title","company":"exact company name","dates":"exact date range","bullets":["strong bullet 1","strong bullet 2","strong bullet 3"]}]}';
+
+    const part2 = await callClaude(
+      'You are CareerCompass, a resume writer. Rewrite work experience bullets. Include EVERY job listed — do not stop early. Respond ONLY with valid JSON, no markdown.',
+      prompt2, 3000
+    );
+
     clearInterval(iv);
-    const data = await res.json();
-    if(data.error) throw new Error(data.error);
-    const raw = data.content.map(b=>b.text||'').join('');
-    let parsed;
-    try { parsed=JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) { parsed=buildFallback(ctx); }
-    renderFeedback(parsed, ctx);
+    const merged = Object.assign({}, part1, { experience: part2.experience || [] });
+    renderFeedback(merged, ctx);
+
   } catch(err) {
     clearInterval(iv);
     console.error('API error:',err);
@@ -1079,8 +1113,9 @@ function renderFeedback(data, ctx) {
   if (data.name) { window._resumeCtx = Object.assign({}, ctx, { name: data.name, location: displayLocation, phone: displayPhone, email: displayEmail }); }
   const expHtml=(data.experience||[]).map(e=>'<div class="resume-doc-entry"><div class="resume-doc-entry-title" style="font-family:'+font+';color:'+accent+';">'+e.title+'</div><div class="resume-doc-entry-meta">'+e.company+' &nbsp;·&nbsp; '+e.dates+'</div><div class="resume-doc-entry-body"><ul>'+(e.bullets||[]).map(b=>'<li>'+b+'</li>').join('')+'</ul></div></div>').join('');
   const eduHtml=(data.education||[]).map(e=>'<div class="resume-doc-entry"><div class="resume-doc-entry-title" style="font-family:'+font+';color:'+accent+';">'+e.degree+'</div><div class="resume-doc-entry-meta">'+e.school+' &nbsp;·&nbsp; '+e.year+'</div></div>').join('');
+  const certHtml=(data.certifications||[]).length>0?'<div class="resume-doc-section"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Certifications & Licenses</div>'+(data.certifications||[]).map(c=>'<div class="resume-doc-entry"><div class="resume-doc-entry-meta">'+c+'</div></div>').join('')+'</div>':'';
   const skillsHtml=(data.skills||[]).map(s=>'<span class="resume-doc-skill" style="background:'+accentLight+';color:'+accent+';">'+s+'</span>').join('');
-  document.getElementById('resume-preview-wrap').innerHTML='<div class="resume-doc animate-in delay-3"><div class="resume-doc-header" style="background:'+accent+';"><div class="resume-doc-name" style="font-family:'+font+';color:#fff;">'+displayName+'</div><div class="resume-doc-contact" style="color:rgba(255,255,255,0.8);">'+contact+'</div><div class="resume-doc-divider" style="background:rgba(255,255,255,0.4);"></div><div class="resume-doc-summary" style="color:rgba(255,255,255,0.92);font-family:'+font+';">'+data.summary+'</div></div><div class="resume-doc-section" style="padding-top:1.25rem;"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Experience</div>'+expHtml+'</div><div class="resume-doc-section"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Education</div>'+eduHtml+'</div><div class="resume-doc-section"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Skills</div><div class="resume-doc-skills">'+skillsHtml+'</div></div></div>';
+  document.getElementById('resume-preview-wrap').innerHTML='<div class="resume-doc animate-in delay-3"><div class="resume-doc-header" style="background:'+accent+';"><div class="resume-doc-name" style="font-family:'+font+';color:#fff;">'+displayName+'</div><div class="resume-doc-contact" style="color:rgba(255,255,255,0.8);">'+contact+'</div><div class="resume-doc-divider" style="background:rgba(255,255,255,0.4);"></div><div class="resume-doc-summary" style="color:rgba(255,255,255,0.92);font-family:'+font+';">'+data.summary+'</div></div><div class="resume-doc-section" style="padding-top:1.25rem;"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Experience</div>'+expHtml+'</div><div class="resume-doc-section"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Education</div>'+eduHtml+'</div>'+certHtml+'<div class="resume-doc-section"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Skills</div><div class="resume-doc-skills">'+skillsHtml+'</div></div></div>';
   document.getElementById('feedback-body').scrollTop=0;
   // Store resume data for cover letter use
   window._resumeData = data;
@@ -1131,6 +1166,7 @@ function downloadResumeAsWord() {
 <div class="summary">${data.summary || ''}</div>
 <h2>Experience</h2>${expHtml}
 <h2>Education</h2>${eduHtml}
+${(data.certifications||[]).length>0?`<h2>Certifications &amp; Licenses</h2><p class="skills">${(data.certifications||[]).join('<br>')}</p>`:''}
 <h2>Skills</h2><p class="skills">${skillsHtml}</p>
 </body></html>`;
 
@@ -1322,7 +1358,7 @@ async function runCoverLetter() {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model:'claude-haiku-4-5',
         max_tokens:1500,
         system:'You are CareerCompass, a expert cover letter writer. Write compelling, specific, human-sounding cover letters. Never mention AI. Respond ONLY with valid JSON.',
         messages:[{role:'user',content:prompt}]
