@@ -513,6 +513,7 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
         <div id="resume-preview-wrap"></div>
       </div>
       <div style="display:flex; gap:10px; margin-bottom:1.5rem;">
+        <button class="btn-next" style="flex:0 0 auto; background:transparent; color:var(--navy); border:1.5px solid rgba(15,31,61,0.2); padding:14px 18px;" onclick="downloadResumeAsWord()">⬇ Word</button>
         <button class="btn-next gold" style="flex:1;" onclick="goToPaywall()">Find Matching Jobs →</button>
       </div>
     </div>
@@ -1087,8 +1088,63 @@ function renderFeedback(data, ctx) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// PAYWALL
+// DOWNLOAD RESUME AS WORD (.docx via HTML conversion)
 // ─────────────────────────────────────────────────────────────────
+function downloadResumeAsWord() {
+  const data = window._resumeData;
+  const ctx = window._resumeCtx || buildResumeContext();
+  if (!data) { showToast('Generate your resume first'); return; }
+
+  const displayName = data.name || ctx.name || 'Your Name';
+  const contact = [data.location || ctx.location, data.phone || ctx.phone, data.email || ctx.email].filter(Boolean).join('  |  ');
+  const scheme = COLOR_SCHEMES.find(c => c.id === (ctx.colorScheme || 'navy')) || COLOR_SCHEMES[0];
+  const accent = scheme.swatches[0];
+
+  const expHtml = (data.experience || []).map(e =>
+    `<p><b>${e.title}</b><br>${e.company} &nbsp;|&nbsp; ${e.dates}</p><ul>${(e.bullets||[]).map(b=>`<li>${b}</li>`).join('')}</ul>`
+  ).join('');
+  const eduHtml = (data.education || []).map(e =>
+    `<p><b>${e.degree}</b><br>${e.school} &nbsp;|&nbsp; ${e.year}</p>`
+  ).join('');
+  const skillsHtml = (data.skills || []).join(', ');
+
+  // Build an HTML document that Word can open natively
+  const html = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<style>
+  body { font-family: Calibri, sans-serif; font-size: 11pt; margin: 1in; color: #333; }
+  h1 { font-size: 20pt; color: ${accent}; margin-bottom: 2pt; }
+  .contact { font-size: 10pt; color: #666; margin-bottom: 10pt; }
+  .summary { font-size: 11pt; font-style: italic; margin-bottom: 14pt; color: #444; }
+  h2 { font-size: 12pt; color: ${accent}; border-bottom: 1pt solid ${accent}; padding-bottom: 2pt; margin-top: 14pt; margin-bottom: 6pt; text-transform: uppercase; letter-spacing: 1pt; }
+  p { margin: 4pt 0; }
+  li { margin: 3pt 0; }
+  .skills { font-size: 10pt; }
+</style>
+</head>
+<body>
+<h1>${displayName}</h1>
+<div class="contact">${contact}</div>
+<div class="summary">${data.summary || ''}</div>
+<h2>Experience</h2>${expHtml}
+<h2>Education</h2>${eduHtml}
+<h2>Skills</h2><p class="skills">${skillsHtml}</p>
+</body></html>`;
+
+  const blob = new Blob([html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (displayName.replace(/\s+/g, '_') || 'Resume') + '_CareerCompass.doc';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✅ Resume downloading as Word doc!');
+}
 function goToPaywall() { showScreen('paywall'); }
 
 function selectPlanCard(el, plan) {
