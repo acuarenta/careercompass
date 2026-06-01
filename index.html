@@ -1001,12 +1001,16 @@ function buildResumeContext() {
 }
 
 function buildPrompt(ctx) {
-  const resumeSection = ctx.hasUpload && ctx.uploadedFileContent.length>50
-    ? 'UPLOADED RESUME TEXT:\n'+ctx.uploadedFileContent
-    : ctx.hasUpload
-      ? 'The user uploaded a resume file. Use their personality profile to generate feedback as if you reviewed it.'
-      : 'RESUME CONTENT:\nName: '+(ctx.name||'Not provided')+'\nLocation: '+(ctx.location||'Not provided')+'\nSummary: '+(ctx.summary||'Not provided')+'\nExperience: '+(ctx.experience||'Not provided')+'\nEducation: '+(ctx.education||'Not provided')+'\nSkills: '+(ctx.skills||'Not provided');
-  return 'Generate resume feedback and a rewritten resume for this person.\n\nPERSONALITY PROFILE:\n- Type: '+ctx.personalityType+'\n- Preferred environment: '+ctx.preferredEnv+'\n- Top career value: '+ctx.topValue+'\n- Work style: '+ctx.workStyle+'\n- Natural team role: '+ctx.teamRole+'\n- Resume challenge: '+ctx.resumeChallenge+'\n- Desired employer impression: "'+ctx.desiredImpression+'"\n\n'+resumeSection+'\n\nRespond with ONLY this JSON (no markdown, no extra text):\n{"strengths":"2-3 sentences about genuine strengths. Be specific and encouraging.","improvements":"2-3 specific actionable improvements referencing their personality type.","keywords":"comma-separated list of 8-10 keywords they should add","summary":"A rewritten 3-sentence professional summary. Warm, confident, specific. No clichés.","experience":[{"title":"Job title","company":"Company","dates":"Date range","bullets":["bullet 1","bullet 2","bullet 3"]}],"education":[{"degree":"Degree","school":"School","year":"Year"}],"skills":["Skill 1","Skill 2","Skill 3","Skill 4","Skill 5","Skill 6","Skill 7","Skill 8"]}\n\nIf user provided real data, use and improve it. If not, create realistic placeholders matching their profile. Use name "'+(ctx.name||'Your Name')+'" in the output.';
+  const hasRealResume = ctx.hasUpload && ctx.uploadedFileContent.length > 50;
+  const resumeSection = hasRealResume
+    ? 'UPLOADED RESUME TEXT (extract ALL details from this — name, address, phone, email, every job, every education entry, all skills):\n'+ctx.uploadedFileContent
+    : 'RESUME CONTENT:\nName: '+(ctx.name||'Not provided')+'\nLocation: '+(ctx.location||'Not provided')+'\nSummary: '+(ctx.summary||'Not provided')+'\nExperience: '+(ctx.experience||'Not provided')+'\nEducation: '+(ctx.education||'Not provided')+'\nSkills: '+(ctx.skills||'Not provided');
+
+  const nameInstruction = hasRealResume
+    ? 'CRITICAL: Extract the person\'s full name, full address, phone, and email directly from the resume text above. Do not use a first name from anywhere else. Use whatever name appears on the resume exactly as written.'
+    : 'Use name "'+(ctx.name||'Your Name')+'" in the output.';
+
+  return 'Generate resume feedback and a rewritten resume for this person.\n\nPERSONALITY PROFILE:\n- Type: '+ctx.personalityType+'\n- Preferred environment: '+ctx.preferredEnv+'\n- Top career value: '+ctx.topValue+'\n- Work style: '+ctx.workStyle+'\n- Natural team role: '+ctx.teamRole+'\n- Resume challenge: '+ctx.resumeChallenge+'\n- Desired employer impression: "'+ctx.desiredImpression+'"\n\n'+resumeSection+'\n\n'+nameInstruction+'\n\nRespond with ONLY this JSON (no markdown, no extra text):\n{"name":"Full name from resume","location":"Full address from resume","phone":"Phone from resume","email":"Email from resume","strengths":"2-3 sentences about genuine strengths. Be specific and encouraging.","improvements":"2-3 specific actionable improvements referencing their personality type.","keywords":"comma-separated list of 8-10 keywords they should add","summary":"A rewritten 3-sentence professional summary. Warm, confident, specific. No clichés.","experience":[{"title":"Job title","company":"Company","dates":"Date range","bullets":["bullet 1","bullet 2","bullet 3"]}],"education":[{"degree":"Degree","school":"School","year":"Year"}],"skills":["Skill 1","Skill 2","Skill 3","Skill 4","Skill 5","Skill 6","Skill 7","Skill 8"]}\n\nIf a real resume was uploaded, extract and use EVERY job and EVERY education entry from it accurately. Do not invent or omit anything. Improve the bullet points but keep the real employers, titles, dates, and schools.';
 }
 
 async function runResumeFeedback() {
@@ -1064,11 +1068,18 @@ function renderFeedback(data, ctx) {
   const font=fontMap[ctx.fontChoice]||fontMap['serif'];
   const accent=scheme.swatches[0];
   const accentLight=scheme.swatches[2];
-  const contact=[ctx.location,ctx.phone,ctx.email].filter(Boolean).join('  ·  ')||'Fort Lauderdale, FL  ·  your@email.com';
+  // Use contact info extracted from resume by Claude if available, fall back to manual entry
+  const displayName = data.name || ctx.name || 'Your Name';
+  const displayLocation = data.location || ctx.location || '';
+  const displayPhone = data.phone || ctx.phone || '';
+  const displayEmail = data.email || ctx.email || '';
+  const contact=[displayLocation,displayPhone,displayEmail].filter(Boolean).join('  ·  ')||'your@email.com';
+  // Also store extracted name for cover letter use
+  if (data.name) { window._resumeCtx = Object.assign({}, ctx, { name: data.name, location: displayLocation, phone: displayPhone, email: displayEmail }); }
   const expHtml=(data.experience||[]).map(e=>'<div class="resume-doc-entry"><div class="resume-doc-entry-title" style="font-family:'+font+';color:'+accent+';">'+e.title+'</div><div class="resume-doc-entry-meta">'+e.company+' &nbsp;·&nbsp; '+e.dates+'</div><div class="resume-doc-entry-body"><ul>'+(e.bullets||[]).map(b=>'<li>'+b+'</li>').join('')+'</ul></div></div>').join('');
   const eduHtml=(data.education||[]).map(e=>'<div class="resume-doc-entry"><div class="resume-doc-entry-title" style="font-family:'+font+';color:'+accent+';">'+e.degree+'</div><div class="resume-doc-entry-meta">'+e.school+' &nbsp;·&nbsp; '+e.year+'</div></div>').join('');
   const skillsHtml=(data.skills||[]).map(s=>'<span class="resume-doc-skill" style="background:'+accentLight+';color:'+accent+';">'+s+'</span>').join('');
-  document.getElementById('resume-preview-wrap').innerHTML='<div class="resume-doc animate-in delay-3"><div class="resume-doc-header" style="background:'+accent+';"><div class="resume-doc-name" style="font-family:'+font+';color:#fff;">'+(ctx.name||'Your Name')+'</div><div class="resume-doc-contact" style="color:rgba(255,255,255,0.8);">'+contact+'</div><div class="resume-doc-divider" style="background:rgba(255,255,255,0.4);"></div><div class="resume-doc-summary" style="color:rgba(255,255,255,0.92);font-family:'+font+';">'+data.summary+'</div></div><div class="resume-doc-section" style="padding-top:1.25rem;"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Experience</div>'+expHtml+'</div><div class="resume-doc-section"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Education</div>'+eduHtml+'</div><div class="resume-doc-section"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Skills</div><div class="resume-doc-skills">'+skillsHtml+'</div></div></div>';
+  document.getElementById('resume-preview-wrap').innerHTML='<div class="resume-doc animate-in delay-3"><div class="resume-doc-header" style="background:'+accent+';"><div class="resume-doc-name" style="font-family:'+font+';color:#fff;">'+displayName+'</div><div class="resume-doc-contact" style="color:rgba(255,255,255,0.8);">'+contact+'</div><div class="resume-doc-divider" style="background:rgba(255,255,255,0.4);"></div><div class="resume-doc-summary" style="color:rgba(255,255,255,0.92);font-family:'+font+';">'+data.summary+'</div></div><div class="resume-doc-section" style="padding-top:1.25rem;"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Experience</div>'+expHtml+'</div><div class="resume-doc-section"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Education</div>'+eduHtml+'</div><div class="resume-doc-section"><div class="resume-doc-section-title" style="color:'+accent+';border-color:'+accentLight+';">Skills</div><div class="resume-doc-skills">'+skillsHtml+'</div></div></div>';
   document.getElementById('feedback-body').scrollTop=0;
   // Store resume data for cover letter use
   window._resumeData = data;
