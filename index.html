@@ -896,26 +896,40 @@ async function handleFileSelect(input) {
   document.getElementById('upload-file-name').textContent='Extracting text — please wait';
   try {
     const base64 = await readFileAsBase64(f);
-    const resp = await fetch('/.netlify/functions/parse-resume', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ fileData:base64, fileType:f.type, fileName:f.name })
-    });
-    const result = await resp.json();
-    if (result.error) throw new Error(result.error);
-    if (result.warning || !result.text) {
-      document.getElementById('upload-icon').textContent='⚠️';
-      document.getElementById('upload-title').textContent='Could not read this file';
-      document.getElementById('upload-sub').textContent=result.warning||'Try the manual entry tab instead';
-      document.getElementById('upload-file-name').textContent='';
+    const type = f.type.toLowerCase();
+    const name = f.name.toLowerCase();
+    const isPdf = type.includes('pdf') || name.endsWith('.pdf');
+    const isTxt = type.includes('text') || name.endsWith('.txt');
+
+    if (isPdf) {
+      // Store raw base64 — Claude will read the PDF directly, no extraction needed
+      uploadedFileBase64 = base64;
+      uploadedFileType = 'application/pdf';
+      uploadedFileContent = '';
+      document.getElementById('upload-icon').textContent='✅';
+      document.getElementById('upload-title').textContent='Resume ready!';
+      document.getElementById('upload-sub').textContent=f.name;
+      document.getElementById('upload-file-name').textContent='PDF ready · '+(f.size/1024).toFixed(0)+' KB';
+    } else if (isTxt) {
+      // Plain text — decode directly
+      uploadedFileContent = atob(base64);
+      uploadedFileBase64 = '';
+      uploadedFileType = '';
+      document.getElementById('upload-icon').textContent='✅';
+      document.getElementById('upload-title').textContent='Resume ready!';
+      document.getElementById('upload-sub').textContent=f.name;
+      document.getElementById('upload-file-name').textContent='Text file ready · '+(f.size/1024).toFixed(0)+' KB';
+    } else {
+      // Word docs — show helpful message
       uploadedFileContent='';
-      return;
+      uploadedFileBase64='';
+      uploadedFileType='';
+      document.getElementById('upload-icon').textContent='⚠️';
+      document.getElementById('upload-title').textContent='Please use a PDF';
+      document.getElementById('upload-sub').textContent='Save your resume as a PDF and re-upload for best results.';
+      document.getElementById('upload-file-name').textContent='Or use the manual entry tab below';
+      zone.classList.remove('has-file');
     }
-    uploadedFileContent=result.text;
-    document.getElementById('upload-icon').textContent='✅';
-    document.getElementById('upload-title').textContent='Resume ready!';
-    document.getElementById('upload-sub').textContent=f.name;
-    document.getElementById('upload-file-name').textContent='Text extracted · '+(f.size/1024).toFixed(0)+' KB'+(result.truncated?' · trimmed for length':'');
   } catch(err) {
     console.error('Upload error:',err);
     document.getElementById('upload-icon').textContent='❌';
@@ -923,6 +937,7 @@ async function handleFileSelect(input) {
     document.getElementById('upload-sub').textContent=err.message||'Try the manual entry tab instead';
     document.getElementById('upload-file-name').textContent='';
     uploadedFileContent='';
+    uploadedFileBase64='';
     zone.classList.remove('has-file');
   }
 }
@@ -983,12 +998,16 @@ function buildResumeContext() {
   const skills=(document.getElementById('m-skills')||{}).value||'';
   const expText=expEntries.map(e=>e.title+' at '+e.company+' ('+e.dates+'): '+e.bullets).join('\n');
   const eduText=eduEntries.map(e=>e.degree+' — '+e.school+' ('+e.year+')').join('\n');
-  const hasUpload=uploadedFileContent.length>0;
+  const hasPdf=uploadedFileBase64.length>0;
+  const hasUpload=hasPdf||uploadedFileContent.length>0;
   return {
     name:fname?(fname+' '+lname).trim():name,
     location,phone,email,summary,skills,
     experience:expText,education:eduText,
-    hasUpload,uploadedFileContent:uploadedFileContent.substring(0,3000),
+    hasUpload,hasPdf,
+    uploadedFileBase64:uploadedFileBase64,
+    uploadedFileType:uploadedFileType||'application/pdf',
+    uploadedFileContent:uploadedFileContent.substring(0,3000),
     personalityType:typeMap[q5]||typeMap['A'],
     preferredEnv:envMap[answers[7]]||envMap['A'],
     topValue:valMap[answers[17]]||valMap['A'],
@@ -1002,13 +1021,24 @@ function buildResumeContext() {
 }
 
 function buildResumeText(ctx) {
-  const hasRealResume = ctx.hasUpload && ctx.uploadedFileContent.length > 50;
-  return hasRealResume
-    ? ctx.uploadedFileContent
-    : 'Name: '+(ctx.name||'Not provided')+'\nLocation: '+(ctx.location||'Not provided')+'\nSummary: '+(ctx.summary||'Not provided')+'\nExperience: '+(ctx.experience||'Not provided')+'\nEducation: '+(ctx.education||'Not provided')+'\nSkills: '+(ctx.skills||'Not provided');
+  if (ctx.hasPdf) return '[PDF ATTACHED AS DOCUMENT]';
+  if (ctx.uploadedFileContent && ctx.uploadedFileContent.length > 50) return ctx.uploadedFileContent;
+  return 'Name: '+(ctx.name||'Not provided')+'\nLocation: '+(ctx.location||'Not provided')+'\nSummary: '+(ctx.summary||'Not provided')+'\nExperience: '+(ctx.experience||'Not provided')+'\nEducation: '+(ctx.education||'Not provided')+'\nSkills: '+(ctx.skills||'Not provided');
 }
 
-async function callClaude(systemPrompt, userPrompt, maxTokens) {
+function buildMessageContent(ctx, userText) {
+  // If PDF uploaded, send it as a native document — Claude reads the full PDF directly
+  if (ctx.hasPdf && ctx.uploadedFileBase64) {
+    return [
+      { type:'document', source:{ type:'base64', media_type: ctx.uploadedFileType||'application/pdf', data: ctx.uploadedFileBase64 } },
+      { type:'text', text: userText }
+    ];
+  }
+  return userText;
+}
+
+async function callClaude(systemPrompt, userPrompt, maxTokens, ctx) {
+  const messageContent = ctx ? buildMessageContent(ctx, userPrompt) : userPrompt;
   const res = await fetch(API_BASE+'/claude', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
@@ -1016,7 +1046,7 @@ async function callClaude(systemPrompt, userPrompt, maxTokens) {
       model:'claude-haiku-4-5-20251001',
       max_tokens: maxTokens,
       system: systemPrompt,
-      messages:[{role:'user', content: userPrompt}]
+      messages:[{role:'user', content: messageContent}]
     })
   });
   const data = await res.json();
@@ -1047,11 +1077,12 @@ async function runResumeFeedback() {
 
   try {
     // CALL 1: Feedback + contact + summary + education + skills
-    const prompt1 = 'RESUME:\n'+resumeText+'\n\nPROFILE:\n'+profile+'\n\nRespond with ONLY valid JSON, no markdown:\n{"name":"full name from resume","location":"full address","phone":"phone","email":"email","strengths":"2-3 sentences on genuine strengths, specific and encouraging","improvements":"2-3 specific actionable improvements","keywords":"8-10 comma-separated keywords to add","summary":"rewritten 3-sentence professional summary, warm and specific, no clichés","education":[{"degree":"degree","school":"school","year":"year"}],"certifications":["cert 1","cert 2"],"skills":["skill 1","skill 2","skill 3","skill 4","skill 5","skill 6","skill 7","skill 8"]}';
+    const resumeIntro = ctx.hasPdf ? 'Read the attached resume PDF carefully.' : 'RESUME:\n'+resumeText;
+    const prompt1 = resumeIntro+'\n\nPROFILE:\n'+profile+'\n\nRespond with ONLY valid JSON, no markdown:\n{"name":"full name from resume","location":"full address from resume","phone":"phone from resume","email":"email from resume","strengths":"2-3 sentences on genuine strengths, specific and encouraging","improvements":"2-3 specific actionable improvements","keywords":"8-10 comma-separated keywords to add","summary":"rewritten 3-sentence professional summary, warm and specific, no clichés","education":[{"degree":"degree","school":"school","year":"year"}],"certifications":["cert 1","cert 2"],"skills":["skill 1","skill 2","skill 3","skill 4","skill 5","skill 6","skill 7","skill 8"]}';
 
     const part1 = await callClaude(
       'You are CareerCompass, a career coach. Extract contact info and write feedback. Respond ONLY with valid JSON, no markdown.',
-      prompt1, 1500
+      prompt1, 1500, ctx
     );
 
     const lt=document.getElementById('loading-title');
@@ -1059,17 +1090,20 @@ async function runResumeFeedback() {
     if(lt) lt.textContent='Rewriting your experience...';
     if(ls) ls.textContent='Strengthening every bullet point for every role.';
 
-    // CALL 2: Full experience rewrite in plain text (avoids JSON truncation)
-    const prompt2 = 'RESUME:\n'+resumeText+'\n\nRewrite EVERY job listed in this resume. Include ALL positions — do not skip any. For each job, write 3-5 strong impact-focused bullets.\n\nFormat your response EXACTLY like this for each job (no JSON, no markdown):\n\nJOB_START\nTITLE: [exact job title]\nCOMPANY: [exact company name]\nDATES: [exact date range]\nBULLET: [bullet 1]\nBULLET: [bullet 2]\nBULLET: [bullet 3]\nJOB_END\n\nRepeat JOB_START...JOB_END for every single job. Do not stop until all jobs are listed.';
+    // CALL 2: Full experience rewrite — PDF sent as native document so Claude reads ALL jobs
+    const prompt2text = ctx.hasPdf
+      ? 'Read the attached resume PDF. Rewrite EVERY job listed. Include ALL positions — do not skip any. For each job, write 3-5 strong impact-focused bullets that quantify results.\n\nFormat EXACTLY like this for each job:\n\nJOB_START\nTITLE: [exact job title]\nCOMPANY: [exact company name]\nDATES: [exact date range]\nBULLET: [bullet 1]\nBULLET: [bullet 2]\nBULLET: [bullet 3]\nJOB_END\n\nRepeat for EVERY job. Do not stop until all jobs are done.'
+      : 'RESUME:\n'+resumeText+'\n\nRewrite EVERY job listed. Include ALL positions — do not skip any. For each job, write 3-5 strong impact-focused bullets.\n\nFormat EXACTLY like this for each job:\n\nJOB_START\nTITLE: [exact job title]\nCOMPANY: [exact company name]\nDATES: [exact date range]\nBULLET: [bullet 1]\nBULLET: [bullet 2]\nBULLET: [bullet 3]\nJOB_END\n\nRepeat for EVERY job. Do not stop until all jobs are done.';
 
+    const messageContent2 = buildMessageContent(ctx, prompt2text);
     const res2 = await fetch(API_BASE+'/claude', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:'claude-haiku-4-5-20251001',
         max_tokens: 4000,
-        system: 'You are CareerCompass, a resume writer. Rewrite work experience for every job listed. Use the exact JOB_START/JOB_END format requested. Include ALL jobs.',
-        messages:[{role:'user', content: prompt2}]
+        system: 'You are CareerCompass, a resume writer. Rewrite work experience for EVERY job in the resume. Use the JOB_START/JOB_END format. Do not stop early — include ALL jobs.',
+        messages:[{role:'user', content: messageContent2}]
       })
     });
     const raw2 = await res2.json();
