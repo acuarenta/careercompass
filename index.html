@@ -1187,14 +1187,15 @@ async function handleFileSelect(input) {
   document.getElementById('upload-sub').textContent=f.name;
   document.getElementById('upload-file-name').textContent='Extracting text — please wait';
   try {
-    const base64 = await readFileAsBase64(f);
     const type = f.type.toLowerCase();
     const name = f.name.toLowerCase();
     const isPdf = type.includes('pdf') || name.endsWith('.pdf');
     const isTxt = type.includes('text') || name.endsWith('.txt');
+    const isDocx = name.endsWith('.docx') || name.endsWith('.doc');
+
+    const base64 = await readFileAsBase64(f);
 
     if (isPdf) {
-      // Store raw base64 — Claude will read the PDF directly, no extraction needed
       uploadedFileBase64 = base64;
       uploadedFileType = 'application/pdf';
       uploadedFileContent = '';
@@ -1203,7 +1204,6 @@ async function handleFileSelect(input) {
       document.getElementById('upload-sub').textContent=f.name;
       document.getElementById('upload-file-name').textContent='PDF ready · '+(f.size/1024).toFixed(0)+' KB';
     } else if (isTxt) {
-      // Plain text — decode directly
       uploadedFileContent = atob(base64);
       uploadedFileBase64 = '';
       uploadedFileType = '';
@@ -1211,14 +1211,41 @@ async function handleFileSelect(input) {
       document.getElementById('upload-title').textContent='Resume ready!';
       document.getElementById('upload-sub').textContent=f.name;
       document.getElementById('upload-file-name').textContent='Text file ready · '+(f.size/1024).toFixed(0)+' KB';
-    } else {
-      // Word docs — show helpful message
-      uploadedFileContent='';
-      uploadedFileBase64='';
-      uploadedFileType='';
+    } else if (isDocx) {
+      // Attempt server-side Word conversion
+      document.getElementById('upload-title').textContent='Converting Word document...';
+      document.getElementById('upload-sub').textContent='This will take a moment';
+      document.getElementById('upload-file-name').textContent='';
+      try {
+        const resp = await fetch(API_BASE+'/parse-resume', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ fileBase64: base64, fileType: name.endsWith('.docx')?'docx':'doc' })
+        });
+        const data = await resp.json();
+        if (data.text && data.text.length > 50) {
+          uploadedFileContent = data.text;
+          uploadedFileBase64 = '';
+          uploadedFileType = 'text/plain';
+          document.getElementById('upload-icon').textContent='✅';
+          document.getElementById('upload-title').textContent='Word doc ready!';
+          document.getElementById('upload-sub').textContent=f.name;
+          document.getElementById('upload-file-name').textContent='Converted successfully · '+(f.size/1024).toFixed(0)+' KB';
+          showToast('✅ Word document converted!');
+          return;
+        }
+      } catch(docxErr) { console.error('DOCX parse error:', docxErr); }
+      // Server not available — tell user to use PDF
+      uploadedFileContent=''; uploadedFileBase64=''; uploadedFileType='';
       document.getElementById('upload-icon').textContent='⚠️';
-      document.getElementById('upload-title').textContent='Please use a PDF';
-      document.getElementById('upload-sub').textContent='Save your resume as a PDF and re-upload for best results.';
+      document.getElementById('upload-title').textContent='Word files need conversion';
+      document.getElementById('upload-sub').textContent='Save your resume as a PDF and re-upload — it only takes a moment.';
+      document.getElementById('upload-file-name').textContent='Or use the "Enter Manually" tab below';
+      zone.classList.remove('has-file');
+    } else {
+      uploadedFileContent=''; uploadedFileBase64=''; uploadedFileType='';
+      document.getElementById('upload-icon').textContent='⚠️';
+      document.getElementById('upload-title').textContent='Please use a PDF or Word file';
+      document.getElementById('upload-sub').textContent='Save your resume as a PDF and re-upload.';
       document.getElementById('upload-file-name').textContent='Or use the manual entry tab below';
       zone.classList.remove('has-file');
     }
@@ -1228,8 +1255,7 @@ async function handleFileSelect(input) {
     document.getElementById('upload-title').textContent='Upload failed';
     document.getElementById('upload-sub').textContent=err.message||'Try the manual entry tab instead';
     document.getElementById('upload-file-name').textContent='';
-    uploadedFileContent='';
-    uploadedFileBase64='';
+    uploadedFileContent=''; uploadedFileBase64=''; uploadedFileType='';
     zone.classList.remove('has-file');
   }
 }
@@ -1337,7 +1363,7 @@ async function callClaude(systemPrompt, userPrompt, maxTokens, ctx) {
     body:JSON.stringify({
       model:'claude-haiku-4-5-20251001',
       max_tokens: maxTokens,
-      system: systemPrompt,
+      system: systemPrompt + ' Never fabricate specific numbers or statistics. Use [X%] or [number] as placeholders instead.',
       messages:[{role:'user', content: messageContent}]
     })
   });
@@ -1476,6 +1502,7 @@ function renderFeedback(data, ctx) {
 // DOWNLOAD RESUME AS WORD (.docx via HTML conversion)
 // ─────────────────────────────────────────────────────────────────
 function downloadResumeAsWord() {
+  if (!requirePlan('starter')) return;
   const data = window._resumeData;
   const ctx = window._resumeCtx || buildResumeContext();
   if (!data) { showToast('Generate your resume first'); return; }
@@ -1545,8 +1572,10 @@ function handlePaywallCTA() {
 }
 
 function continueAsTester() {
-  showToast('🧪 Tester access granted — enjoy the full app!', 3000);
-  loadAndShowJobs();
+  selectedPlan = 'pro';
+  showToast('🧪 Tester access granted — full Pro enabled!', 3000);
+  renderDashboard();
+  showScreen('dashboard');
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -1559,11 +1588,18 @@ async function loadAndShowJobs() {
   try {
     const q5=answers[5]||'A';
     const queryMap={A:'Training Manager OR Corporate Trainer OR L&D Manager',B:'Business Analyst OR Operations Manager',C:'Project Manager OR Program Coordinator',D:'Director OR VP OR Business Development'};
-    const loc=((document.getElementById('m-location')||{}).value)||'Fort Lauderdale, FL';
+    // Use extracted resume location, fallback to manual entry, then Fort Lauderdale
+    const resumeLoc = (window._resumeData&&window._resumeData.location) ? window._resumeData.location : '';
+    const manualLoc = ((document.getElementById('m-location')||{}).value)||'';
+    const loc = resumeLoc || manualLoc || 'Fort Lauderdale, FL';
+    // Enrich query with top extracted skills
+    const skills = (window._resumeData&&window._resumeData.skills) ? window._resumeData.skills.slice(0,3).join(' OR ') : '';
+    const baseQuery = queryMap[q5]||queryMap['A'];
+    const query = skills ? baseQuery + ' OR ' + skills : baseQuery;
     const resp = await fetch(API_BASE+'/jobs', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ query:queryMap[q5]||queryMap['A'], location:loc })
+      body:JSON.stringify({ query, location:loc })
     });
     const data = await resp.json();
     allJobs = data.results || [];
@@ -1680,6 +1716,8 @@ function getMatchReason(job) {
 // COVER LETTER (Claude API)
 // ─────────────────────────────────────────────────────────────────
 function writeCoverLetter(jobId) {
+  if (!requirePlan('starter')) return;
+  if (!checkCoverLetterLimit()) return;
   const job = jobId ? (allJobs.find(j=>j.id===jobId)||getLocalJobs().find(j=>j.id===jobId)||currentJobData) : currentJobData;
   if(!job && !jobId) {
     // No specific job — write a general letter
@@ -1746,6 +1784,7 @@ function buildFallbackCoverLetter(job, name) {
 }
 
 function renderCoverLetter(data, job) {
+  incrementCLCount();
   coverLetterText = [data.date,'',data.greeting,'',...data.body,'',data.closing,data.name].join('\n');
   document.getElementById('cover-loading').style.display='none';
   document.getElementById('cover-header-sub').textContent=job.company?`For ${job.company}`:'Your cover letter';
@@ -1899,25 +1938,7 @@ function requirePlan(minPlan) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// UPDATED: continueAsTester → goes to Dashboard
-// ─────────────────────────────────────────────────────────────────
-function continueAsTester() {
-  selectedPlan = 'pro';
-  showToast('🧪 Tester access granted — full Pro enabled!', 3000);
-  renderDashboard();
-  showScreen('dashboard');
-}
-
-// ─────────────────────────────────────────────────────────────────
-// UPDATED: handlePaywallCTA - sets plan then routes
-// ─────────────────────────────────────────────────────────────────
-function handlePaywallCTA() {
-  showToast('💳 Stripe checkout coming soon!', 3000);
-  // Would normally gate on payment; for now just proceed
-}
-
-// ─────────────────────────────────────────────────────────────────
-// UPDATED: callClaude — also has plain-text variant
+// PLAIN-TEXT CLAUDE HELPER
 // ─────────────────────────────────────────────────────────────────
 async function callClaudeText(systemPrompt, userPrompt, maxTokens) {
   const res = await fetch(API_BASE+'/claude', {
@@ -2580,119 +2601,15 @@ function checkInterviewReminders() {
   } catch(e) {}
 }
 
-// ─────────────────────────────────────────────────────────────────
-// UPDATED: downloadResumeAsWord — gated to Starter+
-// ─────────────────────────────────────────────────────────────────
-const _origDownloadResumeAsWord = downloadResumeAsWord;
-function downloadResumeAsWord() {
-  if (!requirePlan('starter')) return;
-  _origDownloadResumeAsWord();
-}
+// downloadResumeAsWord — gated directly in original function above
 
-// ─────────────────────────────────────────────────────────────────
-// UPDATED: writeCoverLetter — check cover letter limit
-// ─────────────────────────────────────────────────────────────────
-const _origWriteCoverLetter = writeCoverLetter;
-function writeCoverLetter(jobId) {
-  if (!requirePlan('starter')) return;
-  if (!checkCoverLetterLimit()) return;
-  _origWriteCoverLetter(jobId);
-}
-// Increment count when letter is successfully rendered
-const _origRenderCoverLetter = renderCoverLetter;
-function renderCoverLetter(data, job) {
-  incrementCLCount();
-  _origRenderCoverLetter(data, job);
-}
+// writeCoverLetter and renderCoverLetter — gating handled directly in the original functions above
 
-// ─────────────────────────────────────────────────────────────────
-// UPDATED: handleFileSelect — add DOCX support
-// ─────────────────────────────────────────────────────────────────
-const _origHandleFileSelect = handleFileSelect;
-async function handleFileSelect(input) {
-  const f = input.files ? input.files[0] : null;
-  if (!f) return;
-  const name = f.name.toLowerCase();
-  if (name.endsWith('.docx') || name.endsWith('.doc')) {
-    const zone = document.getElementById('upload-zone');
-    zone.classList.add('uploading');
-    document.getElementById('upload-icon').textContent = '⏳';
-    document.getElementById('upload-title').textContent = 'Converting Word document...';
-    document.getElementById('upload-sub').textContent = 'This will take a moment';
-    try {
-      const base64 = await readFileAsBase64(f);
-      const resp = await fetch(API_BASE+'/parse-resume', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ fileBase64: base64, fileType: name.endsWith('.docx')?'docx':'doc' })
-      });
-      const data = await resp.json();
-      if (data.text && data.text.length > 50) {
-        uploadedFileContent = data.text;
-        uploadedFileBase64 = '';
-        uploadedFileType = 'text/plain';
-        document.getElementById('upload-icon').textContent = '✅';
-        document.getElementById('upload-title').textContent = f.name;
-        document.getElementById('upload-sub').textContent = 'Word document converted successfully';
-        document.getElementById('upload-file-name').textContent = '';
-        zone.classList.remove('uploading');
-        showToast('✅ Word doc converted!');
-        return;
-      }
-    } catch(e) { console.error('DOCX parse error:',e); }
-    // Fallback: ask for PDF
-    zone.classList.remove('uploading');
-    document.getElementById('upload-icon').textContent = '⚠️';
-    document.getElementById('upload-title').textContent = 'Word conversion unavailable';
-    document.getElementById('upload-sub').textContent = 'Please upload a PDF for best results';
-    showToast('⚠️ Please use a PDF resume for best results', 4000);
-    return;
-  }
-  // Delegate to original for PDF and TXT
-  _origHandleFileSelect(input);
-}
+// handleFileSelect — unified version above handles PDF, TXT, and DOCX
 
-// ─────────────────────────────────────────────────────────────────
-// UPDATED: runResumeFeedback — update system prompts to avoid fabrication
-// ─────────────────────────────────────────────────────────────────
-// Patch: wrap fetch calls in callClaude and runResumeFeedback
-// The anti-fabrication instruction is injected via updated system prompts below
-const _originalCallClaude = callClaude;
-async function callClaude(systemPrompt, userPrompt, maxTokens, ctx) {
-  const enhanced = systemPrompt + ' Never fabricate specific numbers or percentages. Use [X%] or [number] as placeholders the user fills in.';
-  return _originalCallClaude(enhanced, userPrompt, maxTokens, ctx);
-}
+// Anti-fabrication instruction is now baked into the callClaude system prompt directly
 
-// ─────────────────────────────────────────────────────────────────
-// UPDATED: loadAndShowJobs — use extracted location + skills
-// ─────────────────────────────────────────────────────────────────
-const _origLoadAndShowJobs = loadAndShowJobs;
-async function loadAndShowJobs() {
-  showScreen('jobs');
-  document.getElementById('jobs-body').innerHTML=`<div class="jobs-loading"><div class="feedback-spinner"></div><div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--navy); margin-top:1.25rem; margin-bottom:6px;">Searching live listings...</div><div style="font-size:13px; color:var(--text-mid);">Matching roles to your profile</div></div>`;
-  try {
-    const q5=answers[5]||'A';
-    const queryMap={A:'Training Manager OR Corporate Trainer OR L&D Manager',B:'Business Analyst OR Operations Manager',C:'Project Manager OR Program Coordinator',D:'Director OR VP OR Business Development'};
-    // Use extracted location from resume, fall back to manual entry, then Fort Lauderdale
-    const resumeLoc = (window._resumeData&&window._resumeData.location) ? window._resumeData.location : '';
-    const manualLoc = ((document.getElementById('m-location')||{}).value)||'';
-    const loc = resumeLoc || manualLoc || 'Fort Lauderdale, FL';
-    // Use extracted skills for query enrichment
-    const skills = (window._resumeData&&window._resumeData.skills) ? window._resumeData.skills.slice(0,3).join(' OR ') : '';
-    const baseQuery = queryMap[q5]||queryMap['A'];
-    const query = skills ? baseQuery + ' OR ' + skills : baseQuery;
-    const resp = await fetch(API_BASE+'/jobs', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ query, location:loc })
-    });
-    const data = await resp.json();
-    allJobs = data.results || [];
-    if(allJobs.length===0) allJobs = getLocalJobs();
-  } catch(e) {
-    console.error('Jobs fetch error:',e);
-    allJobs = getLocalJobs();
-  }
-  renderJobs('all');
-}
+// loadAndShowJobs — improved version now in original location above
 
 // ─────────────────────────────────────────────────────────────────
 // MODAL CLOSE ON OVERLAY CLICK
