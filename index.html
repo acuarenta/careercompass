@@ -334,6 +334,12 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 .delay-2 { animation-delay: 0.2s; opacity: 0; }
 .delay-3 { animation-delay: 0.3s; opacity: 0; }
 .delay-4 { animation-delay: 0.4s; opacity: 0; }
+.job-search-link-card { display:flex; align-items:center; gap:14px; background:var(--white); border-radius:var(--radius); padding:1rem 1.25rem; margin-bottom:10px; box-shadow:var(--shadow-sm); text-decoration:none; color:inherit; transition:all 0.2s; border:1.5px solid transparent; }
+.job-search-link-card:hover { border-color:var(--gold); transform:translateY(-1px); box-shadow:var(--shadow); }
+.job-search-link-logo { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:14px; }
+.job-search-link-title { font-size:15px; font-weight:500; color:var(--navy); }
+.job-search-link-sub { font-size:12px; color:var(--text-mid); margin-top:2px; }
+.job-search-link-arrow { margin-left:auto; font-size:18px; color:var(--gold); flex-shrink:0; }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(15,31,61,0.15); border-radius: 2px; }
@@ -1597,32 +1603,91 @@ function continueAsTester() {
 // ─────────────────────────────────────────────────────────────────
 async function loadAndShowJobs() {
   showScreen('jobs');
-  document.getElementById('jobs-body').innerHTML=`<div class="jobs-loading"><div class="feedback-spinner"></div><div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--navy); margin-top:1.25rem; margin-bottom:6px;">Searching live listings...</div><div style="font-size:13px; color:var(--text-mid);">Matching roles to your profile</div></div>`;
+  document.getElementById('jobs-body').innerHTML=`<div class="jobs-loading"><div class="feedback-spinner"></div><div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--navy); margin-top:1.25rem; margin-bottom:6px;">Searching live listings...</div><div style="font-size:13px; color:var(--text-mid);">Matching open roles to your profile</div></div>`;
+
+  const q5 = answers[5]||'A';
+  const queryMap = {
+    A:'Training Manager OR Corporate Trainer OR Learning Development',
+    B:'Business Analyst OR Operations Manager OR Consultant',
+    C:'Project Manager OR Program Coordinator OR Operations',
+    D:'Director OR VP OR Business Development Manager'
+  };
+  const resumeLoc = (window._resumeData&&window._resumeData.location) ? window._resumeData.location : '';
+  const manualLoc = ((document.getElementById('m-location')||{}).value)||'';
+  const loc = resumeLoc || manualLoc || 'Fort Lauderdale, FL';
+  const skills = (window._resumeData&&window._resumeData.skills) ? window._resumeData.skills.slice(0,2).join(' OR ') : '';
+  const baseQuery = queryMap[q5]||queryMap['A'];
+  const query = skills ? `${baseQuery} OR ${skills}` : baseQuery;
+
+  let liveJobs = [];
+  let source = 'fallback';
 
   try {
-    const q5=answers[5]||'A';
-    const queryMap={A:'Training Manager OR Corporate Trainer OR L&D Manager',B:'Business Analyst OR Operations Manager',C:'Project Manager OR Program Coordinator',D:'Director OR VP OR Business Development'};
-    // Use extracted resume location, fallback to manual entry, then Fort Lauderdale
-    const resumeLoc = (window._resumeData&&window._resumeData.location) ? window._resumeData.location : '';
-    const manualLoc = ((document.getElementById('m-location')||{}).value)||'';
-    const loc = resumeLoc || manualLoc || 'Fort Lauderdale, FL';
-    // Enrich query with top extracted skills
-    const skills = (window._resumeData&&window._resumeData.skills) ? window._resumeData.skills.slice(0,3).join(' OR ') : '';
-    const baseQuery = queryMap[q5]||queryMap['A'];
-    const query = skills ? baseQuery + ' OR ' + skills : baseQuery;
     const resp = await fetch(API_BASE+'/jobs', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ query, location:loc })
     });
     const data = await resp.json();
-    allJobs = data.results || [];
-    if(allJobs.length===0) allJobs = getLocalJobs();
+    liveJobs = data.results || [];
+    source = data.source || 'jsearch';
   } catch(e) {
-    console.error('Jobs fetch error:',e);
-    allJobs = getLocalJobs();
+    console.error('Jobs fetch error:', e);
   }
-  renderJobs('all');
+
+  if (liveJobs.length > 0) {
+    // Score each live job against the user's profile
+    allJobs = liveJobs.map(job => ({
+      ...job,
+      match: scoreJob(job)
+    })).sort((a,b) => b.match - a.match);
+  } else {
+    // No live results — show a helpful "search directly" screen instead of fake jobs
+    allJobs = [];
+  }
+
+  renderJobs('all', source);
+}
+
+// Score a live job against the user's quiz answers and resume data (0–100)
+function scoreJob(job) {
+  const text = ((job.title||'') + ' ' + (job.desc||'')).toLowerCase();
+  const q5 = answers[5]||'A';
+  const skills = (window._resumeData&&window._resumeData.skills)||[];
+  let score = 50; // baseline
+
+  // Personality type alignment
+  const typeKeywords = {
+    A: ['train','coach','facilitat','develop','learning','people'],
+    B: ['analys','operations','consult','strategy','process'],
+    C: ['project','program','coordinat','manage','organiz'],
+    D: ['director','vp','vice president','head of','business develop','chief']
+  };
+  (typeKeywords[q5]||[]).forEach(kw => { if (text.includes(kw)) score += 8; });
+
+  // Resume skill match
+  skills.slice(0,6).forEach(skill => {
+    if (text.includes(skill.toLowerCase())) score += 6;
+  });
+
+  // Location match
+  const resumeLoc = (window._resumeData&&window._resumeData.location)||'';
+  const jobLoc = (job.location||'').toLowerCase();
+  if (job.type === 'Remote') score += 5;
+  else if (resumeLoc && jobLoc.includes(resumeLoc.split(',')[0].toLowerCase().trim())) score += 10;
+
+  // Recency bonus — fresher postings rank higher
+  const postedStr = job.posted||'';
+  if (postedStr.includes('Today')||postedStr.includes('Yesterday')) score += 8;
+  else if (postedStr.includes('days ago')) score += 4;
+
+  // Seniority match (rough)
+  const prevTitles = (window._resumeData&&window._resumeData.experience||[]).map(e=>(e.title||'').toLowerCase());
+  if (prevTitles.some(t => t.includes('director')||t.includes('vp')||t.includes('head'))) {
+    if (text.includes('director')||text.includes('manager')||text.includes('lead')) score += 6;
+  }
+
+  return Math.min(98, Math.max(35, score));
 }
 
 function getLocalJobs() {
@@ -1640,27 +1705,119 @@ function getLocalJobs() {
   ];
 }
 
-function renderJobs(filter) {
+function renderJobs(filter, source) {
   filter = filter || currentFilter;
   currentFilter = filter;
-  const name=(answers[1]||'').split(' ')[0]||'you';
-  const q5=answers[5]||'A';
-  const typeLabels={A:'connector and people-leader',B:'analytical problem-solver',C:'organized executor',D:'visionary leader'};
+  const name = (answers[1]||'').split(' ')[0]||'you';
+  const q5 = answers[5]||'A';
+  const typeLabels = {A:'connector and people-leader',B:'analytical problem-solver',C:'organized executor',D:'visionary leader'};
+  const resumeLoc = (window._resumeData&&window._resumeData.location)||((document.getElementById('m-location')||{}).value)||'your area';
+
+  // No live results at all — show helpful "search directly" state
+  if (allJobs.length === 0) {
+    const queryMap = {
+      A:'Training+Manager+OR+Corporate+Trainer+OR+L%26D',
+      B:'Business+Analyst+OR+Operations+Manager',
+      C:'Project+Manager+OR+Program+Coordinator',
+      D:'Director+OR+VP+OR+Business+Development'
+    };
+    const q = queryMap[q5]||queryMap['A'];
+    const loc = encodeURIComponent(resumeLoc);
+    document.getElementById('jobs-match-count').textContent = 'Search live';
+    document.getElementById('jobs-body').innerHTML = `
+      <div class="feedback-banner">
+        <div class="feedback-banner-title">Your profile is ready, ${name}</div>
+        <div class="feedback-banner-body">We weren't able to load live listings right now — use the links below to search on the major job boards. Your CareerCompass profile gives you a strong starting point for any of these.</div>
+      </div>
+      <div class="section-label">Search on the major job boards</div>
+      <a class="job-search-link-card" href="https://www.indeed.com/jobs?q=${q}&l=${loc}" target="_blank" rel="noopener">
+        <div class="job-search-link-logo" style="background:#003A9B;color:#fff;font-weight:700;font-size:13px;">in</div>
+        <div><div class="job-search-link-title">Search Indeed</div><div class="job-search-link-sub">The largest job board — most postings are here</div></div>
+        <div class="job-search-link-arrow">→</div>
+      </a>
+      <a class="job-search-link-card" href="https://www.linkedin.com/jobs/search/?keywords=${q}&location=${loc}" target="_blank" rel="noopener">
+        <div class="job-search-link-logo" style="background:#0A66C2;color:#fff;font-weight:700;font-size:13px;">in</div>
+        <div><div class="job-search-link-title">Search LinkedIn Jobs</div><div class="job-search-link-sub">Great for networking + applying in one place</div></div>
+        <div class="job-search-link-arrow">→</div>
+      </a>
+      <a class="job-search-link-card" href="https://www.glassdoor.com/Job/jobs.htm?suggestCount=0&suggestChosen=false&clickSource=searchBtn&typedKeyword=${q}&sc.keyword=${q}&locT=C&locId=0&jobType=" target="_blank" rel="noopener">
+        <div class="job-search-link-logo" style="background:#0CAA41;color:#fff;font-weight:700;font-size:11px;">GD</div>
+        <div><div class="job-search-link-title">Search Glassdoor</div><div class="job-search-link-sub">See salaries and company reviews alongside listings</div></div>
+        <div class="job-search-link-arrow">→</div>
+      </a>
+      <a class="job-search-link-card" href="https://www.ziprecruiter.com/jobs-search?search=${q}&location=${loc}" target="_blank" rel="noopener">
+        <div class="job-search-link-logo" style="background:#4A5568;color:#fff;font-weight:700;font-size:10px;">ZIP</div>
+        <div><div class="job-search-link-title">Search ZipRecruiter</div><div class="job-search-link-sub">Strong for mid-market and regional companies</div></div>
+        <div class="job-search-link-arrow">→</div>
+      </a>
+      <div style="background:var(--white);border-radius:var(--radius);padding:1.25rem;margin-top:10px;box-shadow:var(--shadow-sm);">
+        <div style="font-size:13px;font-weight:500;color:var(--navy);margin-bottom:8px;">✍️ Ready to write a cover letter?</div>
+        <div style="font-size:13px;color:var(--text-mid);margin-bottom:12px;">Find a role you like, then come back and we'll write you a tailored cover letter for it.</div>
+        <button class="feedback-btn" onclick="writeCoverLetter(null)">Write a cover letter</button>
+      </div>`;
+    return;
+  }
+
   let filtered = allJobs.filter(j => {
-    if(filter==='all') return true;
-    if(filter==='remote') return j.type==='Remote';
-    if(filter==='nearby') return j.location.includes('FL')||j.type==='Remote';
+    if (filter==='all') return true;
+    if (filter==='remote') return j.type==='Remote';
+    if (filter==='nearby') return (j.location||'').includes('FL') || j.type==='Remote';
     return (j.category||[]).includes(filter);
   });
-  document.getElementById('jobs-match-count').textContent=filtered.length+' matches';
-  let html=`<div class="feedback-banner"><div class="feedback-banner-title">Here's what we found for you, ${name}</div><div class="feedback-banner-body">Based on your profile as a ${typeLabels[q5]}, we matched you to ${filtered.length} roles. Each score reflects how well the role aligns with your strengths and values.</div><div class="feedback-actions"><button class="feedback-btn" onclick="writeCoverLetter(null)">✍️ Write a cover letter</button><button class="feedback-btn outline" onclick="showScreen('feedback')">📄 Back to my resume</button></div></div>
+
+  document.getElementById('jobs-match-count').textContent = filtered.length + ' live match' + (filtered.length!==1?'es':'');
+
+  const sourceBadge = source === 'jsearch'
+    ? `<span style="font-size:10px;background:rgba(201,165,90,0.15);color:var(--gold);padding:2px 8px;border-radius:50px;margin-left:8px;">● Live</span>`
+    : '';
+
+  let html = `<div class="feedback-banner">
+    <div class="feedback-banner-title">Live matches for you, ${name}${sourceBadge}</div>
+    <div class="feedback-banner-body">Based on your profile as a ${typeLabels[q5]}, we found ${filtered.length} active listing${filtered.length!==1?'s':''} near ${resumeLoc}. Match scores reflect how closely each role aligns with your background.</div>
+    <div class="feedback-actions">
+      <button class="feedback-btn" onclick="writeCoverLetter(null)">✍️ Write a cover letter</button>
+      <button class="feedback-btn outline" onclick="showScreen('feedback')">📄 My resume</button>
+    </div>
+  </div>
   <div class="section-label">Matched roles — sorted by fit</div>`;
+
   filtered.forEach(job => {
-    const mc=job.match>=90?'#2d7d52':job.match>=80?'#c9a55a':'#4a5568';
-    html+=`<div class="job-card" onclick="openJob('${job.id}')"><div class="job-card-top"><div class="job-logo" style="background:${job.bg||'#f0f0f0'};">${job.logo||'💼'}</div><div><div class="job-title">${job.title}</div><div class="job-company">${job.company}</div></div></div><div class="job-meta"><span class="job-meta-tag">📍 ${job.location}</span><span class="job-meta-tag">💼 ${job.type}</span><span class="job-meta-tag">💰 ${job.salary||'Competitive'}</span><span class="job-meta-tag">🕐 ${job.posted||'Recently'}</span></div><div class="job-desc">${job.desc}</div><div class="job-card-footer"><div class="match-score"><span class="match-label">Match</span><div class="match-bar"><div class="match-fill" style="width:${job.match||75}%; background:${mc};"></div></div><span class="match-pct" style="color:${mc};">${job.match||75}%</span></div><button class="apply-btn" onclick="event.stopPropagation(); applyToJob('${job.id}')">Apply →</button></div></div>`;
+    const match = job.match||75;
+    const mc = match>=88?'#2d7d52':match>=75?'#c9a55a':'#4a5568';
+    const logoHtml = job.employer_logo
+      ? `<img src="${job.employer_logo}" style="width:40px;height:40px;object-fit:contain;border-radius:8px;background:#fff;" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="job-logo" style="background:${job.bg||'#f0f0f0'};display:none;">${job.logo||'💼'}</div>`
+      : `<div class="job-logo" style="background:${job.bg||'#f0f0f0'};">${job.logo||'💼'}</div>`;
+    const sourceBadgeSmall = job.source ? `<span class="job-meta-tag">🔗 ${job.source}</span>` : '';
+    html += `<div class="job-card" onclick="openJob('${job.id}')">
+      <div class="job-card-top"><div style="display:flex;align-items:center;justify-content:center;flex-shrink:0;">${logoHtml}</div>
+      <div><div class="job-title">${job.title}</div><div class="job-company">${job.company}</div></div></div>
+      <div class="job-meta">
+        <span class="job-meta-tag">📍 ${job.location}</span>
+        <span class="job-meta-tag">💼 ${job.type}</span>
+        ${job.salary?`<span class="job-meta-tag">💰 ${job.salary}</span>`:''}
+        <span class="job-meta-tag">🕐 ${job.posted||'Recently'}</span>
+        ${sourceBadgeSmall}
+      </div>
+      <div class="job-desc">${job.desc}</div>
+      <div class="job-card-footer">
+        <div class="match-score"><span class="match-label">Match</span>
+          <div class="match-bar"><div class="match-fill" style="width:${match}%;background:${mc};"></div></div>
+          <span class="match-pct" style="color:${mc};">${match}%</span>
+        </div>
+        <button class="apply-btn" onclick="event.stopPropagation();applyToJob('${job.id}')">Apply →</button>
+      </div>
+    </div>`;
   });
-  if(filtered.length===0) html+='<div style="text-align:center;padding:3rem 1rem;"><div style="font-size:32px;margin-bottom:12px;">🔍</div><div style="font-family:\'Cormorant Garamond\',serif;font-size:22px;color:var(--navy);margin-bottom:8px;">No matches for this filter</div><div style="font-size:13px;color:var(--text-mid);">Try "All Matches" to see everything we found.</div></div>';
-  document.getElementById('jobs-body').innerHTML=html;
+
+  if (filtered.length === 0) {
+    html += `<div style="text-align:center;padding:3rem 1rem;">
+      <div style="font-size:32px;margin-bottom:12px;">🔍</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--navy);margin-bottom:8px;">No matches for this filter</div>
+      <div style="font-size:13px;color:var(--text-mid);">Try "All Matches" to see all ${allJobs.length} live listings.</div>
+    </div>`;
+  }
+
+  document.getElementById('jobs-body').innerHTML = html;
 }
 
 function filterJobs(filter, btn) {
@@ -1679,16 +1836,20 @@ function openJob(id) {
   document.getElementById('jd-header-title').textContent = job.title;
   document.getElementById('jd-header-sub').textContent = job.company;
   const mc=job.match>=90?'#2d7d52':job.match>=80?'#c9a55a':'#4a5568';
+  const logoHtml = job.employer_logo
+    ? `<img src="${job.employer_logo}" style="width:64px;height:64px;object-fit:contain;border-radius:12px;background:#fff;" onerror="this.style.display='none'">`
+    : `<div class="jobdetail-logo-lg" style="background:${job.bg||'#f0f0f0'}">${job.logo||'💼'}</div>`;
   document.getElementById('jobdetail-body').innerHTML=`
     <div class="jobdetail-hero">
-      <div class="jobdetail-logo-lg" style="background:${job.bg||'#f0f0f0'}">${job.logo||'💼'}</div>
+      ${logoHtml}
       <div class="jobdetail-title">${job.title}</div>
       <div class="jobdetail-company">${job.company}</div>
       <div class="jobdetail-tags">
         <span class="jobdetail-tag">📍 ${job.location}</span>
         <span class="jobdetail-tag">💼 ${job.type}</span>
-        <span class="jobdetail-tag">💰 ${job.salary||'Competitive'}</span>
+        ${job.salary?`<span class="jobdetail-tag">💰 ${job.salary}</span>`:''}
         <span class="jobdetail-tag">🕐 Posted ${job.posted||'recently'}</span>
+        ${job.source?`<span class="jobdetail-tag">🔗 ${job.source}</span>`:''}
       </div>
     </div>
     <div class="jobdetail-section">
