@@ -436,6 +436,8 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 .modal-field-input { width: 100%; border: 1.5px solid rgba(15,31,61,0.12); border-radius: var(--radius-sm); padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-dark); background: var(--white); transition: border-color 0.2s; outline: none; }
 .modal-field-input:focus { border-color: var(--navy); }
 .modal-field-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a5568' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.apply-modal-open-btn { background: var(--gold); color: var(--navy); font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; padding: 14px; border-radius: 50px; border: none; cursor: pointer; transition: all 0.2s; width: 100%; margin-bottom: 0; }
+.apply-modal-open-btn:hover { background: var(--gold-light); }
 .modal-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 </style>
@@ -850,12 +852,24 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 <div class="modal-overlay" id="reminder-modal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">Set a follow-up reminder?</div>
-    <div class="modal-body" id="reminder-modal-body">We'll send you a push notification in 7 days to follow up on this application.</div>
-    <div class="modal-actions">
-      <button class="modal-btn-primary" onclick="setReminder(true)">Yes, remind me in 7 days</button>
-      <button class="modal-btn-secondary" onclick="setReminder(false)">No reminder needed</button>
+    <div class="modal-title" id="apply-modal-title">You're applying!</div>
+    <div class="modal-body" id="reminder-modal-body"></div>
+    <!-- Direct apply link -->
+    <a id="apply-direct-link" href="#" target="_blank" rel="noopener" class="modal-btn-primary apply-modal-open-btn" onclick="handleDirectApplyClick(event)" style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;margin-bottom:10px;">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Open Job on Indeed
+    </a>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button class="modal-btn-secondary" id="apply-track-btn" onclick="trackAndClose()" style="font-size:13px;padding:12px 10px;">
+        📋 Track this job
+      </button>
+      <button class="modal-btn-secondary" id="apply-remind-btn" onclick="setReminder(true)" style="font-size:13px;padding:12px 10px;">
+        ⏰ Remind in 7 days
+      </button>
     </div>
+    <button class="modal-btn-secondary" onclick="setReminder(false)" style="font-size:12px;color:var(--text-light);border-color:transparent;padding:8px;">
+      Done, no thanks
+    </button>
   </div>
 </div>
 
@@ -1612,15 +1626,17 @@ async function loadAndShowJobs() {
 }
 
 function getLocalJobs() {
+  // URLs use Indeed's company+title search for direct targeting
+  // Format: q="Job Title" "Company Name" finds the exact posting far better than generic keyword search
   return [
-    { id:'j1', title:'Senior Training & Development Manager', company:'AmeriHealth Caritas', location:'Fort Lauderdale, FL', type:'Hybrid', salary:'$85K – $105K', match:94, category:['training','leadership'], logo:'🏥', bg:'#e8f4fd', desc:'Lead enterprise-wide training programs. Ideal for someone who combines coaching skills with measurable program outcomes.', url:'https://www.indeed.com/jobs?q=training+development+manager&l=Fort+Lauderdale%2C+FL', posted:'2 days ago' },
-    { id:'j2', title:'Corporate Trainer — Sales & Service', company:'Marriott International', location:'Miami, FL (18 mi)', type:'On-site', salary:'$78K – $95K', match:91, category:['training','sales'], logo:'🏨', bg:'#fff3e0', desc:'Develop and facilitate sales training across multiple properties. Work closely with GMs to build high-performance teams.', url:'https://www.indeed.com/jobs?q=corporate+trainer&l=Miami%2C+FL', posted:'4 days ago' },
-    { id:'j3', title:'Director of Learning & Development', company:'AutoNation', location:'Fort Lauderdale, FL', type:'Hybrid', salary:'$95K – $120K', match:89, category:['training','leadership'], logo:'🚗', bg:'#f3e5f5', desc:'Own the full L&D strategy for one of the nation\'s largest automotive retailers.', url:'https://www.indeed.com/jobs?q=director+learning+development&l=Fort+Lauderdale%2C+FL', posted:'1 week ago' },
-    { id:'j4', title:'Remote Training Specialist — Financial Services', company:'Fidelity Investments', location:'Remote (US)', type:'Remote', salary:'$80K – $98K', match:87, category:['training','remote'], logo:'📈', bg:'#e8f5e9', desc:'Create and deliver training for financial advisors nationwide. Financial sales background is a significant advantage.', url:'https://www.indeed.com/jobs?q=training+specialist+financial&remotejob=1', posted:'3 days ago' },
-    { id:'j5', title:'People Development Partner', company:'Spirit Airlines', location:'Miramar, FL (12 mi)', type:'Hybrid', salary:'$82K – $100K', match:85, category:['training','leadership'], logo:'✈️', bg:'#fffde7', desc:'Build training initiatives and succession programs across the airline. Industry knowledge highly valued.', url:'https://www.indeed.com/jobs?q=people+development+airline&l=Miramar%2C+FL', posted:'5 days ago' },
-    { id:'j6', title:'Sales Enablement Manager', company:'Chewy', location:'Plantation, FL (8 mi)', type:'Hybrid', salary:'$90K – $110K', match:83, category:['sales','leadership'], logo:'🐾', bg:'#fce4ec', desc:'Build tools, content, and training programs that help a high-growth sales team perform at its best.', url:'https://www.indeed.com/jobs?q=sales+enablement+manager&l=Plantation%2C+FL', posted:'1 week ago' },
-    { id:'j7', title:'Instructional Designer — Remote', company:'LinkedIn Learning', location:'Remote (US)', type:'Remote', salary:'$85K – $105K', match:81, category:['training','remote'], logo:'💼', bg:'#e3f2fd', desc:'Create compelling learning experiences for professionals worldwide.', url:'https://www.indeed.com/jobs?q=instructional+designer+remote', posted:'2 weeks ago' },
-    { id:'j8', title:'Regional Training Manager', company:'Bank of America', location:'Boca Raton, FL (22 mi)', type:'On-site', salary:'$88K – $108K', match:79, category:['training','sales','leadership'], logo:'🏦', bg:'#e8f4fd', desc:'Oversee training delivery for a multi-branch region. Financial services track record preferred.', url:'https://www.indeed.com/jobs?q=regional+training+manager&l=Boca+Raton%2C+FL', posted:'1 week ago' }
+    { id:'j1', title:'Senior Training & Development Manager', company:'AmeriHealth Caritas', location:'Fort Lauderdale, FL', type:'Hybrid', salary:'$85K – $105K', match:94, category:['training','leadership'], logo:'🏥', bg:'#e8f4fd', desc:'Lead enterprise-wide training programs. Ideal for someone who combines coaching skills with measurable program outcomes.', url:'https://www.indeed.com/jobs?q=%22Training+Development+Manager%22+%22AmeriHealth+Caritas%22&l=Fort+Lauderdale%2C+FL', posted:'2 days ago' },
+    { id:'j2', title:'Corporate Trainer — Sales & Service', company:'Marriott International', location:'Miami, FL (18 mi)', type:'On-site', salary:'$78K – $95K', match:91, category:['training','sales'], logo:'🏨', bg:'#fff3e0', desc:'Develop and facilitate sales training across multiple properties. Work closely with GMs to build high-performance teams.', url:'https://www.indeed.com/jobs?q=%22Corporate+Trainer%22+%22Marriott%22&l=Miami%2C+FL', posted:'4 days ago' },
+    { id:'j3', title:'Director of Learning & Development', company:'AutoNation', location:'Fort Lauderdale, FL', type:'Hybrid', salary:'$95K – $120K', match:89, category:['training','leadership'], logo:'🚗', bg:'#f3e5f5', desc:'Own the full L&D strategy for one of the nation\'s largest automotive retailers.', url:'https://www.indeed.com/jobs?q=%22Learning+Development%22+%22AutoNation%22&l=Fort+Lauderdale%2C+FL', posted:'1 week ago' },
+    { id:'j4', title:'Remote Training Specialist — Financial Services', company:'Fidelity Investments', location:'Remote (US)', type:'Remote', salary:'$80K – $98K', match:87, category:['training','remote'], logo:'📈', bg:'#e8f5e9', desc:'Create and deliver training for financial advisors nationwide. Financial sales background is a significant advantage.', url:'https://www.indeed.com/jobs?q=%22Training+Specialist%22+%22Fidelity+Investments%22&remotejob=032b3046-06a3-4876-8dfd-474eb5e7ed11', posted:'3 days ago' },
+    { id:'j5', title:'People Development Partner', company:'Spirit Airlines', location:'Miramar, FL (12 mi)', type:'Hybrid', salary:'$82K – $100K', match:85, category:['training','leadership'], logo:'✈️', bg:'#fffde7', desc:'Build training initiatives and succession programs across the airline. Industry knowledge highly valued.', url:'https://www.indeed.com/jobs?q=%22People+Development%22+%22Spirit+Airlines%22&l=Miramar%2C+FL', posted:'5 days ago' },
+    { id:'j6', title:'Sales Enablement Manager', company:'Chewy', location:'Plantation, FL (8 mi)', type:'Hybrid', salary:'$90K – $110K', match:83, category:['sales','leadership'], logo:'🐾', bg:'#fce4ec', desc:'Build tools, content, and training programs that help a high-growth sales team perform at its best.', url:'https://www.indeed.com/jobs?q=%22Sales+Enablement+Manager%22+%22Chewy%22&l=Plantation%2C+FL', posted:'1 week ago' },
+    { id:'j7', title:'Instructional Designer — Remote', company:'LinkedIn Learning', location:'Remote (US)', type:'Remote', salary:'$85K – $105K', match:81, category:['training','remote'], logo:'💼', bg:'#e3f2fd', desc:'Create compelling learning experiences for professionals worldwide.', url:'https://www.indeed.com/jobs?q=%22Instructional+Designer%22+%22LinkedIn%22&remotejob=032b3046-06a3-4876-8dfd-474eb5e7ed11', posted:'2 weeks ago' },
+    { id:'j8', title:'Regional Training Manager', company:'Bank of America', location:'Boca Raton, FL (22 mi)', type:'On-site', salary:'$88K – $108K', match:79, category:['training','sales','leadership'], logo:'🏦', bg:'#e8f4fd', desc:'Oversee training delivery for a multi-branch region. Financial services track record preferred.', url:'https://www.indeed.com/jobs?q=%22Training+Manager%22+%22Bank+of+America%22&l=Boca+Raton%2C+FL', posted:'1 week ago' }
   ];
 }
 
@@ -1814,8 +1830,9 @@ function regenerateCoverLetter() {
 
 function applyWithCoverLetter() {
   copyCoverLetter();
-  if(currentJobData && currentJobData.url) {
-    setTimeout(()=>{ window.open(currentJobData.url,'_blank'); },800);
+  if(currentJobData) {
+    const url = buildJobUrl(currentJobData);
+    setTimeout(()=>{ window.open(url,'_blank'); }, 800);
   }
   applyToJob(currentJobData?currentJobData.id:null);
 }
@@ -1823,13 +1840,65 @@ function applyWithCoverLetter() {
 // ─────────────────────────────────────────────────────────────────
 // APPLY + NOTIFICATIONS
 // ─────────────────────────────────────────────────────────────────
+
+// Build the best possible URL for a job — use provided url first,
+// otherwise construct a targeted Indeed search with title + company quoted
+function buildJobUrl(job) {
+  if (!job) return 'https://www.indeed.com/jobs';
+  if (job.url && job.url.length > 10) return job.url;
+  // Construct precise quoted title+company search
+  const title = encodeURIComponent('"' + (job.title||'').replace(/[—–-].*/,'').trim() + '"');
+  const company = encodeURIComponent('"' + (job.company||'').trim() + '"');
+  const loc = (job.type === 'Remote')
+    ? '&remotejob=032b3046-06a3-4876-8dfd-474eb5e7ed11'
+    : '&l=' + encodeURIComponent((job.location||'').replace(/\s*\(.*\)/,'').trim());
+  return 'https://www.indeed.com/jobs?q=' + title + '+' + company + loc;
+}
+
 function applyToJob(id) {
   const job = id ? (allJobs.find(j=>j.id===id)||getLocalJobs().find(j=>j.id===id)) : currentJobData;
-  if(job && job.url) window.open(job.url,'_blank');
   selectedJobForReminder = id||'general';
-  const modal = document.getElementById('reminder-modal');
-  document.getElementById('reminder-modal-body').textContent = job ? `We'll remind you in 7 days to follow up on your application to ${job.company}.` : 'We\'ll remind you in 7 days to follow up on this application.';
-  modal.classList.add('open');
+  // Set up the apply modal
+  const jobUrl = buildJobUrl(job);
+  const link = document.getElementById('apply-direct-link');
+  if (link) { link.href = jobUrl; link.dataset.jobUrl = jobUrl; }
+  const titleEl = document.getElementById('apply-modal-title');
+  const bodyEl = document.getElementById('reminder-modal-body');
+  if (titleEl) titleEl.textContent = job ? job.title : 'Apply to this role';
+  if (bodyEl) bodyEl.textContent = job
+    ? job.company + (job.location ? ' · ' + job.location : '') + (job.type ? ' · ' + job.type : '')
+    : 'Ready to apply?';
+  // Update track button label
+  const trackBtn = document.getElementById('apply-track-btn');
+  if (trackBtn) {
+    const alreadyTracked = getApplications().some(a =>
+      a.company === (job&&job.company) && a.role === (job&&job.title)
+    );
+    trackBtn.textContent = alreadyTracked ? '✅ Already tracked' : '📋 Track this job';
+    trackBtn.disabled = alreadyTracked;
+  }
+  document.getElementById('reminder-modal').classList.add('open');
+}
+
+function handleDirectApplyClick(e) {
+  // Let the link open, then close modal after a beat
+  setTimeout(() => {
+    document.getElementById('reminder-modal').classList.remove('open');
+  }, 400);
+}
+
+function trackAndClose() {
+  const job = selectedJobForReminder
+    ? (allJobs.find(j=>j.id===selectedJobForReminder)||getLocalJobs().find(j=>j.id===selectedJobForReminder)||currentJobData)
+    : currentJobData;
+  if (job) {
+    // Pre-fill and open the tracker add modal
+    currentJobData = job;  // ensure openAddAppModal can pre-fill
+    document.getElementById('reminder-modal').classList.remove('open');
+    setTimeout(() => openAddAppModal(null), 200);
+  } else {
+    document.getElementById('reminder-modal').classList.remove('open');
+  }
 }
 
 function applyNow(id) { applyToJob(id); }
