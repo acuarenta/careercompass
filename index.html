@@ -337,6 +337,107 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(15,31,61,0.15); border-radius: 2px; }
+
+/* ── APPLICATION TRACKER ──────────────────────────────────────────────────── */
+#screen-tracker { background: var(--cream); flex-direction: column; }
+.tracker-header { background: var(--navy); padding: 1rem 1.25rem 1.25rem; flex-shrink: 0; }
+.tracker-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.tracker-status-tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.tracker-status-tabs::-webkit-scrollbar { display: none; }
+.status-tab { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 50px; border: none; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+.status-tab.active { background: var(--gold); color: var(--navy); }
+.tracker-body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem; }
+.tracker-empty { text-align: center; padding: 3rem 1rem; }
+.tracker-empty-icon { font-size: 40px; margin-bottom: 1rem; }
+.tracker-card { background: var(--white); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 10px; box-shadow: var(--shadow-sm); border-left: 4px solid transparent; transition: all 0.2s; }
+.tracker-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+.tracker-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+.tracker-card-title { font-size: 15px; font-weight: 500; color: var(--navy); line-height: 1.3; }
+.tracker-card-company { font-size: 13px; color: var(--text-mid); margin-top: 2px; }
+.tracker-status-pill { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 50px; flex-shrink: 0; margin-left: 8px; }
+.status-applied { background: #e3f2fd; color: #1565c0; border-left-color: #1565c0; }
+.status-inprocess { background: #fff3e0; color: #e65100; border-left-color: #e65100; }
+.status-interview { background: #f3e5f5; color: #6a1b9a; border-left-color: #6a1b9a; }
+.status-offer { background: #e8f5e9; color: #2e7d32; border-left-color: #2e7d32; }
+.status-closed { background: var(--cream-dark); color: var(--text-mid); border-left-color: var(--text-light); }
+.tracker-card-meta { font-size: 11px; color: var(--text-light); margin-bottom: 10px; display: flex; gap: 12px; flex-wrap: wrap; }
+.tracker-card-actions { display: flex; gap: 8px; }
+.tracker-action-btn { background: var(--cream-dark); color: var(--text-mid); border: none; border-radius: 50px; font-size: 11px; font-weight: 500; padding: 6px 14px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+.tracker-action-btn:hover { background: var(--navy); color: var(--white); }
+.tracker-action-btn.gold { background: var(--gold); color: var(--navy); }
+.tracker-action-btn.gold:hover { background: var(--gold-light); }
+.tracker-fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; background: var(--gold); color: var(--navy); border: none; border-radius: 50%; font-size: 28px; cursor: pointer; box-shadow: 0 4px 20px rgba(201,165,90,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; transition: all 0.2s; }
+.tracker-fab:hover { background: var(--gold-light); transform: scale(1.05); }
+
+/* ── DASHBOARD ─────────────────────────────────────────────────────────────── */
+#screen-dashboard { background: var(--cream); flex-direction: column; }
+.dashboard-header { background: var(--navy); padding: 1.25rem; flex-shrink: 0; }
+.dashboard-greeting { font-size: 12px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+.dashboard-name { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--white); font-weight: 500; }
+.dashboard-body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem 80px; }
+.dash-card { background: var(--white); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 10px; box-shadow: var(--shadow-sm); }
+.dash-card-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-light); margin-bottom: 10px; }
+.dash-stat-row { display: flex; gap: 10px; }
+.dash-stat { flex: 1; text-align: center; background: var(--cream); border-radius: var(--radius-sm); padding: 12px 8px; }
+.dash-stat-num { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--navy); line-height: 1; }
+.dash-stat-label { font-size: 10px; color: var(--text-mid); margin-top: 4px; line-height: 1.3; }
+.dash-alert { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--cream-dark); }
+.dash-alert:last-child { border-bottom: none; }
+.dash-interview-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--cream-dark); }
+.dash-interview-item:last-child { border-bottom: none; }
+.dash-interview-date { font-size: 11px; color: var(--gold); font-weight: 500; }
+.win-banner { background: linear-gradient(135deg, var(--navy), var(--navy-light)); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 10px; text-align: center; border: 1px solid rgba(201,165,90,0.3); }
+.dash-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-top: 1px solid var(--cream-dark); display: flex; z-index: 50; box-shadow: 0 -4px 20px rgba(15,31,61,0.08); }
+.dash-nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 4px; background: none; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 10px; color: var(--text-light); transition: all 0.2s; }
+.dash-nav-btn.active { color: var(--navy); }
+.dash-nav-btn svg { transition: all 0.2s; }
+.dash-nav-btn.active svg { transform: scale(1.15); }
+
+/* ── INTERVIEW PREP ─────────────────────────────────────────────────────────── */
+#screen-interview { background: var(--cream); flex-direction: column; }
+.interview-body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem 1.5rem; }
+.interview-question-card { background: var(--white); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; box-shadow: var(--shadow-sm); }
+.interview-q-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+.interview-q-text { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--navy); line-height: 1.4; margin-bottom: 8px; }
+.interview-q-tip { font-size: 12px; color: var(--text-mid); font-style: italic; padding: 8px 12px; background: var(--cream); border-radius: 8px; }
+.star-step { background: var(--white); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; border: 1.5px solid var(--cream-dark); }
+.star-step-header { display: flex; align-items: center; gap: 12px; padding: 1rem 1.25rem; cursor: pointer; }
+.star-letter { width: 32px; height: 32px; border-radius: 50%; background: var(--navy); color: var(--gold); font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.star-label { font-weight: 500; color: var(--navy); font-size: 14px; }
+.star-hint { font-size: 12px; color: var(--text-mid); }
+.star-input-wrap { padding: 0 1.25rem 1rem; }
+.rating-bar { display: flex; gap: 8px; margin: 8px 0; }
+.rating-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--cream-dark); border: 2px solid transparent; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--text-mid); }
+.rating-dot.active { background: var(--gold); color: var(--navy); border-color: var(--gold-light); }
+.rating-feedback { background: var(--cream); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: var(--text-mid); line-height: 1.6; margin-top: 8px; }
+
+/* ── SALARY NEGOTIATION ────────────────────────────────────────────────────── */
+#screen-salary { background: var(--cream); flex-direction: column; }
+.salary-body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem 1.5rem; }
+.salary-range-card { background: linear-gradient(135deg, var(--navy), var(--navy-light)); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; text-align: center; }
+.salary-range-label { font-size: 11px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.salary-range-value { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: var(--gold); font-weight: 500; }
+.salary-range-sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+.salary-script { background: var(--cream); border-left: 3px solid var(--gold); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 1rem; font-size: 13px; color: var(--text-mid); line-height: 1.7; font-style: italic; margin: 10px 0; }
+
+/* ── UNEMPLOYMENT REPORT ───────────────────────────────────────────────────── */
+#screen-report { background: var(--cream); flex-direction: column; }
+.report-body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem 1.5rem; }
+.report-week-header { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-light); padding: 12px 0 8px; border-bottom: 1px solid var(--cream-dark); margin-bottom: 8px; }
+.report-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 12px; }
+.report-row { border-bottom: 1px solid var(--cream-dark); }
+.report-row-label { padding: 8px 0; color: var(--text-mid); width: 40%; }
+.report-row-value { padding: 8px 0; color: var(--navy); font-weight: 500; }
+
+/* ── ADD APPLICATION MODAL ─────────────────────────────────────────────────── */
+.modal-sheet { max-height: 90vh; overflow-y: auto; }
+.modal-field-group { margin-bottom: 12px; }
+.modal-field-label { font-size: 11px; font-weight: 500; color: var(--text-mid); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.modal-field-input { width: 100%; border: 1.5px solid rgba(15,31,61,0.12); border-radius: var(--radius-sm); padding: 10px 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-dark); background: var(--white); transition: border-color 0.2s; outline: none; }
+.modal-field-input:focus { border-color: var(--navy); }
+.modal-field-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a5568' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.modal-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
 </style>
 </head>
 <body>
@@ -636,6 +737,115 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
   </div>
 </div>
 
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<div id="screen-dashboard" class="screen">
+  <div class="dashboard-header">
+    <div class="dashboard-greeting">Good to see you</div>
+    <div class="dashboard-name" id="dash-name">Welcome back</div>
+  </div>
+  <div class="dashboard-body" id="dashboard-body">
+    <!-- Rendered by renderDashboard() -->
+  </div>
+  <div class="dash-nav">
+    <button class="dash-nav-btn active" onclick="showDashTab('dashboard')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="7" height="7" rx="2" fill="currentColor" opacity="0.8"/><rect x="11" y="2" width="7" height="7" rx="2" fill="currentColor" opacity="0.4"/><rect x="2" y="11" width="7" height="7" rx="2" fill="currentColor" opacity="0.4"/><rect x="11" y="11" width="7" height="7" rx="2" fill="currentColor" opacity="0.8"/></svg>
+      Dashboard
+    </button>
+    <button class="dash-nav-btn" onclick="showScreen('tracker')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 6h12M4 10h12M4 14h7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Tracker
+    </button>
+    <button class="dash-nav-btn" onclick="showScreen('jobs')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v7l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Jobs
+    </button>
+    <button class="dash-nav-btn" onclick="showScreen('report')">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 4h10a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.5"/><path d="M7 8h6M7 11h6M7 14h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Report
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════ APPLICATION TRACKER ═══════════ -->
+<div id="screen-tracker" class="screen">
+  <div class="tracker-header">
+    <div class="tracker-header-top">
+      <button style="background:none;border:none;color:var(--gold);font-size:20px;cursor:pointer;" onclick="showScreen('dashboard')">←</button>
+      <div class="quiz-logo-sm">Career<span>Compass</span></div>
+      <div style="font-size:12px;color:var(--text-light);" id="tracker-count">0 applications</div>
+    </div>
+    <div class="tracker-status-tabs" id="tracker-tabs">
+      <button class="status-tab active" onclick="filterTracker('all',this)">All</button>
+      <button class="status-tab" onclick="filterTracker('applied',this)">Applied</button>
+      <button class="status-tab" onclick="filterTracker('inprocess',this)">In Process</button>
+      <button class="status-tab" onclick="filterTracker('interview',this)">Interview</button>
+      <button class="status-tab" onclick="filterTracker('offer',this)">Offer</button>
+      <button class="status-tab" onclick="filterTracker('closed',this)">Closed</button>
+    </div>
+  </div>
+  <div class="tracker-body" id="tracker-body">
+    <!-- Rendered by renderTracker() -->
+  </div>
+  <button class="tracker-fab" onclick="openAddAppModal(null)" title="Add application">+</button>
+</div>
+
+<!-- ═══════════ INTERVIEW PREP ═══════════ -->
+<div id="screen-interview" class="screen">
+  <div class="resume-header">
+    <button class="resume-header-back" onclick="showScreen('tracker')">←</button>
+    <div class="resume-header-info">
+      <div class="resume-header-title">Interview Prep</div>
+      <div class="resume-header-sub" id="interview-header-sub">Preparing your coaching session</div>
+    </div>
+    <div class="quiz-logo-sm" style="flex-shrink:0;">Career<span style="color:var(--gold);">Compass</span></div>
+  </div>
+  <div class="interview-body" id="interview-body">
+    <div style="display:flex;flex-direction:column;align-items:center;padding:3rem 1.5rem;text-align:center;" id="interview-loading">
+      <div class="feedback-spinner"></div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--navy);margin-top:1.25rem;margin-bottom:6px;">Researching the role...</div>
+      <div style="font-size:13px;color:var(--text-mid);">Generating questions tailored to your background.</div>
+    </div>
+    <div id="interview-content" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ═══════════ SALARY NEGOTIATION ═══════════ -->
+<div id="screen-salary" class="screen">
+  <div class="resume-header">
+    <button class="resume-header-back" onclick="showScreen('tracker')">←</button>
+    <div class="resume-header-info">
+      <div class="resume-header-title">Salary Negotiation</div>
+      <div class="resume-header-sub" id="salary-header-sub">Analyzing your offer</div>
+    </div>
+    <div class="quiz-logo-sm" style="flex-shrink:0;">Career<span style="color:var(--gold);">Compass</span></div>
+  </div>
+  <div class="salary-body" id="salary-body">
+    <div style="display:flex;flex-direction:column;align-items:center;padding:3rem 1.5rem;text-align:center;" id="salary-loading">
+      <div class="feedback-spinner"></div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--navy);margin-top:1.25rem;margin-bottom:6px;">Analyzing your offer...</div>
+      <div style="font-size:13px;color:var(--text-mid);">Building your negotiation strategy.</div>
+    </div>
+    <div id="salary-content" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ═══════════ UNEMPLOYMENT REPORT ═══════════ -->
+<div id="screen-report" class="screen">
+  <div class="resume-header">
+    <button class="resume-header-back" onclick="showScreen('dashboard')">←</button>
+    <div class="resume-header-info">
+      <div class="resume-header-title">Unemployment Report</div>
+      <div class="resume-header-sub">Weekly job search activity</div>
+    </div>
+    <div class="quiz-logo-sm" style="flex-shrink:0;">Career<span style="color:var(--gold);">Compass</span></div>
+  </div>
+  <div class="report-body" id="report-body">
+    <!-- Rendered by renderReport() -->
+  </div>
+</div>
+
+
 <!-- ═══════════ MODALS ═══════════ -->
 <div class="modal-overlay" id="reminder-modal">
   <div class="modal-sheet">
@@ -645,6 +855,86 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
     <div class="modal-actions">
       <button class="modal-btn-primary" onclick="setReminder(true)">Yes, remind me in 7 days</button>
       <button class="modal-btn-secondary" onclick="setReminder(false)">No reminder needed</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ADD APPLICATION MODAL -->
+<div class="modal-overlay" id="add-app-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="add-app-modal-title">Add Application</div>
+    <div id="add-app-form">
+      <div class="modal-two-col">
+        <div class="modal-field-group">
+          <div class="modal-field-label">Company *</div>
+          <input class="modal-field-input" id="app-company" placeholder="Company name" type="text">
+        </div>
+        <div class="modal-field-group">
+          <div class="modal-field-label">Role *</div>
+          <input class="modal-field-input" id="app-role" placeholder="Job title" type="text">
+        </div>
+      </div>
+      <div class="modal-two-col">
+        <div class="modal-field-group">
+          <div class="modal-field-label">Location</div>
+          <input class="modal-field-input" id="app-location" placeholder="City, ST" type="text">
+        </div>
+        <div class="modal-field-group">
+          <div class="modal-field-label">Salary Range</div>
+          <input class="modal-field-input" id="app-salary" placeholder="$XX–$XX K" type="text">
+        </div>
+      </div>
+      <div class="modal-two-col">
+        <div class="modal-field-group">
+          <div class="modal-field-label">Date Applied</div>
+          <input class="modal-field-input" id="app-date" type="date">
+        </div>
+        <div class="modal-field-group">
+          <div class="modal-field-label">How Found</div>
+          <select class="modal-field-input modal-field-select" id="app-source">
+            <option value="">Select...</option>
+            <option>Indeed</option>
+            <option>LinkedIn</option>
+            <option>Referral</option>
+            <option>Company site</option>
+            <option>ZipRecruiter</option>
+            <option>Glassdoor</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-field-group">
+        <div class="modal-field-label">Contact Name</div>
+        <input class="modal-field-input" id="app-contact" placeholder="Recruiter or hiring manager" type="text">
+      </div>
+      <div class="modal-field-group">
+        <div class="modal-field-label">Notes</div>
+        <textarea class="modal-field-input" id="app-notes" placeholder="Anything worth remembering about this role..." rows="3" style="resize:none;"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn-primary" onclick="saveApplication()">Save Application</button>
+      <button class="modal-btn-secondary" onclick="closeModal('add-app-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS UPDATE MODAL -->
+<div class="modal-overlay" id="status-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Update Status</div>
+    <div class="modal-body" id="status-modal-body"></div>
+    <div id="status-options" style="display:flex;flex-direction:column;gap:8px;margin:16px 0;"></div>
+    <div class="modal-field-group">
+      <div class="modal-field-label">Add a note</div>
+      <textarea class="modal-field-input" id="status-note" placeholder="What happened? Next steps?" rows="3" style="resize:none;"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn-primary" onclick="confirmStatusUpdate()">Update Status</button>
+      <button class="modal-btn-secondary" onclick="closeModal('status-modal')">Cancel</button>
     </div>
   </div>
 </div>
@@ -1553,6 +1843,898 @@ function checkReminders() {
     localStorage.setItem('cc_reminders', JSON.stringify(remaining));
   } catch(e){}
 }
+
+
+// ─────────────────────────────────────────────────────────────────
+// NEW GLOBAL STATE
+// ─────────────────────────────────────────────────────────────────
+let coverLetterCount = parseInt(localStorage.getItem('cc_cl_count_v1')||'0', 10);
+let currentInterviewApp = null;
+let currentSalaryApp = null;
+let editingAppId = null;
+let trackerFilter = 'all';
+let pendingStatusAppId = null;
+let pendingStatusValue = null;
+
+const STATUS_LABELS = {
+  applied:   { label: 'Applied',            cls: 'status-applied' },
+  inprocess: { label: 'In Process',         cls: 'status-inprocess' },
+  interview: { label: 'Interview Scheduled',cls: 'status-interview' },
+  offer:     { label: 'Offer Received',     cls: 'status-offer' },
+  closed:    { label: 'Closed',             cls: 'status-closed' }
+};
+
+// ─────────────────────────────────────────────────────────────────
+// COVER LETTER COUNT HELPERS
+// ─────────────────────────────────────────────────────────────────
+function getCLCount() { return parseInt(localStorage.getItem('cc_cl_count_v1')||'0',10); }
+function incrementCLCount() {
+  const n = getCLCount()+1;
+  localStorage.setItem('cc_cl_count_v1', n);
+  coverLetterCount = n;
+  return n;
+}
+function checkCoverLetterLimit() {
+  if (selectedPlan === 'pro') return true;      // Pro: unlimited
+  if (selectedPlan === 'starter') {
+    if (getCLCount() < 3) return true;          // Starter: up to 3
+    showToast('📊 You\'ve used your 3 cover letters. Upgrade to Pro for unlimited.');
+    return false;
+  }
+  // Free — no cover letters
+  goToPaywall();
+  return false;
+}
+
+// ─────────────────────────────────────────────────────────────────
+// PLAN GATE HELPERS
+// ─────────────────────────────────────────────────────────────────
+function requirePlan(minPlan) {
+  const order = ['free','starter','pro'];
+  const current = order.indexOf(selectedPlan);
+  const required = order.indexOf(minPlan);
+  if (current >= required) return true;
+  goToPaywall();
+  return false;
+}
+
+// ─────────────────────────────────────────────────────────────────
+// UPDATED: continueAsTester → goes to Dashboard
+// ─────────────────────────────────────────────────────────────────
+function continueAsTester() {
+  selectedPlan = 'pro';
+  showToast('🧪 Tester access granted — full Pro enabled!', 3000);
+  renderDashboard();
+  showScreen('dashboard');
+}
+
+// ─────────────────────────────────────────────────────────────────
+// UPDATED: handlePaywallCTA - sets plan then routes
+// ─────────────────────────────────────────────────────────────────
+function handlePaywallCTA() {
+  showToast('💳 Stripe checkout coming soon!', 3000);
+  // Would normally gate on payment; for now just proceed
+}
+
+// ─────────────────────────────────────────────────────────────────
+// UPDATED: callClaude — also has plain-text variant
+// ─────────────────────────────────────────────────────────────────
+async function callClaudeText(systemPrompt, userPrompt, maxTokens) {
+  const res = await fetch(API_BASE+'/claude', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-haiku-4-5-20251001',
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages:[{role:'user', content: userPrompt}]
+    })
+  });
+  const data = await res.json();
+  if(data.error) throw new Error(data.error);
+  return (data.content||[]).map(b=>b.text||'').join('').trim();
+}
+
+// ─────────────────────────────────────────────────────────────────
+// APPLICATION TRACKER
+// ─────────────────────────────────────────────────────────────────
+function getApplications() {
+  try { return JSON.parse(localStorage.getItem('cc_tracker_v1')||'[]'); } catch(e) { return []; }
+}
+function saveApplications(apps) {
+  try { localStorage.setItem('cc_tracker_v1', JSON.stringify(apps)); } catch(e) {}
+}
+
+function openAddAppModal(appId) {
+  editingAppId = appId;
+  const modal = document.getElementById('add-app-modal');
+  document.getElementById('add-app-modal-title').textContent = appId ? 'Edit Application' : 'Add Application';
+  // Pre-fill from currentJobData if available and adding new
+  if (!appId && currentJobData) {
+    document.getElementById('app-company').value = currentJobData.company||'';
+    document.getElementById('app-role').value = currentJobData.title||'';
+    document.getElementById('app-location').value = currentJobData.location||'';
+    document.getElementById('app-salary').value = currentJobData.salary||'';
+    document.getElementById('app-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('app-source').value = '';
+    document.getElementById('app-contact').value = '';
+    document.getElementById('app-notes').value = '';
+  } else if (appId) {
+    const app = getApplications().find(a=>a.id===appId);
+    if (app) {
+      document.getElementById('app-company').value = app.company||'';
+      document.getElementById('app-role').value = app.role||'';
+      document.getElementById('app-location').value = app.location||'';
+      document.getElementById('app-salary').value = app.salary||'';
+      document.getElementById('app-date').value = app.dateApplied||'';
+      document.getElementById('app-source').value = app.source||'';
+      document.getElementById('app-contact').value = app.contact||'';
+      document.getElementById('app-notes').value = app.notes||'';
+    }
+  } else {
+    document.getElementById('app-company').value = '';
+    document.getElementById('app-role').value = '';
+    document.getElementById('app-location').value = '';
+    document.getElementById('app-salary').value = '';
+    document.getElementById('app-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('app-source').value = '';
+    document.getElementById('app-contact').value = '';
+    document.getElementById('app-notes').value = '';
+  }
+  modal.classList.add('open');
+}
+
+function saveApplication() {
+  const company = document.getElementById('app-company').value.trim();
+  const role = document.getElementById('app-role').value.trim();
+  if (!company || !role) { showToast('Please enter company and role'); return; }
+  const apps = getApplications();
+  const now = new Date().toISOString();
+  if (editingAppId) {
+    const idx = apps.findIndex(a=>a.id===editingAppId);
+    if (idx >= 0) {
+      apps[idx].company = company;
+      apps[idx].role = role;
+      apps[idx].location = document.getElementById('app-location').value.trim();
+      apps[idx].salary = document.getElementById('app-salary').value.trim();
+      apps[idx].dateApplied = document.getElementById('app-date').value;
+      apps[idx].source = document.getElementById('app-source').value;
+      apps[idx].contact = document.getElementById('app-contact').value.trim();
+      apps[idx].notes = document.getElementById('app-notes').value.trim();
+    }
+  } else {
+    apps.unshift({
+      id: 'app_'+Date.now(),
+      company, role,
+      location: document.getElementById('app-location').value.trim(),
+      salary: document.getElementById('app-salary').value.trim(),
+      dateApplied: document.getElementById('app-date').value,
+      source: document.getElementById('app-source').value,
+      contact: document.getElementById('app-contact').value.trim(),
+      notes: document.getElementById('app-notes').value.trim(),
+      status: 'applied',
+      statusHistory: [{ status:'applied', date: now, note: 'Application added' }],
+      followUpLog: [],
+      createdAt: now
+    });
+  }
+  saveApplications(apps);
+  closeModal('add-app-modal');
+  renderTracker();
+  showToast(editingAppId ? '✅ Application updated' : '✅ Application added!');
+}
+
+function openStatusModal(appId) {
+  pendingStatusAppId = appId;
+  pendingStatusValue = null;
+  const app = getApplications().find(a=>a.id===appId);
+  if (!app) return;
+  document.getElementById('status-modal-body').textContent = `Update status for ${app.role} at ${app.company}`;
+  document.getElementById('status-note').value = '';
+  const opts = document.getElementById('status-options');
+  opts.innerHTML = Object.entries(STATUS_LABELS).map(([key, val]) => `
+    <button class="option-card" onclick="selectPendingStatus('${key}',this)" style="padding:10px 14px;">
+      <div class="option-letter"><span class="tracker-status-pill ${val.cls}" style="margin:0;">${val.label}</span></div>
+      <div style="font-size:13px;color:var(--text-mid);">${getStatusHint(key)}</div>
+    </button>
+  `).join('');
+  // Pre-select current
+  document.getElementById('status-modal').classList.add('open');
+}
+
+function getStatusHint(s) {
+  return {applied:'Waiting for response',inprocess:'Screening or recruiter call',interview:'Interview scheduled',offer:'Offer received — time to negotiate!',closed:'No longer pursuing'}[s]||'';
+}
+
+function selectPendingStatus(val, el) {
+  pendingStatusValue = val;
+  document.querySelectorAll('#status-options .option-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function confirmStatusUpdate() {
+  if (!pendingStatusValue) { showToast('Select a status first'); return; }
+  const apps = getApplications();
+  const idx = apps.findIndex(a=>a.id===pendingStatusAppId);
+  if (idx < 0) return;
+  const note = document.getElementById('status-note').value.trim();
+  apps[idx].status = pendingStatusValue;
+  apps[idx].statusHistory.push({ status: pendingStatusValue, date: new Date().toISOString(), note });
+  saveApplications(apps);
+  closeModal('status-modal');
+  renderTracker();
+  showToast('✅ Status updated!');
+  // If interview scheduled, offer interview prep
+  if (pendingStatusValue === 'interview') {
+    scheduleInterviewReminder(apps[idx]);
+    setTimeout(()=>{
+      if(confirm('Interview scheduled! Launch Interview Prep for this role?')) {
+        startInterviewPrep(apps[idx]);
+      }
+    }, 500);
+  }
+  // If offer, prompt salary negotiation
+  if (pendingStatusValue === 'offer') {
+    setTimeout(()=>{
+      if(confirm('Offer received! Launch Salary Negotiation Assistant?')) {
+        startSalaryNegotiation(apps[idx]);
+      }
+    }, 500);
+  }
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function deleteApplication(appId) {
+  if (!confirm('Remove this application?')) return;
+  const apps = getApplications().filter(a=>a.id!==appId);
+  saveApplications(apps);
+  renderTracker();
+  showToast('Application removed');
+}
+
+function filterTracker(status, btn) {
+  trackerFilter = status;
+  document.querySelectorAll('.status-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderTracker();
+}
+
+function renderTracker() {
+  let apps = getApplications();
+  document.getElementById('tracker-count').textContent = apps.length+' application'+(apps.length!==1?'s':'');
+  if (trackerFilter !== 'all') apps = apps.filter(a=>a.status===trackerFilter);
+  const body = document.getElementById('tracker-body');
+  if (apps.length === 0) {
+    body.innerHTML = `<div class="tracker-empty">
+      <div class="tracker-empty-icon">📋</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--navy);margin-bottom:8px;">${trackerFilter==='all'?'No applications yet':'Nothing here yet'}</div>
+      <div style="font-size:13px;color:var(--text-mid);line-height:1.6;max-width:260px;margin:0 auto 1.5rem;">
+        ${trackerFilter==='all'?'Start tracking your job search. Tap + to add your first application.':'No applications in this status.'}
+      </div>
+    </div>`;
+    return;
+  }
+  body.innerHTML = apps.map(app => {
+    const sl = STATUS_LABELS[app.status]||STATUS_LABELS['applied'];
+    const daysAgo = app.dateApplied ? Math.floor((Date.now()-new Date(app.dateApplied))/(86400000)) : null;
+    const dayStr = daysAgo===0?'Today':daysAgo===1?'Yesterday':daysAgo?daysAgo+' days ago':'';
+    const canInterviewPrep = app.status==='interview';
+    const canSalary = app.status==='offer';
+    return `<div class="tracker-card ${sl.cls}">
+      <div class="tracker-card-top">
+        <div>
+          <div class="tracker-card-title">${app.role}</div>
+          <div class="tracker-card-company">${app.company}${app.location?' · '+app.location:''}</div>
+        </div>
+        <span class="tracker-status-pill ${sl.cls}">${sl.label}</span>
+      </div>
+      <div class="tracker-card-meta">
+        ${dayStr?`<span>📅 ${dayStr}</span>`:''}
+        ${app.salary?`<span>💰 ${app.salary}</span>`:''}
+        ${app.source?`<span>🔍 ${app.source}</span>`:''}
+      </div>
+      <div class="tracker-card-actions">
+        <button class="tracker-action-btn" onclick="openStatusModal('${app.id}')">Update Status</button>
+        <button class="tracker-action-btn" onclick="openAddAppModal('${app.id}')">Edit</button>
+        ${canInterviewPrep?`<button class="tracker-action-btn gold" onclick="startInterviewPrep(getApplications().find(a=>a.id==='${app.id}'))">🎯 Prep</button>`:''}
+        ${canSalary?`<button class="tracker-action-btn gold" onclick="startSalaryNegotiation(getApplications().find(a=>a.id==='${app.id}'))">💰 Negotiate</button>`:''}
+        <button class="tracker-action-btn" onclick="deleteApplication('${app.id}')" style="margin-left:auto;color:var(--danger);">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────────
+// DASHBOARD
+// ─────────────────────────────────────────────────────────────────
+function showDashTab(tab) {
+  document.querySelectorAll('.dash-nav-btn').forEach(b=>b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+function renderDashboard() {
+  const apps = getApplications();
+  const name = (window._resumeData&&window._resumeData.name) ? window._resumeData.name.split(' ')[0] : (answers[1]||'').split(' ')[0] || 'there';
+  document.getElementById('dash-name').textContent = 'Hello, '+name+'!';
+  const counts = {applied:0,inprocess:0,interview:0,offer:0,closed:0};
+  apps.forEach(a=>{ if(counts[a.status]!==undefined) counts[a.status]++; });
+  const total = apps.length;
+  const clCount = getCLCount();
+
+  // Follow-up alerts: applied > 7 days with no status change
+  const now = Date.now();
+  const alerts = apps.filter(a=>{
+    if(a.status!=='applied') return false;
+    const d = a.dateApplied ? new Date(a.dateApplied).getTime() : 0;
+    return (now - d) > 7*86400000;
+  });
+
+  // Upcoming interviews (in next 7 days via statusHistory date)
+  const upcoming = apps.filter(a=>{
+    if(a.status!=='interview') return false;
+    const last = a.statusHistory&&a.statusHistory.length ? a.statusHistory[a.statusHistory.length-1] : null;
+    if(!last) return false;
+    const d = new Date(last.date).getTime();
+    return (d > now - 86400000) && (d < now + 7*86400000);
+  });
+
+  const wins = apps.filter(a=>a.status==='offer');
+
+  let html = '';
+
+  // Win banner
+  if(wins.length > 0) {
+    html += `<div class="win-banner animate-in">
+      <div style="font-size:28px;margin-bottom:8px;">🎉</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);margin-bottom:4px;">You have an offer!</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.7);">${wins.map(w=>w.role+' at '+w.company).join(' · ')}</div>
+    </div>`;
+  }
+
+  // Stats
+  html += `<div class="dash-card animate-in delay-1">
+    <div class="dash-card-label">Your search at a glance</div>
+    <div class="dash-stat-row">
+      <div class="dash-stat"><div class="dash-stat-num">${total}</div><div class="dash-stat-label">Total Applications</div></div>
+      <div class="dash-stat"><div class="dash-stat-num">${counts.interview}</div><div class="dash-stat-label">Interviews</div></div>
+      <div class="dash-stat"><div class="dash-stat-num">${counts.offer}</div><div class="dash-stat-label">Offers</div></div>
+      <div class="dash-stat"><div class="dash-stat-num">${clCount}</div><div class="dash-stat-label">Cover Letters</div></div>
+    </div>
+  </div>`;
+
+  // Coach message
+  const msg = total===0 ? 'Your journey starts with one application. You have everything you need.' :
+    counts.interview>0 ? 'You have interviews in the pipeline — that is real progress. Stay consistent.' :
+    alerts.length>0 ? 'Some applications may be ready for a follow-up. Reaching out shows initiative.' :
+    'Keep going. Every application brings you closer.';
+  html += `<div class="dash-card animate-in delay-2">
+    <div class="dash-card-label">Your coach says</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--navy);line-height:1.5;">"${msg}"</div>
+  </div>`;
+
+  // Follow-up alerts
+  if(alerts.length>0) {
+    html += `<div class="dash-card animate-in delay-2">
+      <div class="dash-card-label">⏰ Follow-up alerts (${alerts.length})</div>
+      ${alerts.map(a=>`<div class="dash-alert">
+        <div style="font-size:20px;">📬</div>
+        <div>
+          <div style="font-size:14px;font-weight:500;color:var(--navy);">${a.role} at ${a.company}</div>
+          <div style="font-size:12px;color:var(--text-mid);">Applied ${a.dateApplied||'a while ago'} — no update yet</div>
+          <button class="tracker-action-btn" style="margin-top:6px;" onclick="openStatusModal('${a.id}')">Update Status</button>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  }
+
+  // Upcoming interviews
+  if(upcoming.length>0) {
+    html += `<div class="dash-card animate-in delay-3">
+      <div class="dash-card-label">📅 Upcoming interviews</div>
+      ${upcoming.map(a=>`<div class="dash-interview-item">
+        <div>
+          <div style="font-size:14px;font-weight:500;color:var(--navy);">${a.role}</div>
+          <div style="font-size:12px;color:var(--text-mid);">${a.company}</div>
+        </div>
+        <div>
+          <div class="dash-interview-date">Scheduled</div>
+          <button class="tracker-action-btn gold" onclick="startInterviewPrep(getApplications().find(x=>x.id==='${a.id}'))">Prep →</button>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  }
+
+  // Quick actions
+  html += `<div class="dash-card animate-in delay-3">
+    <div class="dash-card-label">Quick actions</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btn-next" style="background:var(--cream-dark);color:var(--navy);justify-content:flex-start;gap:12px;" onclick="showScreen('tracker');renderTracker();">📋 View Application Tracker</button>
+      <button class="btn-next" style="background:var(--cream-dark);color:var(--navy);justify-content:flex-start;gap:12px;" onclick="loadAndShowJobs();">🔍 Search Jobs</button>
+      <button class="btn-next" style="background:var(--cream-dark);color:var(--navy);justify-content:flex-start;gap:12px;" onclick="renderReport();showScreen('report');">📄 Unemployment Report</button>
+    </div>
+  </div>`;
+
+  document.getElementById('dashboard-body').innerHTML = html;
+}
+
+// ─────────────────────────────────────────────────────────────────
+// INTERVIEW PREP (Pro)
+// ─────────────────────────────────────────────────────────────────
+function startInterviewPrep(app) {
+  if (!requirePlan('pro')) return;
+  currentInterviewApp = app;
+  document.getElementById('interview-header-sub').textContent = app.role+' at '+app.company;
+  document.getElementById('interview-loading').style.display='flex';
+  document.getElementById('interview-content').style.display='none';
+  showScreen('interview');
+  runInterviewPrep(app);
+}
+
+async function runInterviewPrep(app) {
+  const resumeData = window._resumeData;
+  const ctx = window._resumeCtx || buildResumeContext();
+  const name = ctx.name||(answers[1]||'');
+  const skills = resumeData ? resumeData.skills.join(', ') : 'leadership, training, communication';
+  const summary = resumeData ? resumeData.summary : '';
+  const prompt = `Generate 3 targeted interview questions for this candidate and role.
+
+ROLE: ${app.role} at ${app.company}${app.location?' in '+app.location:''}
+CANDIDATE SKILLS: ${skills}
+CANDIDATE SUMMARY: ${summary}
+PERSONALITY: ${ctx.personalityType||'connector'}
+
+For each question, also suggest which experience from their resume to draw from and a STAR coaching tip.
+
+Never invent specific numbers or percentages. Use [X%] or [number] as placeholders the user fills in.
+
+Respond ONLY with valid JSON (no markdown):
+{"questions":[
+  {"question":"...","why":"Why this question matters for this role","tip":"Which resume experience to draw from and how to structure the answer","starFocus":"Which STAR element (S,T,A,R) to emphasize most"},
+  {"question":"...","why":"...","tip":"...","starFocus":"..."},
+  {"question":"...","why":"...","tip":"...","starFocus":"..."}
+]}`;
+  try {
+    const res = await fetch(API_BASE+'/claude', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:1500,
+        system:'You are CareerCompass interview coach. Generate targeted questions and STAR coaching. Respond ONLY with valid JSON.',
+        messages:[{role:'user',content:prompt}] })
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    const raw = (data.content||[]).map(b=>b.text||'').join('');
+    let parsed;
+    try { parsed = JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) { parsed = getFallbackQuestions(app); }
+    renderInterviewPrep(parsed, app);
+  } catch(err) {
+    console.error('Interview prep error:',err);
+    renderInterviewPrep(getFallbackQuestions(app), app);
+  }
+}
+
+function getFallbackQuestions(app) {
+  return { questions: [
+    { question:`Tell me about a time you had to quickly learn something new to deliver results in a role like ${app.role}.`, why:'Tests adaptability and growth mindset.', tip:'Draw from a specific experience where you acquired a new skill under pressure.', starFocus:'A' },
+    { question:'Describe a situation where you led a project or initiative that had a measurable impact.', why:'Assesses leadership and ownership.', tip:'Choose an example with clear before/after outcomes — even if exact numbers need to be filled in.', starFocus:'R' },
+    { question:'How do you handle competing priorities when everything feels urgent?', why:'Tests organizational and communication skills.', tip:'Focus on your system or process, not just the outcome.', starFocus:'T' }
+  ]};
+}
+
+function renderInterviewPrep(data, app) {
+  document.getElementById('interview-loading').style.display='none';
+  document.getElementById('interview-content').style.display='block';
+  const qs = data.questions||[];
+  let html = `<div class="feedback-banner" style="margin-bottom:1rem;">
+    <div class="feedback-banner-title">Your ${app.role} interview prep</div>
+    <div class="feedback-banner-body">3 likely questions, STAR coaching for each, and a self-rating tool to help you practice until you feel ready.</div>
+  </div>`;
+  qs.forEach((q,i) => {
+    html += `<div class="interview-question-card animate-in">
+      <div class="interview-q-label">Question ${i+1}</div>
+      <div class="interview-q-text">"${q.question}"</div>
+      <div class="interview-q-tip">${q.why}</div>
+    </div>
+    <div style="margin-bottom:1.5rem;">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:8px;">STAR Framework — ${q.starFocus ? 'Focus on '+q.starFocus : 'All steps'}</div>
+      ${['S','T','A','R'].map(letter => {
+        const labels={S:{l:'Situation',h:'Set the context — where, when, what was happening'},T:{l:'Task',h:'What was your specific responsibility?'},A:{l:'Action',h:'What did YOU do? Use "I" not "we"'},R:{l:'Result',h:'What happened? Quantify if possible with [X%] or [number]'}};
+        const info = labels[letter];
+        return `<div class="star-step">
+          <div class="star-step-header">
+            <div class="star-letter">${letter}</div>
+            <div><div class="star-label">${info.l}</div><div class="star-hint">${info.h}</div></div>
+          </div>
+          <div class="star-input-wrap">
+            <textarea class="modal-field-input" id="star_${i}_${letter}" placeholder="Write your ${info.l.toLowerCase()} here..." rows="3" style="resize:none;width:100%;"></textarea>
+          </div>
+        </div>`;
+      }).join('')}
+      <div style="background:var(--white);border-radius:var(--radius);padding:1.25rem;margin-top:8px;border:1.5px solid var(--cream-dark);">
+        <div style="font-size:13px;font-weight:500;color:var(--navy);margin-bottom:8px;">💡 ${q.tip}</div>
+        <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">Rate your answer confidence:</div>
+        <div class="rating-bar">
+          ${[1,2,3,4,5].map(n=>`<div class="rating-dot" id="rating_${i}_${n}" onclick="setRating(${i},${n})">${n}</div>`).join('')}
+        </div>
+        <div class="rating-feedback" id="rating_feedback_${i}" style="display:none;"></div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('interview-content').innerHTML = html;
+}
+
+function setRating(qIdx, val) {
+  [1,2,3,4,5].forEach(n=>{
+    const d=document.getElementById(`rating_${qIdx}_${n}`);
+    if(d) d.classList.toggle('active', n<=val);
+  });
+  const fb = document.getElementById(`rating_feedback_${qIdx}`);
+  if(fb) {
+    const msgs={1:'Keep practicing — write out your STAR steps in full first, then practice saying them aloud.',2:'Good start. Focus on your Action steps — be more specific about what YOU did.',3:'Solid answer. Try to add one concrete result, even an estimated [number] or [X%] improvement.',4:'Strong! Review your Situation setup — make sure it is concise and sets context quickly.',5:'Excellent! You are ready. Consider having a backup example in case the interviewer asks for another.'};
+    fb.textContent = msgs[val]||'';
+    fb.style.display = 'block';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// SALARY NEGOTIATION (Pro)
+// ─────────────────────────────────────────────────────────────────
+function startSalaryNegotiation(app) {
+  if (!requirePlan('pro')) return;
+  currentSalaryApp = app;
+  document.getElementById('salary-header-sub').textContent = app.role+' at '+app.company;
+  document.getElementById('salary-loading').style.display='flex';
+  document.getElementById('salary-content').style.display='none';
+  showScreen('salary');
+  runSalaryNegotiation(app);
+}
+
+async function runSalaryNegotiation(app) {
+  const ctx = window._resumeCtx || buildResumeContext();
+  const resumeData = window._resumeData;
+  const offered = app.salary||'not specified';
+  const prompt = `Provide salary negotiation coaching for this job offer.
+
+ROLE: ${app.role} at ${app.company}${app.location?' in '+app.location:''}
+OFFERED SALARY RANGE: ${offered}
+CANDIDATE EXPERIENCE: ${ctx.personalityType||'experienced professional'}
+CANDIDATE SKILLS: ${resumeData?resumeData.skills.join(', '):'leadership, training, communication'}
+
+Provide:
+1. Market analysis for this role and location
+2. A suggested counter-offer range with reasoning
+3. 3 negotiation tactics specific to this situation
+4. A verbatim professional response script
+5. 2-3 red flags to watch for
+
+Never fabricate specific salary numbers you are not sure about — use ranges like "[market rate for this role in this city]" if uncertain.
+
+Respond ONLY with valid JSON (no markdown):
+{"marketAnalysis":"2 sentence market context","counterRange":"$X–$Y (or range guidance)","counterRationale":"why this counter makes sense","tactics":["tactic 1","tactic 2","tactic 3"],"script":"Dear [Name],\\n\\nThank you for the offer... [full email script]","redFlags":["flag 1","flag 2"]}`;
+
+  try {
+    const res = await fetch(API_BASE+'/claude', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:1500,
+        system:'You are CareerCompass salary coach. Provide negotiation strategy. Respond ONLY with valid JSON.',
+        messages:[{role:'user',content:prompt}] })
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    const raw = (data.content||[]).map(b=>b.text||'').join('');
+    let parsed;
+    try { parsed = JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) { parsed = getFallbackSalary(app); }
+    renderSalaryNegotiation(parsed, app);
+  } catch(err) {
+    console.error('Salary negotiation error:',err);
+    renderSalaryNegotiation(getFallbackSalary(app), app);
+  }
+}
+
+function getFallbackSalary(app) {
+  return {
+    marketAnalysis: `For a ${app.role} role, compensation varies by company size, location, and experience. Research sites like Glassdoor, Levels.fyi, and Bureau of Labor Statistics provide current market ranges for your area.`,
+    counterRange: '[Research market rate for this role and location on Glassdoor or LinkedIn Salary]',
+    counterRationale: 'Counteroffers of 10–15% above the initial offer are common and typically expected in professional hiring.',
+    tactics: [
+      'Let the employer make the first specific number — then anchor your counter above it.',
+      'Negotiate the full package: base, bonus, PTO, remote flexibility, and professional development budget.',
+      'Express genuine enthusiasm for the role first, then pivot to compensation — "I am very excited about this opportunity, and I want to make sure the compensation works for both of us."'
+    ],
+    script: `Dear [Hiring Manager Name],\n\nThank you so much for the offer — I am genuinely excited about this opportunity and the team at ${app.company}.\n\nI have reviewed the offer carefully and, after researching the market for ${app.role} roles in this area, I was hoping we could discuss bringing the base salary closer to [your counter amount]. This reflects my [X years] of experience and the specific skills I would bring from day one.\n\nI am fully committed to joining the team and making an impact quickly. I hope we can find a number that works for both sides.\n\nThank you again for the opportunity. I look forward to your response.\n\nWarm regards,\n[Your Name]`,
+    redFlags: [
+      'Pressure to decide immediately without time to review — a legitimate employer will give you at least 24–48 hours.',
+      'Vague or missing details about benefits, equity, or bonus structure in writing.'
+    ]
+  };
+}
+
+function renderSalaryNegotiation(data, app) {
+  document.getElementById('salary-loading').style.display='none';
+  document.getElementById('salary-content').style.display='block';
+  let html = `<div class="salary-range-card animate-in">
+    <div class="salary-range-label">Suggested counter-offer range</div>
+    <div class="salary-range-value">${data.counterRange}</div>
+    <div class="salary-range-sub">${data.counterRationale}</div>
+  </div>
+  <div class="dash-card animate-in delay-1">
+    <div class="dash-card-label">Market context</div>
+    <div style="font-size:14px;color:var(--text-mid);line-height:1.7;">${data.marketAnalysis}</div>
+  </div>
+  <div class="dash-card animate-in delay-2">
+    <div class="dash-card-label">Your negotiation tactics</div>
+    ${(data.tactics||[]).map((t,i)=>`<div class="dash-alert"><div style="font-size:20px;font-family:'Cormorant Garamond',serif;color:var(--gold);">${i+1}</div><div style="font-size:14px;color:var(--text-mid);line-height:1.6;">${t}</div></div>`).join('')}
+  </div>
+  <div class="dash-card animate-in delay-2">
+    <div class="dash-card-label">Your response script</div>
+    <div class="salary-script">${(data.script||'').replace(/\n/g,'<br>')}</div>
+    <button class="btn-next gold" style="margin-top:8px;" onclick="copySalaryScript(${JSON.stringify((data.script||'')).replace(/</g,'&lt;')})">📋 Copy Script</button>
+  </div>
+  ${(data.redFlags||[]).length>0?`<div class="dash-card animate-in delay-3">
+    <div class="dash-card-label">⚠️ Watch out for</div>
+    ${data.redFlags.map(f=>`<div class="dash-alert"><div style="font-size:20px;">🚩</div><div style="font-size:13px;color:var(--text-mid);line-height:1.6;">${f}</div></div>`).join('')}
+  </div>`:''}`;
+  document.getElementById('salary-content').innerHTML = html;
+}
+
+function copySalaryScript(text) {
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(()=>showToast('✅ Script copied!')).catch(()=>showToast('Select text to copy'));
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// UNEMPLOYMENT REPORT
+// ─────────────────────────────────────────────────────────────────
+function renderReport() {
+  const apps = getApplications();
+  if (apps.length === 0) {
+    document.getElementById('report-body').innerHTML = `<div class="tracker-empty">
+      <div class="tracker-empty-icon">📄</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--navy);margin-bottom:8px;">No applications yet</div>
+      <div style="font-size:13px;color:var(--text-mid);">Add applications in the Tracker to generate your weekly report.</div>
+    </div>`;
+    return;
+  }
+  // Group by week
+  const byWeek = {};
+  apps.forEach(a => {
+    const d = a.dateApplied ? new Date(a.dateApplied) : new Date(a.createdAt||Date.now());
+    const weekStart = new Date(d);
+    weekStart.setDate(d.getDate() - d.getDay());
+    const key = weekStart.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    if (!byWeek[key]) byWeek[key] = [];
+    byWeek[key].push(a);
+  });
+  const sl = STATUS_LABELS;
+  let html = `<div style="display:flex;gap:8px;margin-bottom:1rem;">
+    <button class="btn-next" style="background:var(--navy);color:var(--white);font-size:13px;padding:10px 18px;" onclick="exportReport()">⬇ Export as Text</button>
+  </div>`;
+  Object.entries(byWeek).sort((a,b)=>new Date(b[0])-new Date(a[0])).forEach(([week, weekApps]) => {
+    html += `<div class="report-week-header">Week of ${week} — ${weekApps.length} application${weekApps.length!==1?'s':''}</div>`;
+    weekApps.forEach(a => {
+      html += `<table class="report-table" style="margin-bottom:12px;">
+        <tr class="report-row"><td class="report-row-label">Company</td><td class="report-row-value">${a.company||'—'}</td></tr>
+        <tr class="report-row"><td class="report-row-label">Position</td><td class="report-row-value">${a.role||'—'}</td></tr>
+        <tr class="report-row"><td class="report-row-label">Location</td><td class="report-row-value">${a.location||'—'}</td></tr>
+        <tr class="report-row"><td class="report-row-label">Date Applied</td><td class="report-row-value">${a.dateApplied||'—'}</td></tr>
+        <tr class="report-row"><td class="report-row-label">How Found</td><td class="report-row-value">${a.source||'—'}</td></tr>
+        <tr class="report-row"><td class="report-row-label">Contact</td><td class="report-row-value">${a.contact||'—'}</td></tr>
+        <tr class="report-row"><td class="report-row-label">Current Status</td><td class="report-row-value">${(sl[a.status]||{}).label||a.status}</td></tr>
+        <tr class="report-row"><td class="report-row-label">Offer Received</td><td class="report-row-value">${a.status==='offer'?'Yes':'No'}</td></tr>
+      </table>`;
+    });
+  });
+  document.getElementById('report-body').innerHTML = html;
+}
+
+function exportReport() {
+  const apps = getApplications();
+  if (!apps.length) { showToast('No applications to export'); return; }
+  let text = 'UNEMPLOYMENT REPORT — JOB SEARCH ACTIVITY\n';
+  text += 'Generated: '+new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'\n\n';
+  apps.forEach((a,i) => {
+    text += `${i+1}. ${a.company||'Unknown'} — ${a.role||'Unknown'}\n`;
+    text += `   Date Applied: ${a.dateApplied||'—'}\n`;
+    text += `   Location: ${a.location||'—'}\n`;
+    text += `   How Found: ${a.source||'—'}\n`;
+    text += `   Contact: ${a.contact||'—'}\n`;
+    text += `   Status: ${(STATUS_LABELS[a.status]||{}).label||a.status}\n`;
+    text += `   Offer: ${a.status==='offer'?'Yes':'No'}\n\n`;
+  });
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'job-search-report.txt'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ Report downloaded!');
+}
+
+// ─────────────────────────────────────────────────────────────────
+// INTERVIEW REMINDER (push notification day before)
+// ─────────────────────────────────────────────────────────────────
+function scheduleInterviewReminder(app) {
+  try {
+    const reminders = JSON.parse(localStorage.getItem('cc_interview_reminders')||'[]');
+    // Set reminder for tomorrow (assumes interview is soon)
+    const due = Date.now() + (23*60*60*1000); // ~1 day
+    reminders.push({ id: app.id, company: app.company, role: app.role, due, set: Date.now() });
+    localStorage.setItem('cc_interview_reminders', JSON.stringify(reminders));
+  } catch(e) {}
+}
+
+function checkInterviewReminders() {
+  if(Notification.permission!=='granted') return;
+  try {
+    const reminders = JSON.parse(localStorage.getItem('cc_interview_reminders')||'[]');
+    const now = Date.now();
+    const due = reminders.filter(r=>r.due<=now);
+    due.forEach(r=>{
+      new Notification('Interview tomorrow! 🎯',{
+        body:`You have an interview for ${r.role} at ${r.company}. Open CareerCompass to prepare.`,
+        tag:'interview-'+r.id
+      });
+    });
+    const remaining = reminders.filter(r=>r.due>now);
+    localStorage.setItem('cc_interview_reminders', JSON.stringify(remaining));
+  } catch(e) {}
+}
+
+// ─────────────────────────────────────────────────────────────────
+// UPDATED: downloadResumeAsWord — gated to Starter+
+// ─────────────────────────────────────────────────────────────────
+const _origDownloadResumeAsWord = downloadResumeAsWord;
+function downloadResumeAsWord() {
+  if (!requirePlan('starter')) return;
+  _origDownloadResumeAsWord();
+}
+
+// ─────────────────────────────────────────────────────────────────
+// UPDATED: writeCoverLetter — check cover letter limit
+// ─────────────────────────────────────────────────────────────────
+const _origWriteCoverLetter = writeCoverLetter;
+function writeCoverLetter(jobId) {
+  if (!requirePlan('starter')) return;
+  if (!checkCoverLetterLimit()) return;
+  _origWriteCoverLetter(jobId);
+}
+// Increment count when letter is successfully rendered
+const _origRenderCoverLetter = renderCoverLetter;
+function renderCoverLetter(data, job) {
+  incrementCLCount();
+  _origRenderCoverLetter(data, job);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// UPDATED: handleFileSelect — add DOCX support
+// ─────────────────────────────────────────────────────────────────
+const _origHandleFileSelect = handleFileSelect;
+async function handleFileSelect(input) {
+  const f = input.files ? input.files[0] : null;
+  if (!f) return;
+  const name = f.name.toLowerCase();
+  if (name.endsWith('.docx') || name.endsWith('.doc')) {
+    const zone = document.getElementById('upload-zone');
+    zone.classList.add('uploading');
+    document.getElementById('upload-icon').textContent = '⏳';
+    document.getElementById('upload-title').textContent = 'Converting Word document...';
+    document.getElementById('upload-sub').textContent = 'This will take a moment';
+    try {
+      const base64 = await readFileAsBase64(f);
+      const resp = await fetch(API_BASE+'/parse-resume', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ fileBase64: base64, fileType: name.endsWith('.docx')?'docx':'doc' })
+      });
+      const data = await resp.json();
+      if (data.text && data.text.length > 50) {
+        uploadedFileContent = data.text;
+        uploadedFileBase64 = '';
+        uploadedFileType = 'text/plain';
+        document.getElementById('upload-icon').textContent = '✅';
+        document.getElementById('upload-title').textContent = f.name;
+        document.getElementById('upload-sub').textContent = 'Word document converted successfully';
+        document.getElementById('upload-file-name').textContent = '';
+        zone.classList.remove('uploading');
+        showToast('✅ Word doc converted!');
+        return;
+      }
+    } catch(e) { console.error('DOCX parse error:',e); }
+    // Fallback: ask for PDF
+    zone.classList.remove('uploading');
+    document.getElementById('upload-icon').textContent = '⚠️';
+    document.getElementById('upload-title').textContent = 'Word conversion unavailable';
+    document.getElementById('upload-sub').textContent = 'Please upload a PDF for best results';
+    showToast('⚠️ Please use a PDF resume for best results', 4000);
+    return;
+  }
+  // Delegate to original for PDF and TXT
+  _origHandleFileSelect(input);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// UPDATED: runResumeFeedback — update system prompts to avoid fabrication
+// ─────────────────────────────────────────────────────────────────
+// Patch: wrap fetch calls in callClaude and runResumeFeedback
+// The anti-fabrication instruction is injected via updated system prompts below
+const _originalCallClaude = callClaude;
+async function callClaude(systemPrompt, userPrompt, maxTokens, ctx) {
+  const enhanced = systemPrompt + ' Never fabricate specific numbers or percentages. Use [X%] or [number] as placeholders the user fills in.';
+  return _originalCallClaude(enhanced, userPrompt, maxTokens, ctx);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// UPDATED: loadAndShowJobs — use extracted location + skills
+// ─────────────────────────────────────────────────────────────────
+const _origLoadAndShowJobs = loadAndShowJobs;
+async function loadAndShowJobs() {
+  showScreen('jobs');
+  document.getElementById('jobs-body').innerHTML=`<div class="jobs-loading"><div class="feedback-spinner"></div><div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--navy); margin-top:1.25rem; margin-bottom:6px;">Searching live listings...</div><div style="font-size:13px; color:var(--text-mid);">Matching roles to your profile</div></div>`;
+  try {
+    const q5=answers[5]||'A';
+    const queryMap={A:'Training Manager OR Corporate Trainer OR L&D Manager',B:'Business Analyst OR Operations Manager',C:'Project Manager OR Program Coordinator',D:'Director OR VP OR Business Development'};
+    // Use extracted location from resume, fall back to manual entry, then Fort Lauderdale
+    const resumeLoc = (window._resumeData&&window._resumeData.location) ? window._resumeData.location : '';
+    const manualLoc = ((document.getElementById('m-location')||{}).value)||'';
+    const loc = resumeLoc || manualLoc || 'Fort Lauderdale, FL';
+    // Use extracted skills for query enrichment
+    const skills = (window._resumeData&&window._resumeData.skills) ? window._resumeData.skills.slice(0,3).join(' OR ') : '';
+    const baseQuery = queryMap[q5]||queryMap['A'];
+    const query = skills ? baseQuery + ' OR ' + skills : baseQuery;
+    const resp = await fetch(API_BASE+'/jobs', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ query, location:loc })
+    });
+    const data = await resp.json();
+    allJobs = data.results || [];
+    if(allJobs.length===0) allJobs = getLocalJobs();
+  } catch(e) {
+    console.error('Jobs fetch error:',e);
+    allJobs = getLocalJobs();
+  }
+  renderJobs('all');
+}
+
+// ─────────────────────────────────────────────────────────────────
+// MODAL CLOSE ON OVERLAY CLICK
+// ─────────────────────────────────────────────────────────────────
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', function(e) {
+    if(e.target===this) closeModal(this.id);
+  });
+});
+
+// Check interview reminders on load
+setTimeout(checkInterviewReminders, 3000);
+
+// ─────────────────────────────────────────────────────────────────
+// UPDATED PAYWALL SCREEN FEATURES LIST
+// ─────────────────────────────────────────────────────────────────
+// (Paywall HTML plan cards updated inline via DOM on load)
+document.addEventListener('DOMContentLoaded', ()=>{
+  // Update paywall plan feature lists to reflect actual features
+  const starterEl = document.getElementById('plan-starter');
+  if(starterEl) {
+    starterEl.querySelector('.plan-features').innerHTML = `
+      <li>Save resume (Word download)</li>
+      <li>Cover letter writer (3 letters)</li>
+      <li>Application Tracker</li>
+      <li>Unemployment Report</li>
+      <li>Interview day reminders</li>
+    `;
+  }
+  const proEl = document.getElementById('plan-pro');
+  if(proEl) {
+    proEl.querySelector('.plan-features').innerHTML = `
+      <li>Everything in Starter</li>
+      <li>Unlimited cover letters</li>
+      <li>Dashboard & analytics</li>
+      <li>Interview Prep (STAR coaching)</li>
+      <li>Salary Negotiation Assistant</li>
+      <li>Live job search (Indeed)</li>
+    `;
+  }
+});
+
 
 // ─────────────────────────────────────────────────────────────────
 // SERVICE WORKER + PWA
