@@ -1612,12 +1612,17 @@ async function loadAndShowJobs() {
     C:'Project Manager OR Program Coordinator OR Operations',
     D:'Director OR VP OR Business Development Manager'
   };
-  const resumeLoc = (window._resumeData&&window._resumeData.location) ? window._resumeData.location : '';
+  // Location: extract just city+state — resume often contains full street address
+  const resumeLocRaw = (window._resumeData&&window._resumeData.location) ? window._resumeData.location : '';
   const manualLoc = ((document.getElementById('m-location')||{}).value)||'';
-  const loc = resumeLoc || manualLoc || 'Fort Lauderdale, FL';
-  const skills = (window._resumeData&&window._resumeData.skills) ? window._resumeData.skills.slice(0,2).join(' OR ') : '';
-  const baseQuery = queryMap[q5]||queryMap['A'];
-  const query = skills ? `${baseQuery} OR ${skills}` : baseQuery;
+  const rawLoc = resumeLocRaw || manualLoc || 'Fort Lauderdale FL';
+  const locParts = rawLoc.split(',').map(s => s.trim()).filter(Boolean);
+  const loc = locParts.length >= 3
+    ? locParts.slice(-2).join(' ')
+    : rawLoc.replace(/\d{5}/, '').trim();
+
+  // Query: keep short for better Adzuna results — personality type only
+  const query = queryMap[q5] || queryMap['A'];
 
   let liveJobs = [];
   let source = 'fallback';
