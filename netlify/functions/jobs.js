@@ -1,75 +1,161 @@
 // netlify/functions/jobs.js
-// Proxies job search to Indeed API — keeps credentials off the client
-exports.handler = async (event) => {
+// Live job search via Adzuna API
+// Sign up free at https://developer.adzuna.com/
+// Add to Netlify env vars: ADZUNA_APP_ID and ADZUNA_APP_KEY
+// Free tier: 100 calls/day — no credit card required
+
+exports.handler = async function (event) {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   };
 
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
+    return { statusCode: 204, headers, body: '' };
   }
 
-  try {
-    const { query, location, jobType, salary } = JSON.parse(event.body || '{}');
+  const APP_ID  = process.env.ADZUNA_APP_ID;
+  const APP_KEY = process.env.ADZUNA_APP_KEY;
 
-    // Build Indeed search URL
-    const params = new URLSearchParams({
-      q: query || 'Training Manager',
-      l: location || 'Fort Lauderdale, FL',
-      radius: '25',
-      sort: 'relevance',
-      limit: '15',
-      fromage: '30' // jobs posted in last 30 days
-    });
-
-    if (jobType === 'remote') {
-      params.set('remotejob', '1');
-      params.set('l', '');
-    }
-
-    // Note: Indeed public API — for production you'd use the Indeed Publisher API
-    // with your publisher ID stored in process.env.INDEED_PUBLISHER_ID
-    // For now we return curated results enriched by location/query matching
-    const publisherId = process.env.INDEED_PUBLISHER_ID;
-
-    if (publisherId) {
-      const indeedUrl = `https://api.indeed.com/ads/apisearch?publisher=${publisherId}&${params.toString()}&v=2&format=json&highlight=0`;
-      const resp = await fetch(indeedUrl);
-      if (resp.ok) {
-        const data = await resp.json();
-        return { statusCode: 200, headers, body: JSON.stringify({ source: 'indeed', results: data.results || [] }) };
-      }
-    }
-
-    // Fallback: return curated seed jobs enriched with real-looking data
+  // If keys aren't set, return empty results — frontend shows the 4-board search card
+  if (!APP_ID || !APP_KEY) {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ source: 'curated', results: getCuratedJobs(query, location) })
+      body: JSON.stringify({ results: [], source: 'no_key' }),
     };
+  }
 
-  } catch (err) {
+  let body;
+  try {
+    body = JSON.parse(event.body || '{}');
+  } catch (e) {
+    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON' }) };
+  }
+
+  const { query = 'training manager', location = 'Fort Lauderdale FL' } = body;
+
+  // Adzuna uses a simple location string; strip commas for cleaner URL
+  const locationClean = location.replace(/,/g, '').trim();
+
+  // Build Adzuna API URL
+  // Docs: https://api.adzuna.com/v1/api/jobs/us/search/1?...
+  const params = new URLSearchParams({
+    app_id: APP_ID,
+    app_key: APP_KEY,
+    results_per_page: 12,
+    what: query,
+    where: locationClean,
+    sort_by: 'date',           // freshest first
+    content_type: 'application/json',
+  });
+
+  const apiUrl = `https://api.adzuna.com/v1/api/jobs/us/search/1?${params.toString()}`;
+
+  try {
+    const resp = await fetch(apiUrl);
+    if (!resp.ok) {
+      console.error('Adzuna error:', resp.status, await resp.text());
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ results: [], source: 'api_error' }),
+      };
+    }
+
+    const data = await resp.json();
+    const raw = data.results || [];
+
+    // Normalize to CareerCompass job shape
+    const results = raw.map((job) => {
+      const postedDate = job.created ? new Date(job.created) : null;
+      const daysAgo    = postedDate ? Math.floor((Date.now() - postedDate.getTime()) / 86400000) : null;
+      const posted     = daysAgo === null ? 'Recently'
+                       : daysAgo === 0   ? 'Today'
+                       : daysAgo === 1   ? 'Yesterday'
+                       : daysAgo < 7     ? `${daysAgo} days ago`
+                       :                   '1+ weeks ago';
+
+      // Salary — Adzuna often has min/max salary fields
+      let salary = null;
+      if (job.salary_min && job.salary_max) {
+        const lo = Math.round(job.salary_min / 1000);
+        const hi = Math.round(job.salary_max / 1000);
+        salary = `$${lo}K – $${hi}K`;
+      } else if (job.salary_min) {
+        salary = `From $${Math.round(job.salary_min / 1000)}K`;
+      }
+
+      // Work type — Adzuna uses contract_type field
+      let type = 'Full-time';
+      const ct = (job.contract_type || '').toLowerCase();
+      const cl = (job.contract_time || '').toLowerCase();
+      if (ct.includes('contract') || cl.includes('contract')) type = 'Contract';
+      if (ct.includes('part')) type = 'Part-time';
+      if ((job.title || '').toLowerCase().includes('remote') ||
+          (job.description || '').toLowerCase().includes('remote')) type = 'Remote';
+
+      // Category tags for filtering — infer from title + description
+      const text = ((job.title || '') + ' ' + (job.description || '')).toLowerCase();
+      const category = [];
+      if (/train|coach|facilitat|l&d|learning|development|curriculum|instructional/.test(text)) category.push('training');
+      if (/sales|revenue|quota|account|business development/.test(text)) category.push('sales');
+      if (/lead|manager|director|vp|vice president|head of|chief/.test(text)) category.push('leadership');
+      if (/remote|work from home|wfh/.test(text)) category.push('remote');
+
+      // Emoji logo fallback based on category
+      const logoEmojis = { training: '📚', sales: '📊', leadership: '🏆', remote: '🌐' };
+      const logo = logoEmojis[category[0]] || '💼';
+
+      // Card background colors — cycle through a pleasant set
+      const bgColors = ['#e8f4fd', '#fff3e0', '#f3e5f5', '#e8f5e9', '#fce4ec', '#fffde7', '#e3f2fd'];
+      const bg = bgColors[Math.abs(hashCode(job.id || job.title || '')) % bgColors.length];
+
+      // Trim description to ~220 chars
+      const desc = job.description
+        ? job.description.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 220) + '…'
+        : 'See full job description on the company site.';
+
+      return {
+        id:            job.id || `az_${Date.now()}_${Math.random()}`,
+        title:         job.title  || 'Open Position',
+        company:       (job.company && job.company.display_name) || 'Company',
+        location:      job.location && job.location.display_name ? job.location.display_name : location,
+        type,
+        salary,
+        desc,
+        url:           job.redirect_url || job.adref || null,
+        posted,
+        employer_logo: null,      // Adzuna doesn't provide logos — app uses emoji fallback
+        logo,
+        bg,
+        source:        'Adzuna',
+        match:         null,      // scored client-side by scoreJob()
+        category,
+      };
+    });
+
     return {
-      statusCode: 500,
+      statusCode: 200,
       headers,
-      body: JSON.stringify({ error: err.message, source: 'curated', results: getCuratedJobs() })
+      body: JSON.stringify({ results, source: 'adzuna' }),
+    };
+  } catch (err) {
+    console.error('jobs.js fetch error:', err);
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({ results: [], source: 'fetch_error' }),
     };
   }
 };
 
-function getCuratedJobs(query = '', location = '') {
-  const isRemote = query.toLowerCase().includes('remote') || location === '';
-  return [
-    { id: 'j1', title: 'Senior Training & Development Manager', company: 'AmeriHealth Caritas', location: 'Fort Lauderdale, FL', type: 'Hybrid', salary: '$85K – $105K', match: 94, category: ['training','leadership'], logo: '🏥', bg: '#e8f4fd', desc: 'Lead enterprise-wide training programs. Ideal for someone who combines coaching skills with measurable program outcomes.', url: 'https://www.indeed.com/jobs?q=training+development+manager&l=Fort+Lauderdale%2C+FL', posted: '2 days ago' },
-    { id: 'j2', title: 'Corporate Trainer — Sales & Service', company: 'Marriott International', location: 'Miami, FL (18 mi)', type: 'On-site', salary: '$78K – $95K', match: 91, category: ['training','sales'], logo: '🏨', bg: '#fff3e0', desc: 'Develop and facilitate sales training across multiple properties. Work closely with GMs to build high-performance teams.', url: 'https://www.indeed.com/jobs?q=corporate+trainer&l=Miami%2C+FL', posted: '4 days ago' },
-    { id: 'j3', title: 'Director of Learning & Development', company: 'AutoNation', location: 'Fort Lauderdale, FL', type: 'Hybrid', salary: '$95K – $120K', match: 89, category: ['training','leadership'], logo: '🚗', bg: '#f3e5f5', desc: 'Own the full L&D strategy for one of the nation\'s largest automotive retailers. Strong adult learning background required.', url: 'https://www.indeed.com/jobs?q=director+learning+development&l=Fort+Lauderdale%2C+FL', posted: '1 week ago' },
-    { id: 'j4', title: 'Remote Training Specialist — Financial Services', company: 'Fidelity Investments', location: 'Remote (US)', type: 'Remote', salary: '$80K – $98K', match: 87, category: ['training','remote'], logo: '📈', bg: '#e8f5e9', desc: 'Create and deliver training for financial advisors nationwide. Financial sales background is a significant advantage.', url: 'https://www.indeed.com/jobs?q=training+specialist+financial&remotejob=1', posted: '3 days ago' },
-    { id: 'j5', title: 'People Development Partner', company: 'Spirit Airlines', location: 'Miramar, FL (12 mi)', type: 'Hybrid', salary: '$82K – $100K', match: 85, category: ['training','leadership'], logo: '✈️', bg: '#fffde7', desc: 'Build training initiatives and succession programs across the airline. Industry knowledge highly valued.', url: 'https://www.indeed.com/jobs?q=people+development+partner+airline&l=Miramar%2C+FL', posted: '5 days ago' },
-    { id: 'j6', title: 'Sales Enablement Manager', company: 'Chewy', location: 'Plantation, FL (8 mi)', type: 'Hybrid', salary: '$90K – $110K', match: 83, category: ['sales','leadership'], logo: '🐾', bg: '#fce4ec', desc: 'Build tools, content, and training programs that help a high-growth sales team perform at its best.', url: 'https://www.indeed.com/jobs?q=sales+enablement+manager&l=Plantation%2C+FL', posted: '1 week ago' },
-    { id: 'j7', title: 'Instructional Designer — Remote', company: 'LinkedIn Learning', location: 'Remote (US)', type: 'Remote', salary: '$85K – $105K', match: 81, category: ['training','remote'], logo: '💼', bg: '#e3f2fd', desc: 'Create compelling learning experiences for professionals worldwide. Real-world business experience a plus.', url: 'https://www.indeed.com/jobs?q=instructional+designer+remote', posted: '2 weeks ago' },
-    { id: 'j8', title: 'Regional Training Manager', company: 'Bank of America', location: 'Boca Raton, FL (22 mi)', type: 'On-site', salary: '$88K – $108K', match: 79, category: ['training','sales','leadership'], logo: '🏦', bg: '#e8f4fd', desc: 'Oversee training delivery for a multi-branch region. Financial services and team development track record preferred.', url: 'https://www.indeed.com/jobs?q=regional+training+manager&l=Boca+Raton%2C+FL', posted: '1 week ago' }
-  ];
+// Simple hash for deterministic background color assignment
+function hashCode(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+  }
+  return h;
 }

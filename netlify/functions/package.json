@@ -1,6 +1,11 @@
 {
   "name": "careercompass-functions",
   "version": "1.0.0",
-  "description": "Netlify serverless functions for CareerCompass",
-  "dependencies": {}
+  "description": "Netlify serverless functions for CareerCompass PWA",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "mammoth": "^1.7.2"
+  }
 }
