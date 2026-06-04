@@ -1630,7 +1630,7 @@ async function loadAndShowJobs() {
     });
     const data = await resp.json();
     liveJobs = data.results || [];
-    source = data.source || 'jsearch';
+    source = data.source || 'adzuna';
   } catch(e) {
     console.error('Jobs fetch error:', e);
   }
@@ -1727,7 +1727,7 @@ function renderJobs(filter, source) {
     document.getElementById('jobs-body').innerHTML = `
       <div class="feedback-banner">
         <div class="feedback-banner-title">Your profile is ready, ${name}</div>
-        <div class="feedback-banner-body">We weren't able to load live listings right now — use the links below to search on the major job boards. Your CareerCompass profile gives you a strong starting point for any of these.</div>
+        <div class="feedback-banner-body">Live job search isn't active yet — use the links below to search the major job boards directly. Your CareerCompass profile gives you a strong starting point for any of these. <em>(To activate live search: add <strong>ADZUNA_APP_ID</strong> and <strong>ADZUNA_APP_KEY</strong> to Netlify environment variables — free at developer.adzuna.com)</em></div>
       </div>
       <div class="section-label">Search on the major job boards</div>
       <a class="job-search-link-card" href="https://www.indeed.com/jobs?q=${q}&l=${loc}" target="_blank" rel="noopener">
@@ -1767,13 +1767,13 @@ function renderJobs(filter, source) {
 
   document.getElementById('jobs-match-count').textContent = filtered.length + ' live match' + (filtered.length!==1?'es':'');
 
-  const sourceBadge = source === 'jsearch'
+  const sourceBadge = source === 'adzuna'
     ? `<span style="font-size:10px;background:rgba(201,165,90,0.15);color:var(--gold);padding:2px 8px;border-radius:50px;margin-left:8px;">● Live</span>`
     : '';
 
   let html = `<div class="feedback-banner">
     <div class="feedback-banner-title">Live matches for you, ${name}${sourceBadge}</div>
-    <div class="feedback-banner-body">Based on your profile as a ${typeLabels[q5]}, we found ${filtered.length} active listing${filtered.length!==1?'s':''} near ${resumeLoc}. Match scores reflect how closely each role aligns with your background.</div>
+    <div class="feedback-banner-body">Based on your profile as a ${typeLabels[q5]}, we found ${filtered.length} active listing${filtered.length!==1?'s':''} near ${resumeLoc}. Match scores reflect how closely each role aligns with your background. Powered by Adzuna.</div>
     <div class="feedback-actions">
       <button class="feedback-btn" onclick="writeCoverLetter(null)">✍️ Write a cover letter</button>
       <button class="feedback-btn outline" onclick="showScreen('feedback')">📄 My resume</button>
