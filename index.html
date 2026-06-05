@@ -1100,7 +1100,6 @@ function renderQuestion() {
     : 'Continue <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const body = document.getElementById('quiz-body');
   body.scrollTop = 0;
-  // Show "Great to meet you, [name]!" only on Q2
   const firstName = (answers[1]||'').split(' ')[0];
   const greetBadge = (currentQ === 1 && firstName)
     ? `<div style="font-size:13px;color:var(--text-mid);margin-bottom:12px;padding:10px 14px;background:var(--gold-pale);border-radius:var(--radius-sm);border-left:3px solid var(--gold);">Great to meet you, <strong>${firstName}</strong>! Let's find your direction.</div>`
@@ -1499,10 +1498,7 @@ function buildFallback(ctx) {
 function renderFeedback(data, ctx) {
   document.getElementById('feedback-loading').style.display='none';
   const prefName = (answers[1]||'').split(' ')[0] || '';
-  if (prefName) {
-    const fht = document.getElementById('feedback-header-title');
-    if (fht) fht.textContent = prefName + "'s Resume Review";
-  }
+  if (prefName) { const fht = document.getElementById('feedback-header-title'); if (fht) fht.textContent = prefName + "'s Resume Review"; }
   document.getElementById('feedback-header-sub').textContent='Here is what we found';
   document.getElementById('feedback-content').style.display='block';
   const cards='<div class="feedback-card positive animate-in"><div class="feedback-card-label">What is working for you</div><div class="feedback-card-title">Your strengths</div><div class="feedback-card-body"><p>'+data.strengths+'</p></div></div><div class="feedback-card improve animate-in delay-1"><div class="feedback-card-label">What to sharpen</div><div class="feedback-card-title">Suggested improvements</div><div class="feedback-card-body"><p>'+data.improvements.replace(/([123])\./g,'<br><strong>$1.</strong>')+'</p></div></div><div class="feedback-card animate-in delay-2"><div class="feedback-card-label">Keywords to add</div><div class="feedback-card-title">Terms that get you found</div><div class="feedback-card-body">'+data.keywords.split(',').map(k=>'<span style="display:inline-block;background:var(--cream-dark);color:var(--navy);font-size:11px;padding:3px 10px;border-radius:50px;margin:3px 3px 3px 0;">'+k.trim()+'</span>').join('')+'</div></div>';
@@ -1625,16 +1621,14 @@ async function loadAndShowJobs() {
     C:'Project Manager OR Program Coordinator OR Operations',
     D:'Director OR VP OR Business Development Manager'
   };
-  // Strip street address — extract city+state only for Adzuna
-  const resumeLocRaw = (window._resumeData&&window._resumeData.location) ? window._resumeData.location : '';
+  // Strip street address — send city+state only
+  const resumeLocRaw = (window._resumeData&&window._resumeData.location)||'';
   const manualLoc = ((document.getElementById('m-location')||{}).value)||'';
   const rawLoc = resumeLocRaw || manualLoc || 'Fort Lauderdale FL';
-  const locParts = rawLoc.split(',').map(s => s.trim()).filter(Boolean);
-  const loc = locParts.length >= 3
-    ? locParts.slice(-2).join(' ')
-    : rawLoc.replace(/\d{5}/, '').trim();
-  // Short query only — appending skills causes Adzuna to return zero results
-  const query = queryMap[q5] || queryMap['A'];
+  const locParts = rawLoc.split(',').map(s=>s.trim()).filter(Boolean);
+  const loc = locParts.length >= 3 ? locParts.slice(-2).join(' ') : rawLoc.replace(/\d{5}/,'').trim();
+  // First term only — multi-OR queries return 0 results from Adzuna
+  const query = (queryMap[q5]||queryMap['A']).split(' OR ')[0];
 
   let liveJobs = [];
   let source = 'fallback';
@@ -1647,9 +1641,8 @@ async function loadAndShowJobs() {
     });
     const data = await resp.json();
     liveJobs = data.results || [];
-    source = data.source || 'adzuna';
-    // Any error response = treat as empty, fall silently to search card screen
-    if (['api_error','fetch_error','no_key'].includes(source)) liveJobs = [];
+    source = data.source || 'aggregator';
+    if (['api_error','fetch_error','no_key','no_results'].includes(source)) liveJobs = [];
   } catch(e) {
     console.error('Jobs fetch error:', e);
   }
@@ -1786,13 +1779,13 @@ function renderJobs(filter, source) {
 
   document.getElementById('jobs-match-count').textContent = filtered.length + ' live match' + (filtered.length!==1?'es':'');
 
-  const sourceBadge = source === 'adzuna'
+  const sourceBadge = source === 'aggregator'
     ? `<span style="font-size:10px;background:rgba(201,165,90,0.15);color:var(--gold);padding:2px 8px;border-radius:50px;margin-left:8px;">● Live</span>`
     : '';
 
   let html = `<div class="feedback-banner">
     <div class="feedback-banner-title">Live matches for you, ${name}${sourceBadge}</div>
-    <div class="feedback-banner-body">Based on your profile as a ${typeLabels[q5]}, we found ${filtered.length} active listing${filtered.length!==1?'s':''} near ${resumeLoc}. Match scores reflect how closely each role aligns with your background. Powered by Adzuna.</div>
+    <div class="feedback-banner-body">Based on your profile as a ${typeLabels[q5]}, we found ${filtered.length} active listing${filtered.length!==1?'s':''} near ${resumeLoc}. Match scores reflect how closely each role aligns with your background. Sources: Remotive, Adzuna, USAJobs.</div>
     <div class="feedback-actions">
       <button class="feedback-btn" onclick="writeCoverLetter(null)">✍️ Write a cover letter</button>
       <button class="feedback-btn outline" onclick="showScreen('feedback')">📄 My resume</button>
@@ -2428,10 +2421,7 @@ function renderDashboard() {
   const name = (window._resumeData&&window._resumeData.name) ? window._resumeData.name.split(' ')[0] : (answers[1]||'').split(' ')[0] || 'there';
   document.getElementById('dash-name').textContent = 'Hello, '+name+'!';
   const prefNameDash = (answers[1]||'').split(' ')[0];
-  if (prefNameDash) {
-    const dg = document.getElementById('dash-greeting');
-    if (dg) dg.textContent = 'Good to see you,';
-  }
+  if (prefNameDash) { const dg=document.getElementById('dash-greeting'); if(dg) dg.textContent='Good to see you,'; }
   const counts = {applied:0,inprocess:0,interview:0,offer:0,closed:0};
   apps.forEach(a=>{ if(counts[a.status]!==undefined) counts[a.status]++; });
   const total = apps.length;
