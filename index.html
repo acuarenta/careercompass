@@ -1100,12 +1100,10 @@ function renderQuestion() {
     : 'Continue <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const body = document.getElementById('quiz-body');
   body.scrollTop = 0;
-  // Show "Great to meet you, [name]!" banner from Q2 onward
+  // Show "Great to meet you, [name]!" only on Q2
   const firstName = (answers[1]||'').split(' ')[0];
-  const greetBadge = (currentQ >= 1 && firstName)
-    ? `<div style="font-size:13px;color:var(--text-mid);margin-bottom:12px;padding:10px 14px;background:var(--gold-pale);border-radius:var(--radius-sm);border-left:3px solid var(--gold);">
-        Great to meet you, <strong>${firstName}</strong>! Let's find your direction.
-       </div>`
+  const greetBadge = (currentQ === 1 && firstName)
+    ? `<div style="font-size:13px;color:var(--text-mid);margin-bottom:12px;padding:10px 14px;background:var(--gold-pale);border-radius:var(--radius-sm);border-left:3px solid var(--gold);">Great to meet you, <strong>${firstName}</strong>! Let's find your direction.</div>`
     : '';
   let html = `${greetBadge}<div class="question-section-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.2"/><circle cx="5" cy="5" r="1.5" fill="currentColor"/></svg>${q.sectionLabel}</div>
   <div class="question-text">${q.q}</div>
@@ -1627,16 +1625,15 @@ async function loadAndShowJobs() {
     C:'Project Manager OR Program Coordinator OR Operations',
     D:'Director OR VP OR Business Development Manager'
   };
-  // Extract city+state only — resume often has full street address
+  // Strip street address — extract city+state only for Adzuna
   const resumeLocRaw = (window._resumeData&&window._resumeData.location) ? window._resumeData.location : '';
   const manualLoc = ((document.getElementById('m-location')||{}).value)||'';
   const rawLoc = resumeLocRaw || manualLoc || 'Fort Lauderdale FL';
   const locParts = rawLoc.split(',').map(s => s.trim()).filter(Boolean);
   const loc = locParts.length >= 3
-    ? locParts.slice(-2).join(' ')         // "Fort Lauderdale FL" from full street address
-    : rawLoc.replace(/\d{5}/, '').trim(); // strip zip if present, keep city+state
-
-  // Short, clean query — skills append makes Adzuna return 0 results
+    ? locParts.slice(-2).join(' ')
+    : rawLoc.replace(/\d{5}/, '').trim();
+  // Short query only — appending skills causes Adzuna to return zero results
   const query = queryMap[q5] || queryMap['A'];
 
   let liveJobs = [];
@@ -1651,6 +1648,8 @@ async function loadAndShowJobs() {
     const data = await resp.json();
     liveJobs = data.results || [];
     source = data.source || 'adzuna';
+    // Any error response = treat as empty, fall silently to search card screen
+    if (['api_error','fetch_error','no_key'].includes(source)) liveJobs = [];
   } catch(e) {
     console.error('Jobs fetch error:', e);
   }
@@ -1747,7 +1746,7 @@ function renderJobs(filter, source) {
     document.getElementById('jobs-body').innerHTML = `
       <div class="feedback-banner">
         <div class="feedback-banner-title">Your profile is ready, ${name}</div>
-        <div class="feedback-banner-body">Live job search isn't active yet — use the links below to search the major job boards directly. Your CareerCompass profile gives you a strong starting point for any of these. <em>(To activate live search: add <strong>ADZUNA_APP_ID</strong> and <strong>ADZUNA_APP_KEY</strong> to Netlify environment variables — free at developer.adzuna.com)</em></div>
+        <div class="feedback-banner-body">Your profile is set — use the links below to search the major job boards. Each search is pre-loaded with roles that match your CareerCompass profile.</div>
       </div>
       <div class="section-label">Search on the major job boards</div>
       <a class="job-search-link-card" href="https://www.indeed.com/jobs?q=${q}&l=${loc}" target="_blank" rel="noopener">
@@ -2428,7 +2427,6 @@ function renderDashboard() {
   const apps = getApplications();
   const name = (window._resumeData&&window._resumeData.name) ? window._resumeData.name.split(' ')[0] : (answers[1]||'').split(' ')[0] || 'there';
   document.getElementById('dash-name').textContent = 'Hello, '+name+'!';
-  // Use preferred name (Q1) in greeting, not formal resume name
   const prefNameDash = (answers[1]||'').split(' ')[0];
   if (prefNameDash) {
     const dg = document.getElementById('dash-greeting');
