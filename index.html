@@ -493,7 +493,7 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 <div id="screen-results" class="screen">
   <div class="results-header">
     <div class="results-greeting">Your CareerCompass Results</div>
-    <div class="results-name">Hello, <span id="result-name">Friend</span></div>
+    <div class="results-name"><span id="result-name">Friend</span>, here's your profile</div>
     <div class="results-tagline" id="result-tagline">Based on your responses, here's what we found.</div>
   </div>
   <div class="results-body">
@@ -604,7 +604,7 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
   <div class="resume-header">
     <button class="resume-header-back" onclick="showScreen('resume')">←</button>
     <div class="resume-header-info">
-      <div class="resume-header-title">Your Resume Review</div>
+      <div class="resume-header-title" id="feedback-header-title">Your Resume Review</div>
       <div class="resume-header-sub" id="feedback-header-sub">Reviewing your profile...</div>
     </div>
     <div class="quiz-logo-sm" style="flex-shrink:0;">Career<span style="color:var(--gold);">Compass</span></div>
@@ -749,7 +749,7 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 <!-- ═══════════ DASHBOARD ═══════════ -->
 <div id="screen-dashboard" class="screen">
   <div class="dashboard-header">
-    <div class="dashboard-greeting">Good to see you</div>
+    <div class="dashboard-greeting" id="dash-greeting">Good to see you</div>
     <div class="dashboard-name" id="dash-name">Welcome back</div>
   </div>
   <div class="dashboard-body" id="dashboard-body">
@@ -1013,7 +1013,10 @@ const QUESTIONS = [
   { id:25, section:'design', sectionLabel:'Your Resume', type:'single', q:"When an employer reads your resume, what do you most want them to feel?", hint:"The emotion behind a resume matters as much as the facts.", options:[{letter:'A',text:'"This person gets results"',sub:'Proven, measurable impact'},{letter:'B',text:'"This person is trustworthy"',sub:'Reliability, consistency, character'},{letter:'C',text:'"This person will fit right in"',sub:'Culture match, team player'},{letter:'D',text:'"This person is exactly what we need"',sub:'Precise match to the role'}] },
   { id:26, section:'design', sectionLabel:'Your Resume', type:'colorpicker', q:"Choose a color scheme for your resume.", hint:"This reflects your professional personality. You can change it any time." },
   { id:27, section:'design', sectionLabel:'Your Resume', type:'fontpicker', q:"Choose a typography style for your resume.", hint:"The right font communicates your style before they read a single word." },
-  { id:28, section:'design', sectionLabel:'Your Resume', type:'textarea', q:"In your own words, what makes you great at what you do?", hint:"Write 2–3 sentences. Don't be modest — this becomes the foundation of your professional summary.", placeholder:"e.g. I have a gift for building trust quickly with people from all walks of life. I've spent decades helping teams grow, customers succeed, and organizations improve how they develop their people..." }
+  { id:28, section:'design', sectionLabel:'Your Resume', type:'textarea',
+    get q() { const n=(answers[1]||'').split(' ')[0]; return n ? n+", in your own words — what makes you great at what you do?" : "In your own words, what makes you great at what you do?"; },
+    hint:"Write 2–3 sentences. Don't be modest — this becomes the foundation of your professional summary.",
+    placeholder:"e.g. I have a gift for building trust quickly with people from all walks of life. I've spent decades helping teams grow, customers succeed, and organizations improve how they develop their people..." }
 ];
 
 // ─────────────────────────────────────────────────────────────────
@@ -1097,7 +1100,14 @@ function renderQuestion() {
     : 'Continue <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const body = document.getElementById('quiz-body');
   body.scrollTop = 0;
-  let html = `<div class="question-section-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.2"/><circle cx="5" cy="5" r="1.5" fill="currentColor"/></svg>${q.sectionLabel}</div>
+  // Show "Great to meet you, [name]!" banner from Q2 onward
+  const firstName = (answers[1]||'').split(' ')[0];
+  const greetBadge = (currentQ >= 1 && firstName)
+    ? `<div style="font-size:13px;color:var(--text-mid);margin-bottom:12px;padding:10px 14px;background:var(--gold-pale);border-radius:var(--radius-sm);border-left:3px solid var(--gold);">
+        Great to meet you, <strong>${firstName}</strong>! Let's find your direction.
+       </div>`
+    : '';
+  let html = `${greetBadge}<div class="question-section-badge"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.2"/><circle cx="5" cy="5" r="1.5" fill="currentColor"/></svg>${q.sectionLabel}</div>
   <div class="question-text">${q.q}</div>
   <div class="question-hint">${q.hint}</div>`;
   if (q.type==='single') {
@@ -1490,6 +1500,11 @@ function buildFallback(ctx) {
 
 function renderFeedback(data, ctx) {
   document.getElementById('feedback-loading').style.display='none';
+  const prefName = (answers[1]||'').split(' ')[0] || '';
+  if (prefName) {
+    const fht = document.getElementById('feedback-header-title');
+    if (fht) fht.textContent = prefName + "'s Resume Review";
+  }
   document.getElementById('feedback-header-sub').textContent='Here is what we found';
   document.getElementById('feedback-content').style.display='block';
   const cards='<div class="feedback-card positive animate-in"><div class="feedback-card-label">What is working for you</div><div class="feedback-card-title">Your strengths</div><div class="feedback-card-body"><p>'+data.strengths+'</p></div></div><div class="feedback-card improve animate-in delay-1"><div class="feedback-card-label">What to sharpen</div><div class="feedback-card-title">Suggested improvements</div><div class="feedback-card-body"><p>'+data.improvements.replace(/([123])\./g,'<br><strong>$1.</strong>')+'</p></div></div><div class="feedback-card animate-in delay-2"><div class="feedback-card-label">Keywords to add</div><div class="feedback-card-title">Terms that get you found</div><div class="feedback-card-body">'+data.keywords.split(',').map(k=>'<span style="display:inline-block;background:var(--cream-dark);color:var(--navy);font-size:11px;padding:3px 10px;border-radius:50px;margin:3px 3px 3px 0;">'+k.trim()+'</span>').join('')+'</div></div>';
@@ -1612,16 +1627,16 @@ async function loadAndShowJobs() {
     C:'Project Manager OR Program Coordinator OR Operations',
     D:'Director OR VP OR Business Development Manager'
   };
-  // Location: extract just city+state — resume often contains full street address
+  // Extract city+state only — resume often has full street address
   const resumeLocRaw = (window._resumeData&&window._resumeData.location) ? window._resumeData.location : '';
   const manualLoc = ((document.getElementById('m-location')||{}).value)||'';
   const rawLoc = resumeLocRaw || manualLoc || 'Fort Lauderdale FL';
   const locParts = rawLoc.split(',').map(s => s.trim()).filter(Boolean);
   const loc = locParts.length >= 3
-    ? locParts.slice(-2).join(' ')
-    : rawLoc.replace(/\d{5}/, '').trim();
+    ? locParts.slice(-2).join(' ')         // "Fort Lauderdale FL" from full street address
+    : rawLoc.replace(/\d{5}/, '').trim(); // strip zip if present, keep city+state
 
-  // Query: keep short for better Adzuna results — personality type only
+  // Short, clean query — skills append makes Adzuna return 0 results
   const query = queryMap[q5] || queryMap['A'];
 
   let liveJobs = [];
@@ -2413,6 +2428,12 @@ function renderDashboard() {
   const apps = getApplications();
   const name = (window._resumeData&&window._resumeData.name) ? window._resumeData.name.split(' ')[0] : (answers[1]||'').split(' ')[0] || 'there';
   document.getElementById('dash-name').textContent = 'Hello, '+name+'!';
+  // Use preferred name (Q1) in greeting, not formal resume name
+  const prefNameDash = (answers[1]||'').split(' ')[0];
+  if (prefNameDash) {
+    const dg = document.getElementById('dash-greeting');
+    if (dg) dg.textContent = 'Good to see you,';
+  }
   const counts = {applied:0,inprocess:0,interview:0,offer:0,closed:0};
   apps.forEach(a=>{ if(counts[a.status]!==undefined) counts[a.status]++; });
   const total = apps.length;
