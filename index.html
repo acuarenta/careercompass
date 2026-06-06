@@ -472,14 +472,14 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
   <div class="quiz-header">
     <div class="quiz-header-top">
       <div class="quiz-logo-sm">Career<span>Compass</span></div>
-      <div class="quiz-counter">Question <strong id="q-current">1</strong> of <strong id="q-total">28</strong></div>
+      <div class="quiz-counter">Question <strong id="q-current">1</strong> of <strong id="q-total">23</strong></div>
     </div>
     <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:4%"></div></div>
-    <div class="progress-sections">
-      <span class="progress-section-label active" id="sec-about">About You</span>
+      <div class="progress-sections">
+      <span class="progress-section-label active" id="sec-about">Your Goal</span>
       <span class="progress-section-label" id="sec-work">Work Style</span>
       <span class="progress-section-label" id="sec-values">Values</span>
-      <span class="progress-section-label" id="sec-design">Your Resume</span>
+      <span class="progress-section-label" id="sec-compass">Compass</span>
     </div>
   </div>
   <div class="quiz-body" id="quiz-body"></div>
@@ -497,38 +497,50 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
     <div class="results-tagline" id="result-tagline">Based on your responses, here's what we found.</div>
   </div>
   <div class="results-body">
+    <!-- Compass Type Card -->
     <div class="result-card animate-in delay-1">
-      <div class="result-card-label">Your profile type</div>
-      <div class="result-card-title" id="result-type">The Connector</div>
+      <div class="result-card-label">Your CareerCompass type</div>
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:10px;">
+        <div id="result-compass-icon" style="width:52px; height:52px; border-radius:50%; background:var(--navy); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;">🧭</div>
+        <div>
+          <div style="font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold); margin-bottom:3px;" id="result-compass-direction">North</div>
+          <div class="result-card-title" id="result-type">The Navigator</div>
+        </div>
+      </div>
       <div class="result-card-body" id="result-desc"></div>
     </div>
+    <!-- Trait Bars -->
     <div class="result-card animate-in delay-2">
       <div class="result-card-label">Your natural strengths</div>
       <div class="trait-bars" id="result-traits"></div>
     </div>
+    <!-- Job Fit -->
     <div class="result-card animate-in delay-3">
-      <div class="result-card-label">Roles that match your profile</div>
+      <div class="result-card-label">Roles that match your compass type</div>
       <div class="job-tags" id="result-jobs"></div>
     </div>
-    <div class="result-card animate-in delay-4">
-      <div class="result-card-label">Your resume style</div>
-      <div class="result-card-body">You chose the <strong id="result-color-name">Classic Navy</strong> scheme with <strong id="result-font-name">Refined Serif</strong> typography.</div>
-      <div class="design-preview" id="result-colors"></div>
+    <!-- Goal + Timeline -->
+    <div class="result-card animate-in delay-3" id="result-context-card">
+      <div class="result-card-label">Your stated goal</div>
+      <div class="result-card-body" id="result-goal-text"></div>
     </div>
+    <!-- Fit check -->
     <div class="result-card animate-in delay-4" id="feedback-section">
-      <div class="result-card-label">How do these feel to you?</div>
-      <div class="result-card-body" style="margin-bottom:1rem;">Do these recommendations feel like a good match?</div>
+      <div class="result-card-label">How does this feel?</div>
+      <div class="result-card-body" style="margin-bottom:1rem;">Does your compass type feel like a good match?</div>
       <div style="display:flex; flex-direction:column; gap:8px;" id="feedback-options">
-        <button class="option-card" onclick="selectFeedback('yes',this)"><div class="option-letter">👍</div><div><div class="option-text">Yes, these feel right</div><div class="option-sub">Let's move forward</div></div></button>
-        <button class="option-card" onclick="selectFeedback('partial',this)"><div class="option-letter">🤔</div><div><div class="option-text">Partially — some fit, some don't</div><div class="option-sub">Good enough to continue</div></div></button>
-        <button class="option-card" onclick="selectFeedback('no',this)"><div class="option-letter">✏️</div><div><div class="option-text">Not quite — let me adjust</div><div class="option-sub">I want to revisit a few answers</div></div></button>
+        <button class="option-card" onclick="selectFeedback('yes',this)"><div class="option-letter">👍</div><div><div class="option-text">Yes, this feels right</div><div class="option-sub">Let's move forward</div></div></button>
+        <button class="option-card" onclick="selectFeedback('partial',this)"><div class="option-letter">🤔</div><div><div class="option-text">Partially — close enough</div><div class="option-sub">Good enough to continue</div></div></button>
+        <button class="option-card" onclick="selectFeedback('no',this)"><div class="option-letter">✏️</div><div><div class="option-text">Not quite — let me retake it</div><div class="option-sub">I want to revisit my answers</div></div></button>
       </div>
     </div>
+    <!-- CTA to Paywall -->
     <div class="results-cta animate-in delay-4" id="results-cta-block" style="display:none;">
-      <div class="results-cta-title">Ready to build your resume?</div>
-      <div class="results-cta-body">Upload your existing resume or enter your experience and we'll show you exactly how to improve it.</div>
-      <button class="btn-primary" style="width:100%; justify-content:center;" onclick="goToResume()">Continue to Resume →</button>
-      <div class="results-cta-note" style="color:rgba(255,255,255,0.4); margin-top:10px;">Free — no credit card needed</div>
+      <div class="results-cta-title">Ready to unlock your full toolkit?</div>
+      <div class="results-cta-body">Get 10 resume templates tailored to your compass type, live job matching, cover letters, and an application tracker — all for 90 days.</div>
+      <button class="btn-primary" style="width:100%; justify-content:center;" onclick="goToPaywall()">See Your Plan →</button>
+      <div class="results-cta-note" style="color:rgba(255,255,255,0.4); margin-top:10px;">Or continue to upload your resume for a free review</div>
+      <button class="btn-primary" style="width:100%; justify-content:center; background:transparent; border:1.5px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.7); margin-top:10px;" onclick="goToResume()">Free Resume Review →</button>
     </div>
   </div>
 </div>
@@ -633,40 +645,43 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 <div id="screen-paywall" class="screen">
   <div class="paywall-wrap">
     <div class="paywall-logo">Career<span>Compass</span></div>
-    <div class="paywall-hl">You're almost there</div>
-    <div class="paywall-heading">Find jobs that match<br><span>your new resume</span></div>
-    <div class="paywall-sub">Search live listings from Indeed, LinkedIn, and more — filtered to your personality type, location, and salary range. Get a tailored cover letter for every role.</div>
+    <div class="paywall-hl">90 days to your next role</div>
+    <div class="paywall-heading">Unlock your full<br><span>career toolkit</span></div>
+    <div class="paywall-sub">10 resume templates matched to your compass type, live job search, unlimited cover letters, application tracker, interview prep, and salary negotiation coaching.</div>
 
     <div class="tester-note">🧪 Beta tester? Tap "Continue as Tester" below to skip payment and explore the full app.</div>
 
-    <div class="paywall-plans" id="paywall-plans">
-      <div class="plan-card featured selected" onclick="selectPlanCard(this,'starter')" id="plan-starter">
-        <div class="plan-name">Starter Pack</div>
-        <div class="plan-price">$9.99 <span>one-time</span></div>
-        <ul class="plan-features">
-          <li>Live job search — 25 matched listings</li>
-          <li>AI cover letter writer (3 letters)</li>
-          <li>Resume download (PDF)</li>
-          <li>7-day follow-up reminders</li>
+    <div class="paywall-plans" id="paywall-plans" style="display:flex; flex-direction:column; gap:12px;">
+      <div class="plan-card" style="border:1.5px solid var(--cream-dark); border-radius:var(--radius); padding:1.25rem; background:var(--white);">
+        <div class="plan-name" style="font-size:13px; color:var(--text-mid); font-weight:500; margin-bottom:4px;">True North — Free</div>
+        <div class="plan-price" style="font-family:'Cormorant Garamond',serif; font-size:28px; color:var(--navy); font-weight:500;">$0</div>
+        <ul class="plan-features" style="list-style:none; margin-top:12px; font-size:13px; color:var(--text-mid); display:flex; flex-direction:column; gap:6px;">
+          <li>✓ Full 20-question compass assessment</li>
+          <li>✓ Compass personality results</li>
+          <li>✓ Printable results report</li>
+          <li>✓ Free resume review</li>
         </ul>
       </div>
-      <div class="plan-card" onclick="selectPlanCard(this,'pro')" id="plan-pro">
-        <div class="plan-badge">BEST VALUE</div>
-        <div class="plan-name">Pro Pack</div>
-        <div class="plan-price">$24.99 <span>one-time</span></div>
-        <ul class="plan-features">
-          <li>Everything in Starter</li>
-          <li>Unlimited cover letters</li>
-          <li>LinkedIn profile rewrite</li>
-          <li>Application tracker</li>
-          <li>Priority job matching (150 listings)</li>
+      <div class="plan-card featured selected" id="plan-paid" style="border:2px solid var(--gold); border-radius:var(--radius); padding:1.25rem; background:var(--navy); position:relative;">
+        <div style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--gold); color:var(--navy); font-size:10px; font-weight:700; letter-spacing:0.1em; padding:3px 14px; border-radius:50px;">FULL COMPASS</div>
+        <div class="plan-name" style="font-size:13px; color:var(--gold-light); font-weight:500; margin-bottom:4px;">Full Compass — 90 Days</div>
+        <div class="plan-price" style="font-family:'Cormorant Garamond',serif; font-size:36px; color:var(--white); font-weight:500;">$14.99 <span style="font-size:14px; color:rgba(255,255,255,0.5); font-family:'DM Sans',sans-serif;">one-time</span></div>
+        <ul class="plan-features" style="list-style:none; margin-top:12px; font-size:13px; color:rgba(255,255,255,0.8); display:flex; flex-direction:column; gap:6px;">
+          <li>✓ Everything in True North</li>
+          <li>✓ 10 resume templates (DOCX download)</li>
+          <li>✓ Full resume rewrite</li>
+          <li>✓ Live job search — matched to your type</li>
+          <li>✓ Unlimited cover letters</li>
+          <li>✓ Application tracker</li>
+          <li>✓ Interview prep & salary coaching</li>
+          <li>✓ 90-day access window</li>
         </ul>
       </div>
     </div>
 
-    <button class="paywall-cta" onclick="handlePaywallCTA()">Get Started →</button>
+    <button class="paywall-cta" onclick="handlePaywallCTA()">Get Full Compass — $14.99 →</button>
     <button class="paywall-skip" onclick="continueAsTester()">🧪 Continue as Tester (skip payment)</button>
-    <div class="paywall-fine">Credits never expire · Secure checkout via Stripe · Cancel any time</div>
+    <div class="paywall-fine">"90 days to your next role — or your next chapter." · Secure checkout via Stripe</div>
   </div>
 </div>
 
@@ -986,37 +1001,81 @@ const FONTS = [
 ];
 
 const QUESTIONS = [
-  { id:1, section:'about', sectionLabel:'About You', type:'text', q:"What's your first name?", hint:"We'll personalize your results just for you.", placeholder:"Enter your first name" },
-  { id:2, section:'about', sectionLabel:'About You', type:'single', q:"Where are you in your career journey right now?", hint:"Choose the option that feels most like you today.", options:[{letter:'A',text:'Starting out',sub:'Looking for my first or second role'},{letter:'B',text:'Growing professionally',sub:'5–15 years in, ready for the next level'},{letter:'C',text:'Changing direction',sub:'Pivoting to something new'},{letter:'D',text:'Returning to work',sub:'Coming back after a gap'}] },
-  { id:3, section:'about', sectionLabel:'About You', type:'single', q:"Which best describes how you prefer to spend your workday?", hint:"Go with your gut — there's no right answer.", options:[{letter:'A',text:'Working with people',sub:'Meetings, collaboration, relationship-building'},{letter:'B',text:'Working with ideas',sub:'Strategy, analysis, problem-solving'},{letter:'C',text:'Working with systems',sub:'Processes, data, tools, and structure'},{letter:'D',text:'A mix of all three',sub:'Variety is what keeps me energized'}] },
-  { id:4, section:'about', sectionLabel:'About You', type:'single', q:"When you do your best work, the environment usually looks like:", hint:"Think about a time you felt most productive and fulfilled.", options:[{letter:'A',text:'Fast-moving and dynamic',sub:'Energy, change, and new challenges daily'},{letter:'B',text:'Collaborative and team-focused',sub:'We win together or not at all'},{letter:'C',text:'Independent and self-directed',sub:'Give me a goal and let me run with it'},{letter:'D',text:'Structured with clear goals',sub:'I thrive when expectations are clear'}] },
-  { id:5, section:'about', sectionLabel:'About You', type:'single', q:"How do people who know you professionally describe you?", hint:"Pick the one that comes up most often.", options:[{letter:'A',text:'The connector',sub:'People trust me and I bring others together'},{letter:'B',text:'The problem solver',sub:'I find solutions where others see obstacles'},{letter:'C',text:'The organizer',sub:'I bring structure and make things happen'},{letter:'D',text:'The visionary',sub:'I see the big picture and inspire others'}] },
-  { id:6, section:'about', sectionLabel:'About You', type:'single', q:"How important is helping others in your work?", hint:"Choose the statement that best reflects your values.", options:[{letter:'A',text:'It\'s everything to me',sub:'Helping others is why I go to work'},{letter:'B',text:'Very important',sub:'It\'s a core part of what I want in a role'},{letter:'C',text:'Somewhat important',sub:'I like it but it\'s not the whole picture'},{letter:'D',text:'Nice to have',sub:'I value impact in other ways more'}] },
-  { id:7, section:'about', sectionLabel:'About You', type:'single', q:"Which setting sounds most appealing to you?", hint:"Imagine yourself thriving — where are you?", options:[{letter:'A',text:'Corporate or enterprise',sub:'Structure, scale, and career ladders'},{letter:'B',text:'Small business or startup',sub:'Scrappy, nimble, wear many hats'},{letter:'C',text:'Nonprofit or education',sub:'Mission-driven, purpose-first'},{letter:'D',text:'Remote or self-employed',sub:'Flexibility and independence above all'}] },
-  { id:8, section:'work', sectionLabel:'Work Style', type:'single', q:"When a new challenge lands on your plate, your first instinct is to:", hint:"Be honest — this is about your natural wiring.", options:[{letter:'A',text:'Jump in and figure it out',sub:'Action first, adjust as I go'},{letter:'B',text:'Research and plan first',sub:'I want to understand before I act'},{letter:'C',text:'Talk to others and gather input',sub:'Other perspectives help me see clearly'},{letter:'D',text:'Break it into smaller steps',sub:'Big problems become manageable in pieces'}] },
-  { id:9, section:'work', sectionLabel:'Work Style', type:'single', q:"How do you prefer to communicate at work?", hint:"Think about the mode that feels most natural for you.", options:[{letter:'A',text:'In person or on calls',sub:'Real-time conversation gets things done'},{letter:'B',text:'Written messages or email',sub:'I express myself better in writing'},{letter:'C',text:'Presentations and workshops',sub:'I like sharing ideas with a group'},{letter:'D',text:'One-on-one conversations',sub:'Depth matters more than breadth to me'}] },
-  { id:10, section:'work', sectionLabel:'Work Style', type:'single', q:"How comfortable are you leading others?", hint:"Think about your natural comfort level.", options:[{letter:'A',text:'Very comfortable — I love to lead',sub:'Leadership is where I do my best work'},{letter:'B',text:'Comfortable when needed',sub:'I can step up but don\'t need the spotlight'},{letter:'C',text:'Prefer to contribute as part of a team',sub:'I thrive as a strong team member'},{letter:'D',text:'I\'d rather work independently',sub:'I do my best work on my own'}] },
-  { id:11, section:'work', sectionLabel:'Work Style', type:'single', q:"When you get feedback on your work, you tend to:", hint:"Pick the response closest to how you genuinely react.", options:[{letter:'A',text:'Use it to improve right away',sub:'Feedback is a gift — I act on it fast'},{letter:'B',text:'Think it over before responding',sub:'I need time to process and consider it'},{letter:'C',text:'Discuss it to understand better',sub:'Context helps me make sense of it'},{letter:'D',text:'Feel it deeply then move forward',sub:'It lands hard but I bounce back'}] },
-  { id:12, section:'work', sectionLabel:'Work Style', type:'single', q:"What energizes you most during a busy week?", hint:"This often reveals where your real strengths lie.", options:[{letter:'A',text:'Closing something — a deal, a project',sub:'Completion gives me momentum'},{letter:'B',text:'A great conversation or connection',sub:'People give me energy'},{letter:'C',text:'Learning something new',sub:'Growth keeps me engaged'},{letter:'D',text:'Solving a problem nobody else could',sub:'I love being the person who figures it out'}] },
-  { id:13, section:'work', sectionLabel:'Work Style', type:'single', q:"How much variety do you want in your day-to-day work?", hint:"Some people love routine; others need constant change.", options:[{letter:'A',text:'I love variety — every day should be different',sub:'Routine drains me'},{letter:'B',text:'A good mix',sub:'Familiar patterns with some fresh challenges'},{letter:'C',text:'Mostly consistent with occasional change',sub:'Predictability helps me perform'},{letter:'D',text:'I prefer a clear routine',sub:'I work best when I know what to expect'}] },
-  { id:14, section:'work', sectionLabel:'Work Style', type:'single', q:"When working on a team, your natural role tends to be:", hint:"Think about group projects throughout your career.", options:[{letter:'A',text:'The motivator',sub:'I keep energy and morale high'},{letter:'B',text:'The executor',sub:'I get things done and follow through'},{letter:'C',text:'The strategist',sub:'I set direction and see the big picture'},{letter:'D',text:'The bridge',sub:'I connect people and ideas'}] },
-  { id:15, section:'work', sectionLabel:'Work Style', type:'single', q:"Your ideal job would measure your success by:", hint:"What metric would make you feel truly proud?", options:[{letter:'A',text:'The impact I had on people',sub:'Lives changed, relationships built'},{letter:'B',text:'Results and numbers',sub:'Revenue, performance, measurable outcomes'},{letter:'C',text:'Quality of the work itself',sub:'Craft, excellence, and execution'},{letter:'D',text:'Growth and innovation',sub:'New things built, problems solved'}] },
-  { id:16, section:'work', sectionLabel:'Work Style', type:'single', q:"How important is work-life balance to you?", hint:"Be honest — this shapes which roles will fit you best.", options:[{letter:'A',text:'Balance is essential',sub:'I need clear separation to do my best work'},{letter:'B',text:'Important but flexible',sub:'I can push hard when needed'},{letter:'C',text:'Work is a big priority for me',sub:'I don\'t mind if work bleeds into life'},{letter:'D',text:'I thrive when I\'m fully immersed',sub:'Deep focus and long hours don\'t bother me'}] },
-  { id:17, section:'values', sectionLabel:'Your Values', type:'single', q:"Which of these matters most to you in a role?", hint:"If you could only have one, which would you choose?", options:[{letter:'A',text:'Meaningful work',sub:'I need to feel like it matters'},{letter:'B',text:'Competitive compensation',sub:'Being paid what I\'m worth comes first'},{letter:'C',text:'Growth and learning',sub:'I want to keep getting better'},{letter:'D',text:'Stability and security',sub:'Knowing my position is solid matters to me'}] },
-  { id:18, section:'values', sectionLabel:'Your Values', type:'single', q:"When you think about your dream career, the first word that comes to mind is:", hint:"Don't overthink it — gut response wins here.", options:[{letter:'A',text:'Purpose',sub:'What I do makes a difference'},{letter:'B',text:'Freedom',sub:'I control my time and direction'},{letter:'C',text:'Excellence',sub:'I\'m known for being very good at what I do'},{letter:'D',text:'Connection',sub:'The relationships I build are the reward'}] },
-  { id:19, section:'values', sectionLabel:'Your Values', type:'single', q:"How important is a clear path for advancement?", hint:"Some people want a clear ladder; others prefer to create their own path.", options:[{letter:'A',text:'Very important — I want to know where I\'m headed',sub:'Clear milestones motivate me'},{letter:'B',text:'Important but not the top priority',sub:'I\'d like it but can work without it'},{letter:'C',text:'I\'d rather create my own path',sub:'I don\'t need a ladder — I\'ll build my own'},{letter:'D',text:'Not a priority for me right now',sub:'I\'m focused on the work itself'}] },
-  { id:20, section:'values', sectionLabel:'Your Values', type:'single', q:"What's your relationship with learning new skills?", hint:"This shapes what kind of role and culture will keep you engaged.", options:[{letter:'A',text:'I actively seek it out',sub:'Always taking courses, reading, improving'},{letter:'B',text:'I learn when the role requires it',sub:'Practical learning in context works best'},{letter:'C',text:'I prefer mastering what I know',sub:'Depth over breadth is my style'},{letter:'D',text:'I love teaching others what I know',sub:'Sharing knowledge is how I grow'}] },
-  { id:21, section:'values', sectionLabel:'Your Values', type:'single', q:"Which scenario sounds most like you at your best?", hint:"Picture a workday where you left feeling great.", options:[{letter:'A',text:'I helped someone solve a tough problem',sub:'One-on-one impact, deeply satisfying'},{letter:'B',text:'I presented to a room and nailed it',sub:'Group energy and visible results'},{letter:'C',text:'I finished something really well done',sub:'Quality output I\'m genuinely proud of'},{letter:'D',text:'I built something from scratch',sub:'Created or launched something new'}] },
-  { id:22, section:'values', sectionLabel:'Your Values', type:'single', q:"How much does company culture matter to you?", hint:"Culture fit vs. compensation — where do you land?", options:[{letter:'A',text:'Culture is everything',sub:'I\'d take less money for the right environment'},{letter:'B',text:'Culture matters a lot',sub:'It\'s near the top of my list'},{letter:'C',text:'It matters but so does pay',sub:'I need both to be right'},{letter:'D',text:'Compensation comes first',sub:'I can adapt to most cultures if the pay is right'}] },
-  { id:23, section:'design', sectionLabel:'Your Resume', type:'single', q:"How would you describe your work history?", hint:"This helps us frame your story the right way.", options:[{letter:'A',text:'One clear path',sub:'Same industry or function throughout'},{letter:'B',text:'Diverse experience',sub:'Different industries or roles over time'},{letter:'C',text:'Career change',sub:'Pivoting to something meaningfully different'},{letter:'D',text:'Gaps or non-traditional',sub:'Time off, freelance, caregiving, or other'}] },
-  { id:24, section:'design', sectionLabel:'Your Resume', type:'single', q:"What's the biggest challenge your resume faces right now?", hint:"Be honest — we'll help you fix it.", options:[{letter:'A',text:'It doesn\'t reflect who I am now',sub:'Outdated or misaligned'},{letter:'B',text:'I don\'t know what to highlight',sub:'Too much or too little included'},{letter:'C',text:'It\'s not getting responses',sub:'Submitting but not hearing back'},{letter:'D',text:'I don\'t really have one yet',sub:'Starting from scratch'}] },
-  { id:25, section:'design', sectionLabel:'Your Resume', type:'single', q:"When an employer reads your resume, what do you most want them to feel?", hint:"The emotion behind a resume matters as much as the facts.", options:[{letter:'A',text:'"This person gets results"',sub:'Proven, measurable impact'},{letter:'B',text:'"This person is trustworthy"',sub:'Reliability, consistency, character'},{letter:'C',text:'"This person will fit right in"',sub:'Culture match, team player'},{letter:'D',text:'"This person is exactly what we need"',sub:'Precise match to the role'}] },
-  { id:26, section:'design', sectionLabel:'Your Resume', type:'colorpicker', q:"Choose a color scheme for your resume.", hint:"This reflects your professional personality. You can change it any time." },
-  { id:27, section:'design', sectionLabel:'Your Resume', type:'fontpicker', q:"Choose a typography style for your resume.", hint:"The right font communicates your style before they read a single word." },
-  { id:28, section:'design', sectionLabel:'Your Resume', type:'textarea',
+  // ── ONBOARDING (3 questions) ─────────────────────────────────────────────
+  { id:1, section:'about', sectionLabel:'Your Goal', type:'text', q:"What's your first name?", hint:"We'll personalize your results just for you.", placeholder:"Enter your first name" },
+  { id:2, section:'about', sectionLabel:'Your Goal', type:'single', q:"What's your main goal right now?", hint:"Be honest — this shapes everything that follows.", options:[{letter:'A',text:'Get a job',sub:'I need to land something — soon'},{letter:'B',text:'Change careers',sub:'I\'m pivoting to something meaningfully different'},{letter:'C',text:'Improve my resume',sub:'I\'m employed but want to be more competitive'},{letter:'D',text:'Just exploring',sub:'No pressure — I\'m figuring out my next chapter'}] },
+  { id:3, section:'about', sectionLabel:'Your Goal', type:'single', q:"What's your timeline?", hint:"No judgment — just helps us calibrate your results.", options:[{letter:'A',text:'As soon as possible',sub:'I\'m actively searching right now'},{letter:'B',text:'Within 1–3 months',sub:'Methodical but motivated'},{letter:'C',text:'3–6 months out',sub:'Planning ahead, building my options'},{letter:'D',text:'Just exploring for now',sub:'No hard deadline yet'}] },
+
+  // ── COMPASS ASSESSMENT (20 questions) ───────────────────────────────────
+  // Section: Work Style (Qs 4–10)
+  { id:4, section:'work', sectionLabel:'Work Style',
+    trait: { N:0, S:1, E:0, W:0, NE:0, SE:0, SW:1, NW:0 },
+    type:'single', q:"When working in a group, you naturally tend to:", hint:"Choose the one that shows up most often — not what you wish were true.", options:[{letter:'A',text:'Set the direction and keep everyone on track',sub:'I organize, prioritize, and drive forward'},{letter:'B',text:'Make sure everyone feels heard and included',sub:'I tune in to how people are doing'},{letter:'C',text:'Push for momentum and keep energy high',sub:'I hate inertia — I want to move'},{letter:'D',text:'Analyze what\'s working and what\'s not',sub:'I watch, assess, and improve the system'}] },
+  { id:5, section:'work', sectionLabel:'Work Style',
+    trait: { N:1, S:0, E:1, W:0, NE:1, SE:0, SW:0, NW:0 },
+    type:'single', q:"When starting a new project, your first instinct is to:", hint:"Go with your gut — what do you actually do?", options:[{letter:'A',text:'Map out the plan and set clear milestones',sub:'Structure first, then execute'},{letter:'B',text:'Talk to everyone involved to understand the full picture',sub:'Context before action'},{letter:'C',text:'Start doing something — momentum reveals the path',sub:'I learn by moving'},{letter:'D',text:'Research thoroughly before committing to a direction',sub:'I want to understand before I act'}] },
+  { id:6, section:'work', sectionLabel:'Work Style',
+    trait: { N:0, S:0, E:0, W:1, NE:0, SE:1, SW:0, NW:1 },
+    type:'single', q:"How do you feel about detailed, methodical work?", hint:"Be honest — there's no wrong answer here.", options:[{letter:'A',text:'I enjoy it — precision gives me confidence',sub:'Getting the details right matters to me'},{letter:'B',text:'I like it in small doses but need variety too',sub:'Balance is key'},{letter:'C',text:'It\'s not my strength — I prefer the big picture',sub:'I\'d rather set vision than manage details'},{letter:'D',text:'I can do it but it drains me',sub:'I\'ll get it done, but it\'s not where I thrive'}] },
+  { id:7, section:'work', sectionLabel:'Work Style',
+    trait: { N:0, S:1, E:1, W:0, NE:0, SE:0, SW:1, NW:0 },
+    type:'single', q:"How important is it that your work directly helps other people?", hint:"Think about what makes you feel most fulfilled at the end of the day.", options:[{letter:'A',text:'It\'s everything — it\'s why I go to work',sub:'People and impact are my fuel'},{letter:'B',text:'Very important — it\'s a core part of what I want',sub:'I need to see my work making a difference'},{letter:'C',text:'Somewhat important, but not the whole picture',sub:'I value impact in other ways'},{letter:'D',text:'Nice, but I\'m motivated by other things',sub:'Results, problems, or craft drive me more'}] },
+  { id:8, section:'work', sectionLabel:'Work Style',
+    trait: { N:1, S:0, E:0, W:0, NE:1, SE:0, SW:0, NW:1 },
+    type:'single', q:"How do you typically respond to ambiguity or unclear direction?", hint:"What does your default look like?", options:[{letter:'A',text:'I create structure — I define what\'s missing',sub:'If there\'s no map, I draw one'},{letter:'B',text:'I ask questions until I understand the full picture',sub:'Clarity before movement'},{letter:'C',text:'I experiment — I figure it out as I go',sub:'The doing teaches me what I need to know'},{letter:'D',text:'I feel uncomfortable until things are clearer',sub:'I work best with defined expectations'}] },
+  { id:9, section:'work', sectionLabel:'Work Style',
+    trait: { N:0, S:0, E:1, W:0, NE:1, SE:0, SW:0, NW:0 },
+    type:'single', q:"How do you describe your energy in a work environment?", hint:"Think about how others would describe you, not just how you see yourself.", options:[{letter:'A',text:'High-energy — I bring the room up',sub:'I\'m an activator, a motivator'},{letter:'B',text:'Steady and warm — people find me calming',sub:'I create safety and trust'},{letter:'C',text:'Focused and efficient — I\'m here to produce',sub:'Less small talk, more output'},{letter:'D',text:'Thoughtful and measured — I observe before I act',sub:'I prefer depth over speed'}] },
+  { id:10, section:'work', sectionLabel:'Work Style',
+    trait: { N:0, S:0, E:0, W:1, NE:0, SE:1, SW:0, NW:1 },
+    type:'single', q:"Which work environment brings out your best?", hint:"Where do you consistently do your finest work?", options:[{letter:'A',text:'Fast-paced, high-stakes, and dynamic',sub:'Pressure brings clarity for me'},{letter:'B',text:'Collaborative with space for relationships',sub:'We win together or not at all'},{letter:'C',text:'Independent with clear goals and autonomy',sub:'Give me the target and let me work'},{letter:'D',text:'Structured with defined processes and expectations',sub:'I thrive in order'}] },
+
+  // Section: Values (Qs 11–17)
+  { id:11, section:'values', sectionLabel:'Your Values',
+    trait: { N:1, S:0, E:1, W:0, NE:1, SE:0, SW:0, NW:0 },
+    type:'single', q:"What motivates you most in your work?", hint:"Which of these would make you feel most alive in a role?", options:[{letter:'A',text:'Achieving ambitious goals and leading others',sub:'I want to build something meaningful'},{letter:'B',text:'Helping individuals grow and succeed',sub:'One person at a time — that\'s my impact'},{letter:'C',text:'Creating something new that didn\'t exist before',sub:'Innovation and entrepreneurship drive me'},{letter:'D',text:'Becoming the best in my craft',sub:'Mastery and expertise are my fuel'}] },
+  { id:12, section:'values', sectionLabel:'Your Values',
+    trait: { N:0, S:1, E:0, W:0, NE:0, SE:0, SW:1, NW:0 },
+    type:'single', q:"When you think about the work that gives you the deepest satisfaction, it usually involves:", hint:"Reflect on your actual career highlights — not what sounds good.", options:[{letter:'A',text:'A relationship I built or a person I helped turn around',sub:'Human connection is my reward'},{letter:'B',text:'A complex problem I solved that others couldn\'t crack',sub:'Intellectual challenge at its finest'},{letter:'C',text:'Something I built — a system, a product, a process',sub:'Creating structure from chaos'},{letter:'D',text:'A moment where I led a team to an outcome that mattered',sub:'Collective achievement is my high'}] },
+  { id:13, section:'values', sectionLabel:'Your Values',
+    trait: { N:0, S:0, E:0, W:1, NE:0, SE:1, SW:0, NW:1 },
+    type:'single', q:"How important is accuracy and getting things right the first time?", hint:"Think about your natural standard — not what you aspire to.", options:[{letter:'A',text:'Critical — I double-check everything',sub:'Errors are unacceptable to me'},{letter:'B',text:'Very important, but I balance it with speed',sub:'Good and fast beats perfect and slow'},{letter:'C',text:'Important, but iteration teaches me more than perfection',sub:'I learn through doing and refining'},{letter:'D',text:'It depends on the stakes',sub:'I calibrate my rigor to what matters most'}] },
+  { id:14, section:'values', sectionLabel:'Your Values',
+    trait: { N:0, S:1, E:0, W:0, NE:0, SE:0, SW:1, NW:0 },
+    type:'single', q:"How do you feel about conflict or difficult conversations?", hint:"What do you actually do — not what you wish you did?", options:[{letter:'A',text:'I address it directly and quickly',sub:'Conflict avoided is conflict delayed'},{letter:'B',text:'I seek to understand all sides before responding',sub:'Harmony matters — I approach it carefully'},{letter:'C',text:'I can handle it but I prefer to avoid it',sub:'I pick my battles'},{letter:'D',text:'I use data or facts to navigate it',sub:'Logic defuses emotion'}] },
+  { id:15, section:'values', sectionLabel:'Your Values',
+    trait: { N:1, S:0, E:1, W:0, NE:0, SE:0, SW:0, NW:1 },
+    type:'single', q:"How do you feel about taking risks at work?", hint:"Think about your actual behavior, not your idealized self.", options:[{letter:'A',text:'I actively seek calculated risks — they create opportunity',sub:'No risk, no reward'},{letter:'B',text:'I take risks when I have enough data to feel confident',sub:'Informed boldness'},{letter:'C',text:'I prefer to test small before going big',sub:'Pilot, learn, scale'},{letter:'D',text:'I prefer stability and proven approaches',sub:'Reliability beats novelty for me'}] },
+  { id:16, section:'values', sectionLabel:'Your Values',
+    trait: { N:0, S:0, E:1, W:0, NE:1, SE:0, SW:0, NW:0 },
+    type:'single', q:"Which of these excites you most as a professional?", hint:"Which option gives you that 'this is why I do this' feeling?", options:[{letter:'A',text:'Closing a deal or winning a competitive pursuit',sub:'The win energizes me'},{letter:'B',text:'Watching someone I trained or mentored succeed',sub:'Their success is my success'},{letter:'C',text:'Delivering a project on time, under budget, with quality',sub:'Execution excellence'},{letter:'D',text:'Publishing research, speaking, or being the expert',sub:'Thought leadership and depth'}] },
+  { id:17, section:'values', sectionLabel:'Your Values',
+    trait: { N:0, S:0, E:0, W:0, NE:0, SE:1, SW:1, NW:1 },
+    type:'single', q:"How important are organizational values and mission to you?", hint:"Would you take a pay cut for a mission-aligned role?", options:[{letter:'A',text:'Critical — I need to believe in what I\'m building',sub:'Culture fit matters as much as compensation'},{letter:'B',text:'Very important — it shapes how I show up',sub:'Purpose amplifies my effort'},{letter:'C',text:'Important, but I can adapt to most environments',sub:'I find purpose in my craft more than the org'},{letter:'D',text:'I respect it, but results matter more',sub:'I\'ll serve any mission if the work is meaningful'}] },
+
+  // Section: Compass Profile (Qs 18–23)
+  { id:18, section:'compass', sectionLabel:'Compass Profile',
+    trait: { N:1, S:0, E:0, W:1, NE:0, SE:1, SW:0, NW:0 },
+    type:'single', q:"How do people who know you professionally most often describe you?", hint:"Pick the label that comes up most — not what you'd like to be.", options:[{letter:'A',text:'The one who gets things done',sub:'Decisive, reliable, results-focused'},{letter:'B',text:'The one people trust',sub:'Empathetic, authentic, relational'},{letter:'C',text:'The one who brings new ideas',sub:'Creative, entrepreneurial, forward-thinking'},{letter:'D',text:'The one who figures it out',sub:'Analytical, thorough, resourceful'}] },
+  { id:19, section:'compass', sectionLabel:'Compass Profile',
+    trait: { N:0, S:0, E:0, W:0, NE:1, SE:0, SW:0, NW:1 },
+    type:'single', q:"How do you describe your relationship with big-picture thinking?", hint:"Strategy vs. execution — where does your energy naturally go?", options:[{letter:'A',text:'I live in the big picture — I see the vision first',sub:'Show me where we\'re going and I\'ll rally the troops'},{letter:'B',text:'I balance both — I can dream and do',sub:'Strategy without execution is fantasy'},{letter:'C',text:'I prefer execution over strategy',sub:'Tell me what we\'re building and let me build it'},{letter:'D',text:'I find meaning in both depending on the context',sub:'I flex between them easily'}] },
+  { id:20, section:'compass', sectionLabel:'Compass Profile',
+    trait: { N:0, S:1, E:0, W:0, NE:0, SE:0, SW:1, NW:0 },
+    type:'single', q:"What does a meaningful workday look like to you?", hint:"Picture a day where you leave feeling truly fulfilled.", options:[{letter:'A',text:'I helped someone solve a tough problem or grow',sub:'One-on-one impact, deeply satisfying'},{letter:'B',text:'I closed something important — a deal, a project, a phase',sub:'Completion gives me energy'},{letter:'C',text:'I created something that didn\'t exist before',sub:'Building and inventing light me up'},{letter:'D',text:'I made a complex system or process work better',sub:'Improvement and precision are my craft'}] },
+  { id:21, section:'compass', sectionLabel:'Compass Profile',
+    trait: { N:0, S:0, E:0, W:0, NE:0, SE:1, SW:0, NW:1 },
+    type:'single', q:"How do you best describe your thinking style?", hint:"Go with your first instinct.", options:[{letter:'A',text:'Structured and systematic',sub:'I think in frameworks, plans, and steps'},{letter:'B',text:'Intuitive and people-reading',sub:'I sense dynamics and patterns in behavior'},{letter:'C',text:'Creative and conceptual',sub:'I connect ideas across domains'},{letter:'D',text:'Analytical and evidence-driven',sub:'I follow the data'}] },
+  { id:22, section:'compass', sectionLabel:'Compass Profile',
+    trait: { N:1, S:0, E:0, W:0, NE:0, SE:0, SW:0, NW:0 },
+    type:'single', q:"How important is leadership or advancement to you?", hint:"Where does ambition rank in your professional priorities?", options:[{letter:'A',text:'Very important — I want to lead and grow',sub:'Advancement motivates me'},{letter:'B',text:'Important, but I define success my own way',sub:'I want impact more than title'},{letter:'C',text:'I prefer to master my craft over managing others',sub:'Deep expertise is my ambition'},{letter:'D',text:'Not a priority right now',sub:'I\'m focused on the work itself'}] },
+  {
+    id:23, section:'compass', sectionLabel:'Compass Profile', type:'textarea',
     get q() { const n=(answers[1]||'').split(' ')[0]; return n ? n+", in your own words — what makes you great at what you do?" : "In your own words, what makes you great at what you do?"; },
     hint:"Write 2–3 sentences. Don't be modest — this becomes the foundation of your professional summary.",
-    placeholder:"e.g. I have a gift for building trust quickly with people from all walks of life. I've spent decades helping teams grow, customers succeed, and organizations improve how they develop their people..." }
+    placeholder:"e.g. I have a gift for building trust quickly with people from all walks of life. I've spent decades helping teams grow, customers succeed, and organizations improve how they develop their people...",
+    trait: { N:0, S:0, E:0, W:0, NE:0, SE:0, SW:0, NW:0 }
+  }
 ];
 
 // ─────────────────────────────────────────────────────────────────
@@ -1031,11 +1090,16 @@ let selectedJobForReminder = null;
 let currentJobData = null; // currently viewed job detail
 let coverLetterText = '';
 let allJobs = [];
-let selectedPlan = 'starter';
+let selectedPlan = 'paid'; // v3: 'free' | 'paid'
 let pushRegistration = null;
 let uploadedFileContent = ''; // extracted text (txt files)
 let uploadedFileBase64 = ''; // raw base64 PDF for direct Claude document input
 let uploadedFileType = ''; // mime type of uploaded file
+// v3 additions
+let userGoal = '';       // 'job' | 'career' | 'resume' | 'exploring'
+let userTimeline = '';   // 'asap' | '1-3mo' | '3-6mo' | 'exploring'
+let compassType = '';    // 'navigator' | 'connector' | 'catalyst' | 'anchor' | 'pioneer' | 'builder' | 'diplomat' | 'pathfinder'
+let purchaseDate = null; // Date of purchase (for 90-day countdown)
 
 // ─────────────────────────────────────────────────────────────────
 // LOCAL STORAGE
@@ -1089,7 +1153,7 @@ function renderQuestion() {
   document.getElementById('q-current').textContent = currentQ+1;
   document.getElementById('q-total').textContent = total;
   document.getElementById('progress-fill').style.width = pct+'%';
-  ['about','work','values','design'].forEach(s => document.getElementById('sec-'+s).classList.remove('active'));
+  ['about','work','values','compass'].forEach(s => document.getElementById('sec-'+s).classList.remove('active'));
   document.getElementById('sec-'+q.section).classList.add('active');
   document.getElementById('btn-back').style.display = currentQ===0 ? 'none' : 'flex';
   const isLast = currentQ===QUESTIONS.length-1;
@@ -1145,6 +1209,17 @@ function updateNext() {
 
 function nextQuestion() {
   if (document.getElementById('btn-next').disabled) return;
+  // Persist onboarding answers to localStorage + state
+  if (QUESTIONS[currentQ].id === 2 && answers[2]) {
+    const goalMap = {A:'job',B:'career',C:'resume',D:'exploring'};
+    userGoal = goalMap[answers[2]] || '';
+    try { localStorage.setItem('cc_goal_v1', userGoal); } catch(e) {}
+  }
+  if (QUESTIONS[currentQ].id === 3 && answers[3]) {
+    const tlMap = {A:'asap',B:'1-3mo',C:'3-6mo',D:'exploring'};
+    userTimeline = tlMap[answers[3]] || '';
+    try { localStorage.setItem('cc_timeline_v1', userTimeline); } catch(e) {}
+  }
   if (currentQ<QUESTIONS.length-1) { currentQ++; saveProgress(); renderQuestion(); }
   else { clearProgress(); showResults(); }
 }
@@ -1155,30 +1230,94 @@ function prevQuestion() { if(currentQ>0){currentQ--;renderQuestion();}else showS
 // ─────────────────────────────────────────────────────────────────
 function showResults() { computeResults(); showScreen('results'); setTimeout(()=>{ document.querySelectorAll('.trait-bar-fill').forEach(b=>b.style.width=b.dataset.target); },400); }
 
+// ── COMPASS SCORING ───────────────────────────────────────────────
+// For each scored question, option A/B/C/D maps to trait boosts
+// We use the trait weight tables in the question definition.
+// Answer option letter → compass type contribution index:
+// A=0, B=1, C=2, D=3
+const OPTION_TYPE_MAP = {
+  // question id → [typeForA, typeForB, typeForC, typeForD]
+  4:  ['N','S','E','NW'],   // group role: director, includer, energizer, analyst
+  5:  ['N','S','E','NW'],   // project start: plan, talk, act, research
+  6:  ['W','SE','NE','W'],  // detail work: anchor, builder, pioneer, anchor
+  7:  ['S','S','NE','N'],   // helping others: connector, connector, pioneer, navigator
+  8:  ['N','NW','E','W'],   // ambiguity: navigator, pathfinder, catalyst, anchor
+  9:  ['E','S','SE','NW'],  // energy: catalyst, connector, builder, pathfinder
+  10: ['E','S','NW','W'],   // environment: catalyst, connector, pathfinder, anchor
+  11: ['N','S','E','NW'],   // motivation: navigator, connector, catalyst, pathfinder
+  12: ['S','NW','SE','N'],  // deep satisfaction: connector, pathfinder, builder, navigator
+  13: ['W','SE','E','N'],   // accuracy: anchor, builder, catalyst, navigator
+  14: ['N','SW','E','NW'],  // conflict: navigator, diplomat, catalyst, pathfinder
+  15: ['E','NW','SE','N'],  // risk: catalyst, pathfinder, builder, navigator
+  16: ['E','S','SE','NW'],  // what excites: catalyst, connector, builder, pathfinder
+  17: ['SW','NE','SE','N'], // org values: diplomat, pioneer, builder, navigator
+  18: ['N','S','NE','NW'],  // professional description: navigator, connector, pioneer, pathfinder
+  19: ['NE','SE','N','SW'], // big picture: pioneer, builder, navigator, diplomat
+  20: ['S','N','NE','SE'],  // meaningful workday: connector, navigator, pioneer, builder
+  21: ['W','S','NE','NW'],  // thinking style: anchor, connector, pioneer, pathfinder
+  22: ['N','SW','NW','S'],  // leadership: navigator, diplomat, pathfinder, connector
+};
+
+const COMPASS_TYPES = {
+  N:  { key:'navigator',  name:'The Navigator',  direction:'North',     icon:'🧭', desc:(n)=>`${n}, you are strategic, goal-driven, and decisive. You naturally take charge, define direction, and bring clarity to complexity. You thrive in roles where you can lead teams, set vision, and drive meaningful outcomes. People trust you to get things moving — and to keep them on track.`, jobs:['Director of Operations','Project Manager','VP of Sales','Training Manager','General Manager','Operations Director'], traits:[{label:'Leadership & strategy',pct:92,gold:true},{label:'Decision-making',pct:87},{label:'Team alignment',pct:82},{label:'Relationship focus',pct:60}] },
+  S:  { key:'connector',  name:'The Connector',  direction:'South',     icon:'🤝', desc:(n)=>`${n}, you are empathetic, relationship-focused, and deeply attuned to the people around you. You build trust quickly and create environments where others thrive. Your greatest impact comes through human connection — coaching, counseling, training, or any role where people are the mission.`, jobs:['Training & Development','HR Business Partner','Career Coach','Corporate Trainer','Customer Success','Nonprofit Director'], traits:[{label:'Empathy & trust',pct:94,gold:true},{label:'Coaching & mentoring',pct:88},{label:'Team culture',pct:83},{label:'Strategic thinking',pct:58}] },
+  E:  { key:'catalyst',   name:'The Catalyst',   direction:'East',      icon:'⚡', desc:(n)=>`${n}, you are energetic, entrepreneurial, and action-oriented. You hate inertia and thrive on momentum. You're at your best when you're driving growth, winning new business, or bringing an idea from zero to one. Challenges energize you — you don't wait for permission to move.`, jobs:['Sales Director','Business Development','Account Executive','Entrepreneur','Marketing Manager','Growth Lead'], traits:[{label:'Energy & drive',pct:93,gold:true},{label:'Entrepreneurial instinct',pct:88},{label:'Adaptability',pct:84},{label:'Methodical planning',pct:52}] },
+  W:  { key:'anchor',     name:'The Anchor',     direction:'West',      icon:'⚓', desc:(n)=>`${n}, you are detail-oriented, reliable, and process-driven. You bring stability and precision to everything you touch. Ambiguity unsettles you — not because you're rigid, but because you know that real excellence lives in the details. You're the person organizations trust to get it exactly right.`, jobs:['Finance Manager','Compliance Officer','Operations Analyst','Project Coordinator','Admin Director','Quality Assurance'], traits:[{label:'Precision & accuracy',pct:92,gold:true},{label:'Process & systems',pct:88},{label:'Reliability',pct:90},{label:'Bold risk-taking',pct:44}] },
+  NE: { key:'pioneer',    name:'The Pioneer',    direction:'Northeast',  icon:'🚀', desc:(n)=>`${n}, you are visionary, creative, and drawn to the big picture. You see where things could go before others even realize there's an opportunity. Whether in marketing, consulting, or innovation, you thrive when you're building something new or reimagining something that already exists.`, jobs:['Marketing Director','Innovation Consultant','Brand Strategist','Creative Director','Startup Founder','Chief Marketing Officer'], traits:[{label:'Vision & creativity',pct:93,gold:true},{label:'Strategic innovation',pct:88},{label:'Entrepreneurial energy',pct:82},{label:'Operational detail',pct:50}] },
+  SE: { key:'builder',    name:'The Builder',    direction:'Southeast',  icon:'🏗️', desc:(n)=>`${n}, you combine structured thinking with creative execution. You're the person who takes a great idea and actually builds it — a product, a system, a team, a process. You bring both craft and pragmatism to everything you do, and your work tends to outlast everyone else's.`, jobs:['Product Manager','Engineering Lead','UX Designer','Systems Architect','Instructional Designer','Technical Program Manager'], traits:[{label:'Structured creativity',pct:91,gold:true},{label:'Execution excellence',pct:88},{label:'Technical depth',pct:84},{label:'People leadership',pct:62}] },
+  SW: { key:'diplomat',   name:'The Diplomat',   direction:'Southwest',  icon:'🌿', desc:(n)=>`${n}, you are harmony-seeking, values-driven, and deeply committed to fairness and human dignity. You're drawn to work that creates systemic change, supports communities, or advances a cause. You're a natural bridge-builder who believes that how we achieve something matters as much as what we achieve.`, jobs:['Nonprofit Director','Government Relations','Education Administrator','Social Worker','Diversity & Inclusion Lead','Policy Analyst'], traits:[{label:'Values & mission alignment',pct:93,gold:true},{label:'Relationship harmony',pct:88},{label:'Community impact',pct:86},{label:'Competitive drive',pct:48}] },
+  NW: { key:'pathfinder', name:'The Pathfinder', direction:'Northwest',  icon:'🔭', desc:(n)=>`${n}, you are independent, analytical, and research-minded. You prefer depth over speed, and you trust data over gut instinct. You thrive in roles that reward expertise, intellectual rigor, and problem-solving. You don't need the spotlight — you need the space to figure things out.`, jobs:['Research Analyst','Data Scientist','Strategy Consultant','Technical Writer','Intelligence Analyst','Policy Researcher'], traits:[{label:'Analytical depth',pct:93,gold:true},{label:'Independent thinking',pct:89},{label:'Research & expertise',pct:87},{label:'High-energy leadership',pct:46}] },
+};
+
+function computeCompassType() {
+  const scores = { N:0, S:0, E:0, W:0, NE:0, SE:0, SW:0, NW:0 };
+  Object.keys(OPTION_TYPE_MAP).forEach(qId => {
+    const ans = answers[parseInt(qId)];
+    if (!ans) return;
+    const idx = {A:0,B:1,C:2,D:3}[ans];
+    if (idx === undefined) return;
+    const types = OPTION_TYPE_MAP[qId];
+    const t = types[idx];
+    if (t && scores[t] !== undefined) scores[t] += 1;
+  });
+  // Find highest score
+  let best = 'N', bestScore = -1;
+  Object.keys(scores).forEach(k => { if (scores[k] > bestScore) { bestScore = scores[k]; best = k; } });
+  return best;
+}
+
 function computeResults() {
-  const name=(answers[1]||'Friend').split(' ')[0];
-  document.getElementById('result-name').textContent=name;
-  const types={A:'The Connector',B:'The Problem Solver',C:'The Organizer',D:'The Visionary'};
-  const descs={A:`${name}, you have a natural gift for building trust and bringing people together. Roles where you can coach, guide, sell, or train others will bring out your best.`,B:`${name}, you're wired to tackle challenges head-on. You shine in analytical, strategic, or consultative roles.`,C:`${name}, you're the person who makes things actually happen. Operations, project management, and training coordination are your sweet spot.`,D:`${name}, you see possibilities where others see problems. Leadership, strategy, and business development let you operate at your best.`};
-  const q5=answers[5]||'A';
-  document.getElementById('result-type').textContent=types[q5];
-  document.getElementById('result-desc').textContent=descs[q5];
-  const helpVal=({A:1,B:0.85,C:0.6,D:0.35}[answers[6]]||0.7);
-  const leadVal=({A:1,B:0.75,C:0.5,D:0.3}[answers[10]]||0.6);
-  const varVal=({A:1,B:0.75,C:0.5,D:0.25}[answers[13]]||0.6);
-  const traits=[{label:'People & relationships',pct:Math.round((helpVal*0.6+(q5==='A'?0.9:0.4)*0.4)*100),gold:true},{label:'Leadership & influence',pct:Math.round((leadVal*0.7+(q5==='D'?0.9:0.5)*0.3)*100)},{label:'Adaptability',pct:Math.round((varVal*0.65+0.35)*100)},{label:'Structured thinking',pct:Math.round(((1-varVal)*0.5+(q5==='C'?0.9:0.4)*0.5)*100)}];
-  document.getElementById('result-traits').innerHTML=traits.map(t=>{const pct=Math.min(96,Math.max(20,t.pct));return`<div class="trait-row"><div class="trait-label-row"><span>${t.label}</span><span>${pct}%</span></div><div class="trait-bar-track"><div class="trait-bar-fill${t.gold?' gold':''}" style="width:0" data-target="${pct}%"></div></div></div>`;}).join('');
-  const jobMap={A:['Training & Development','Sales Leadership','Customer Success','Corporate Trainer','Career Coaching'],B:['Business Analyst','Operations Manager','Consultant','Product Manager'],C:['Project Manager','Operations Director','Program Coordinator','Training Coordinator'],D:['VP of Sales','Business Development','Marketing Director','Executive Coach']};
-  document.getElementById('result-jobs').innerHTML=(jobMap[q5]||jobMap['A']).map(j=>`<span class="job-tag">${j}</span>`).join('');
-  const colorId=answers[26]||'navy';
-  const fontId=answers[27]||'serif';
-  const scheme=COLOR_SCHEMES.find(c=>c.id===colorId)||COLOR_SCHEMES[0];
-  const font=FONTS.find(f=>f.id===fontId)||FONTS[0];
-  document.getElementById('result-color-name').textContent=scheme.name;
-  document.getElementById('result-font-name').textContent=font.name;
-  document.getElementById('result-colors').innerHTML=scheme.swatches.map(s=>`<div class="design-swatch" style="background:${s};border:1px solid rgba(0,0,0,0.1);"></div>`).join('');
-  const envMap={A:'corporate environments',B:'small businesses and startups',C:'mission-driven organizations',D:'remote and flexible roles'};
-  document.getElementById('result-tagline').textContent=`You're well-suited for ${envMap[answers[7]]||'roles that match your strengths'}. Here's what your assessment revealed.`;
+  const name = (answers[1]||'Friend').split(' ')[0];
+  document.getElementById('result-name').textContent = name;
+
+  // Score compass type
+  const typeKey = computeCompassType();
+  compassType = COMPASS_TYPES[typeKey].key;
+  const type = COMPASS_TYPES[typeKey];
+
+  document.getElementById('result-compass-direction').textContent = type.direction;
+  document.getElementById('result-compass-icon').textContent = type.icon;
+  document.getElementById('result-type').textContent = type.name;
+  document.getElementById('result-desc').textContent = type.desc(name);
+
+  // Trait bars
+  document.getElementById('result-traits').innerHTML = type.traits.map(t => {
+    const pct = Math.min(96, Math.max(30, t.pct));
+    return `<div class="trait-row"><div class="trait-label-row"><span>${t.label}</span><span>${pct}%</span></div><div class="trait-bar-track"><div class="trait-bar-fill${t.gold?' gold':''}" style="width:0" data-target="${pct}%"></div></div></div>`;
+  }).join('');
+
+  // Job tags
+  document.getElementById('result-jobs').innerHTML = type.jobs.map(j => `<span class="job-tag">${j}</span>`).join('');
+
+  // Goal + timeline context
+  const goalMap = {A:'Land a new role as soon as possible', B:'Make a meaningful career change', C:'Improve your resume and competitiveness', D:'Explore your options with no pressure'};
+  const timelineMap = {A:'actively searching right now', B:'aiming for the next 1–3 months', C:'planning 3–6 months ahead', D:'just exploring for now'};
+  const goal = goalMap[answers[2]] || 'Find the right next step';
+  const timeline = timelineMap[answers[3]] || 'on your own timeline';
+  document.getElementById('result-goal-text').innerHTML = `<strong>${goal}</strong><br><span style="color:var(--text-light);font-size:13px;">Timeline: ${timeline}</span>`;
+
+  // Tagline
+  document.getElementById('result-tagline').textContent = `Your ${type.direction} compass points to ${type.name.replace('The ','')} — here's what that means for your career.`;
 }
 
 function selectFeedback(val, el) {
@@ -1329,17 +1468,15 @@ function goToFeedback() {
 }
 
 function buildResumeContext() {
-  const q5=answers[5]||'A';
-  const typeMap={A:'Connector / People Leader',B:'Problem Solver / Analyst',C:'Organizer / Executor',D:'Visionary / Leader'};
-  const envMap={A:'Corporate / Enterprise',B:'Small Business / Startup',C:'Nonprofit / Education',D:'Remote / Self-Employed'};
-  const valMap={A:'Meaningful work',B:'Competitive pay',C:'Growth & learning',D:'Stability & security'};
+  const typeKey = computeCompassType();
+  const compassT = COMPASS_TYPES[typeKey];
   const name=answers[1]||'';
   const fname=(document.getElementById('m-fname')||{}).value||name||'';
   const lname=(document.getElementById('m-lname')||{}).value||'';
   const location=(document.getElementById('m-location')||{}).value||'';
   const phone=(document.getElementById('m-phone')||{}).value||'';
   const email=(document.getElementById('m-email')||{}).value||'';
-  const summary=(document.getElementById('m-summary')||{}).value||answers[28]||'';
+  const summary=(document.getElementById('m-summary')||{}).value||answers[23]||'';
   const skills=(document.getElementById('m-skills')||{}).value||'';
   const expText=expEntries.map(e=>e.title+' at '+e.company+' ('+e.dates+'): '+e.bullets).join('\n');
   const eduText=eduEntries.map(e=>e.degree+' — '+e.school+' ('+e.year+')').join('\n');
@@ -1353,15 +1490,18 @@ function buildResumeContext() {
     uploadedFileBase64:uploadedFileBase64,
     uploadedFileType:uploadedFileType||'application/pdf',
     uploadedFileContent:uploadedFileContent.substring(0,3000),
-    personalityType:typeMap[q5]||typeMap['A'],
-    preferredEnv:envMap[answers[7]]||envMap['A'],
-    topValue:valMap[answers[17]]||valMap['A'],
-    workStyle:answers[3]==='A'?'People-focused':answers[3]==='B'?'Ideas-focused':answers[3]==='C'?'Systems-focused':'Variety-focused',
-    teamRole:answers[14]==='A'?'Motivator':answers[14]==='B'?'Executor':answers[14]==='C'?'Strategist':'Bridge/Connector',
-    resumeChallenge:{A:'Resume feels outdated',B:'Unsure what to highlight',C:'Not getting responses',D:'Starting from scratch'}[answers[24]]||'',
-    desiredImpression:{A:'Gets results',B:'Trustworthy',C:'Culture fit',D:'Exact match'}[answers[25]]||'',
-    colorScheme:answers[26]||'navy',
-    fontChoice:answers[27]||'serif',
+    personalityType: compassT ? compassT.name : 'Professional',
+    compassDirection: compassT ? compassT.direction : 'North',
+    preferredEnv: compassT ? compassT.name : 'role that matches your strengths',
+    topValue: answers[11]==='A'?'Ambitious goals':answers[11]==='B'?'Helping others':answers[11]==='C'?'Creating something new':'Mastery of craft',
+    workStyle: answers[9]==='A'?'High-energy activator':answers[9]==='B'?'Warm connector':answers[9]==='C'?'Focused producer':'Thoughtful analyst',
+    teamRole: answers[4]==='A'?'Director':answers[4]==='B'?'Includer':answers[4]==='C'?'Energizer':'Analyst',
+    resumeChallenge: '',
+    desiredImpression: '',
+    colorScheme: 'navy',
+    fontChoice: 'serif',
+    userGoal: ({A:'Get a job',B:'Change careers',C:'Improve resume',D:'Exploring'}[answers[2]])||'',
+    userTimeline: ({A:'ASAP',B:'1–3 months',C:'3–6 months',D:'Just exploring'}[answers[3]])||'',
   };
 }
 
@@ -1482,13 +1622,14 @@ async function runResumeFeedback() {
 }
 
 function buildFallback(ctx) {
-  const isConn=(answers[5]||'A')==='A';
+  const ct = compassType || 'connector';
+  const isPeople = ['connector','diplomat','catalyst'].includes(ct);
   const name=ctx.name||'Your Name';
   return {
-    strengths:'Your background shows a natural ability to '+(isConn?'build relationships and guide others':'solve complex problems and deliver results')+'. The combination of your people skills and experience in '+(ctx.preferredEnv||'your field').toLowerCase()+' environments is a genuine differentiator.',
+    strengths:'Your background shows a natural ability to '+(isPeople?'build relationships and guide others':'solve complex problems and deliver results')+'. The combination of your '+(ctx.personalityType||'professional')+' strengths and career experience is a genuine differentiator.',
     improvements:'1. Quantify your impact — add numbers wherever possible (team size, revenue, percentages). 2. Lead every bullet with a strong action verb (Led, Built, Grew, Designed, Delivered). 3. Add keywords from job descriptions you are targeting so your resume gets found.',
     keywords:'Leadership, Training & Development, Team Building, Performance Management, Strategic Planning, Stakeholder Engagement, Process Improvement, Cross-functional Collaboration',
-    summary:(isConn?'A people-first professional with a proven track record of building high-performing teams and delivering measurable results through coaching, training, and relationship-driven leadership.':'A results-oriented professional with expertise in turning complex challenges into clear solutions through strategic thinking and collaborative execution.')+' Brings a genuine commitment to doing great work.',
+    summary:(isPeople?'A people-first professional with a proven track record of building high-performing teams and delivering measurable results through coaching, training, and relationship-driven leadership.':'A results-oriented professional with expertise in turning complex challenges into clear solutions through strategic thinking and collaborative execution.')+' Brings a genuine commitment to doing great work.',
     experience:[{title:'Senior Training & Development Specialist',company:'Example Organization',dates:'2020 – Present',bullets:['Designed and delivered training programs for 150+ employees, reducing time-to-productivity by 25%','Partnered with department heads to identify gaps and create targeted learning solutions','Managed a team of 3 trainers and an annual L&D budget of $200K']},{title:'Training Coordinator',company:'Previous Employer',dates:'2016 – 2020',bullets:['Facilitated weekly workshops on sales methodology, product knowledge, and customer service','Developed a peer-coaching program that improved team retention by 18%','Created a digital resource library used by 300+ staff across 4 locations']}],
     education:[{degree:'Associate in Arts',school:'Your Institution',year:'Year Completed'}],
     skills:['Training & Development','Sales Leadership','Team Coaching','Curriculum Design','Performance Management','Stakeholder Communication','Adult Learning','Program Management']
@@ -1601,8 +1742,10 @@ function handlePaywallCTA() {
 }
 
 function continueAsTester() {
-  selectedPlan = 'pro';
-  showToast('🧪 Tester access granted — full Pro enabled!', 3000);
+  selectedPlan = 'paid';
+  purchaseDate = new Date().toISOString();
+  try { localStorage.setItem('cc_purchase_date', purchaseDate); } catch(e) {}
+  showToast('🧪 Tester access granted — Full Compass enabled!', 3000);
   renderDashboard();
   showScreen('dashboard');
 }
@@ -1614,12 +1757,16 @@ async function loadAndShowJobs() {
   showScreen('jobs');
   document.getElementById('jobs-body').innerHTML=`<div class="jobs-loading"><div class="feedback-spinner"></div><div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--navy); margin-top:1.25rem; margin-bottom:6px;">Searching live listings...</div><div style="font-size:13px; color:var(--text-mid);">Matching open roles to your profile</div></div>`;
 
-  const q5 = answers[5]||'A';
+  const ct = compassType || 'connector';
   const queryMap = {
-    A:'Training Manager OR Corporate Trainer OR Learning Development',
-    B:'Business Analyst OR Operations Manager OR Consultant',
-    C:'Project Manager OR Program Coordinator OR Operations',
-    D:'Director OR VP OR Business Development Manager'
+    navigator: 'Operations Manager OR Program Manager OR Director',
+    connector: 'Training Manager OR Corporate Trainer OR Learning Development',
+    catalyst:  'Sales Director OR Business Development OR Account Executive',
+    anchor:    'Finance Manager OR Operations Analyst OR Project Coordinator',
+    pioneer:   'Marketing Director OR Brand Strategist OR Creative Director',
+    builder:   'Product Manager OR Instructional Designer OR Engineering Lead',
+    diplomat:  'Nonprofit Director OR Education Administrator OR Policy Analyst',
+    pathfinder:'Research Analyst OR Data Scientist OR Strategy Consultant',
   };
   // Strip street address — send city+state only
   const resumeLocRaw = (window._resumeData&&window._resumeData.location)||'';
@@ -1628,7 +1775,7 @@ async function loadAndShowJobs() {
   const locParts = rawLoc.split(',').map(s=>s.trim()).filter(Boolean);
   const loc = locParts.length >= 3 ? locParts.slice(-2).join(' ') : rawLoc.replace(/\d{5}/,'').trim();
   // First term only — multi-OR queries return 0 results from Adzuna
-  const query = (queryMap[q5]||queryMap['A']).split(' OR ')[0];
+  const query = (queryMap[ct]||queryMap['connector']).split(' OR ')[0];
 
   let liveJobs = [];
   let source = 'fallback';
@@ -1664,18 +1811,21 @@ async function loadAndShowJobs() {
 // Score a live job against the user's quiz answers and resume data (0–100)
 function scoreJob(job) {
   const text = ((job.title||'') + ' ' + (job.desc||'')).toLowerCase();
-  const q5 = answers[5]||'A';
   const skills = (window._resumeData&&window._resumeData.skills)||[];
   let score = 50; // baseline
 
-  // Personality type alignment
-  const typeKeywords = {
-    A: ['train','coach','facilitat','develop','learning','people'],
-    B: ['analys','operations','consult','strategy','process'],
-    C: ['project','program','coordinat','manage','organiz'],
-    D: ['director','vp','vice president','head of','business develop','chief']
+  // Personality type alignment — use compass type keywords
+  const compassKeywords = {
+    navigator: ['director','manager','operations','lead','program','strategy'],
+    connector: ['train','coach','facilitat','develop','learning','people','hr','talent'],
+    catalyst:  ['sales','business development','account','growth','startup','revenue'],
+    anchor:    ['analys','finance','compliance','operations','process','coordinator'],
+    pioneer:   ['marketing','brand','creative','innovation','content','campaign'],
+    builder:   ['engineer','product','design','technical','architect','instructional'],
+    diplomat:  ['nonprofit','government','education','policy','community','social'],
+    pathfinder:['research','data','strategy','analyst','intelligence','scientist'],
   };
-  (typeKeywords[q5]||[]).forEach(kw => { if (text.includes(kw)) score += 8; });
+  (compassKeywords[compassType] || compassKeywords['connector'] || []).forEach(kw => { if (text.includes(kw)) score += 8; });
 
   // Resume skill match
   skills.slice(0,6).forEach(skill => {
@@ -1721,19 +1871,23 @@ function renderJobs(filter, source) {
   filter = filter || currentFilter;
   currentFilter = filter;
   const name = (answers[1]||'').split(' ')[0]||'you';
-  const q5 = answers[5]||'A';
-  const typeLabels = {A:'connector and people-leader',B:'analytical problem-solver',C:'organized executor',D:'visionary leader'};
+  const ct = compassType || 'connector';
+  const typeLabel = ct.replace(/^\w/, c => c.toUpperCase());
   const resumeLoc = (window._resumeData&&window._resumeData.location)||((document.getElementById('m-location')||{}).value)||'your area';
 
   // No live results at all — show helpful "search directly" state
   if (allJobs.length === 0) {
     const queryMap = {
-      A:'Training+Manager+OR+Corporate+Trainer+OR+L%26D',
-      B:'Business+Analyst+OR+Operations+Manager',
-      C:'Project+Manager+OR+Program+Coordinator',
-      D:'Director+OR+VP+OR+Business+Development'
+      navigator:'Director+OR+Operations+Manager+OR+Program+Manager',
+      connector:'Training+Manager+OR+Corporate+Trainer+OR+HR+Business+Partner',
+      catalyst: 'Sales+Director+OR+Business+Development+OR+Account+Executive',
+      anchor:   'Finance+Manager+OR+Operations+Analyst+OR+Compliance',
+      pioneer:  'Marketing+Director+OR+Brand+Strategist+OR+Creative+Director',
+      builder:  'Product+Manager+OR+Engineering+Lead+OR+Instructional+Designer',
+      diplomat: 'Nonprofit+Director+OR+Education+Administrator+OR+Policy+Analyst',
+      pathfinder:'Research+Analyst+OR+Data+Scientist+OR+Strategy+Consultant',
     };
-    const q = queryMap[q5]||queryMap['A'];
+    const q = queryMap[ct]||queryMap['connector'];
     const loc = encodeURIComponent(resumeLoc);
     document.getElementById('jobs-match-count').textContent = 'Search live';
     document.getElementById('jobs-body').innerHTML = `
@@ -1785,7 +1939,7 @@ function renderJobs(filter, source) {
 
   let html = `<div class="feedback-banner">
     <div class="feedback-banner-title">Live matches for you, ${name}${sourceBadge}</div>
-    <div class="feedback-banner-body">Based on your profile as a ${typeLabels[q5]}, we found ${filtered.length} active listing${filtered.length!==1?'s':''} near ${resumeLoc}. Match scores reflect how closely each role aligns with your background. Sources: Remotive, Adzuna, USAJobs.</div>
+    <div class="feedback-banner-body">Based on your ${typeLabel} compass profile, we found ${filtered.length} active listing${filtered.length!==1?'s':''} near ${resumeLoc}. Match scores reflect how closely each role aligns with your background. Sources: Remotive, Adzuna, USAJobs.</div>
     <div class="feedback-actions">
       <button class="feedback-btn" onclick="writeCoverLetter(null)">✍️ Write a cover letter</button>
       <button class="feedback-btn outline" onclick="showScreen('feedback')">📄 My resume</button>
@@ -1891,14 +2045,18 @@ function openJob(id) {
 }
 
 function getMatchReason(job) {
-  const q5=answers[5]||'A';
-  const reasons={
-    A:'Your natural ability to build relationships and guide others is exactly what this role calls for. The people-first environment matches your collaborative work style and your history of bringing out the best in teams.',
-    B:'Your analytical mindset and problem-solving instincts align well with the complexity this role demands. You thrive in environments where thinking drives outcomes — and this one delivers that.',
-    C:'Your reputation for making things happen, executing well, and bringing structure to ambiguous situations is a perfect match for the expectations here.',
-    D:'Your big-picture thinking and ability to inspire others positions you to do your best work in this kind of leadership-facing role.'
+  const ct = compassType || 'connector';
+  const reasons = {
+    navigator:  'Your strategic, goal-driven approach is exactly what this role calls for. You thrive in environments where direction-setting and execution combine — and that\'s precisely what this opportunity delivers.',
+    connector:  'Your natural ability to build relationships and guide others is exactly what this role calls for. The people-first environment matches your collaborative style and history of bringing out the best in teams.',
+    catalyst:   'Your entrepreneurial drive and action-oriented energy align perfectly with the pace and ambition this role demands. You\'re wired to close, to grow, and to win — this is your lane.',
+    anchor:     'Your precision, reliability, and process-driven mindset are exactly what organizations trust to get the critical work right. This role rewards the depth of expertise you bring.',
+    pioneer:    'Your visionary thinking and creative approach to strategy align well with what this employer is building. Roles like this one thrive on exactly the kind of big-picture innovation you deliver.',
+    builder:    'Your ability to take ideas and build them into real, working systems is the rare skill this role requires. You bring both craft and pragmatism — a combination that\'s hard to find.',
+    diplomat:   'Your values-driven approach and commitment to mission make you a natural fit here. Organizations in this space need leaders who believe in the work, not just the paycheck.',
+    pathfinder: 'Your analytical depth and independent thinking are exactly what this kind of role rewards. You don\'t need a playbook — you write one. That\'s what they\'re looking for.',
   };
-  return reasons[q5]||reasons['A'];
+  return reasons[ct] || reasons['connector'];
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -1956,13 +2114,22 @@ async function runCoverLetter() {
 }
 
 function buildFallbackCoverLetter(job, name) {
-  const q5=answers[5]||'A';
-  const intro={A:'Throughout my career, I have built a reputation for something that cannot be taught: the ability to earn trust quickly, connect with people at every level, and turn that connection into results.',B:'I have always believed that the best solutions come from asking the right questions before assuming you have the answers.',C:'I have built my career on one principle: if something is worth doing, it is worth doing well — and finished on time.',D:'What drives me is not just getting things done, but changing how they get done. I look for roles where that kind of thinking is an asset, not a complication.'};
+  const ct = compassType || 'connector';
+  const intro = {
+    navigator:  'I have built my career on one discipline: turning ambiguous challenges into clear outcomes. Whether leading teams, designing programs, or driving cross-functional initiatives, I focus on what it takes to actually get there.',
+    connector:  'Throughout my career, I have built a reputation for something that cannot be taught: the ability to earn trust quickly, connect with people at every level, and turn that connection into results.',
+    catalyst:   'I am motivated by growth — in the organizations I serve, in the teams I build, and in the results I drive. When there is an opportunity to create momentum, I find it.',
+    anchor:     'I have always believed that real excellence lives in the details. Whether I am designing a system, managing a process, or delivering a project, I hold myself to a standard that most people find reassuring.',
+    pioneer:    'I see my career as an ongoing experiment in making things better. I am drawn to organizations willing to challenge convention — and I bring the creative discipline to turn that ambition into something real.',
+    builder:    'I have always found the most satisfaction in building things that last. Systems, programs, teams — when I am done, the work speaks for itself.',
+    diplomat:   'The most meaningful moments of my career have come from work that genuinely changed people\'s circumstances. That conviction shapes every role I pursue and every decision I make.',
+    pathfinder: 'I have always believed that the best decisions come from the best analysis. I bring a disciplined, evidence-driven approach to everything I do — and I know how to translate insight into action.',
+  };
   return {
     date:new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}),
     greeting:`Dear ${job.company||'Hiring Team'} Hiring Manager,`,
     body:[
-      intro[q5],
+      intro[ct] || intro['connector'],
       `The ${job.title||'open position'} at ${job.company||'your organization'} immediately caught my attention because it aligns closely with the work I have done throughout my career — specifically, the intersection of people development, performance improvement, and organizational impact.`,
       `In my most recent roles, I have had the opportunity to design programs that actually change behavior, not just check a box. I measure success by the difference it makes: reduced turnover, improved performance metrics, and teams that feel genuinely equipped to do their best work.`,
       `I would welcome the opportunity to bring that same energy and track record to ${job.company||'your team'}. I am happy to share specific examples and discuss how my background fits your current priorities.`
@@ -2156,12 +2323,8 @@ function incrementCLCount() {
   return n;
 }
 function checkCoverLetterLimit() {
-  if (selectedPlan === 'pro') return true;      // Pro: unlimited
-  if (selectedPlan === 'starter') {
-    if (getCLCount() < 3) return true;          // Starter: up to 3
-    showToast('📊 You\'ve used your 3 cover letters. Upgrade to Pro for unlimited.');
-    return false;
-  }
+  if (IS_TESTER) return true;          // Testers: unlimited
+  if (selectedPlan === 'paid') return true; // Paid: unlimited
   // Free — no cover letters
   goToPaywall();
   return false;
@@ -2171,10 +2334,10 @@ function checkCoverLetterLimit() {
 // PLAN GATE HELPERS
 // ─────────────────────────────────────────────────────────────────
 function requirePlan(minPlan) {
-  const order = ['free','starter','pro'];
-  const current = order.indexOf(selectedPlan);
-  const required = order.indexOf(minPlan);
-  if (current >= required) return true;
+  // v3: only two tiers — 'free' and 'paid'
+  // Any call to requirePlan('starter') or requirePlan('pro') maps to 'paid'
+  if (IS_TESTER) return true;
+  if (selectedPlan === 'paid') return true;
   goToPaywall();
   return false;
 }
@@ -2868,32 +3031,18 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
 setTimeout(checkInterviewReminders, 3000);
 
 // ─────────────────────────────────────────────────────────────────
-// UPDATED PAYWALL SCREEN FEATURES LIST
+// INIT — restore v3 purchase state from localStorage
 // ─────────────────────────────────────────────────────────────────
-// (Paywall HTML plan cards updated inline via DOM on load)
 document.addEventListener('DOMContentLoaded', ()=>{
-  // Update paywall plan feature lists to reflect actual features
-  const starterEl = document.getElementById('plan-starter');
-  if(starterEl) {
-    starterEl.querySelector('.plan-features').innerHTML = `
-      <li>Save resume (Word download)</li>
-      <li>Cover letter writer (3 letters)</li>
-      <li>Application Tracker</li>
-      <li>Unemployment Report</li>
-      <li>Interview day reminders</li>
-    `;
+  const storedPurchase = localStorage.getItem('cc_purchase_date');
+  if (storedPurchase) {
+    purchaseDate = storedPurchase;
+    selectedPlan = 'paid';
   }
-  const proEl = document.getElementById('plan-pro');
-  if(proEl) {
-    proEl.querySelector('.plan-features').innerHTML = `
-      <li>Everything in Starter</li>
-      <li>Unlimited cover letters</li>
-      <li>Dashboard & analytics</li>
-      <li>Interview Prep (STAR coaching)</li>
-      <li>Salary Negotiation Assistant</li>
-      <li>Live job search (Indeed)</li>
-    `;
-  }
+  const storedGoal = localStorage.getItem('cc_goal_v1');
+  const storedTimeline = localStorage.getItem('cc_timeline_v1');
+  if (storedGoal) userGoal = storedGoal;
+  if (storedTimeline) userTimeline = storedTimeline;
 });
 
 
