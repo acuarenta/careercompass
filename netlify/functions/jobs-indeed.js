@@ -1,117 +1,168 @@
 // netlify/functions/jobs-indeed.js
-// Uses the Anthropic API with the Indeed MCP server to fetch real job listings
-// matched to the user's compass type and location.
+// Enhanced job search: Remotive (free) + Adzuna with richer, role-specific queries
+// Falls through gracefully — always returns results or empty array, never throws to client.
+
+const https = require('https');
+
+function httpsGet(url) {
+  return new Promise((resolve, reject) => {
+    https.get(url, { headers: { 'User-Agent': 'CareerCompass/1.0' } }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try { resolve(JSON.parse(data)); }
+        catch(e) { reject(new Error('JSON parse failed: ' + e.message)); }
+      });
+    }).on('error', reject);
+  });
+}
+
+// Compass-type → rich keyword sets for each API
+const QUERY_MAP = {
+  navigator:  { remotive: 'operations manager',      adzuna: 'Operations Manager Director',       category: 'management' },
+  connector:  { remotive: 'training manager',         adzuna: 'Training Manager Corporate Trainer', category: 'hr' },
+  catalyst:   { remotive: 'sales director',           adzuna: 'Sales Director Business Development', category: 'sales' },
+  anchor:     { remotive: 'finance manager',          adzuna: 'Finance Manager Analyst',            category: 'accounting' },
+  pioneer:    { remotive: 'marketing director',       adzuna: 'Marketing Director Brand Manager',   category: 'marketing' },
+  builder:    { remotive: 'product manager',          adzuna: 'Product Manager Instructional Designer', category: 'it-jobs' },
+  diplomat:   { remotive: 'program manager nonprofit',adzuna: 'Program Director Nonprofit Education', category: 'social-work' },
+  pathfinder: { remotive: 'data analyst',             adzuna: 'Research Analyst Data Scientist',    category: 'it-jobs' },
+};
+
+function normalizeRemotive(job) {
+  return {
+    id: 'rem_' + job.id,
+    title: job.title || '',
+    company: job.company_name || '',
+    location: job.candidate_required_location || 'Remote',
+    type: 'Remote',
+    salary: job.salary || '',
+    desc: (job.description || '').replace(/<[^>]+>/g, '').substring(0, 220).trim() + '…',
+    url: job.url || '',
+    posted: job.publication_date ? timeAgo(job.publication_date) : '',
+    logo: '💼',
+    category: ['remote'],
+    source: 'remotive',
+  };
+}
+
+function normalizeAdzuna(job, loc) {
+  const isRemote = (job.title + ' ' + (job.description||'')).toLowerCase().includes('remote');
+  const salary = job.salary_min && job.salary_max
+    ? `$${Math.round(job.salary_min/1000)}K – $${Math.round(job.salary_max/1000)}K`
+    : '';
+  return {
+    id: 'adz_' + job.id,
+    title: job.title || '',
+    company: (job.company && job.company.display_name) || '',
+    location: (job.location && job.location.display_name) || loc,
+    type: isRemote ? 'Remote' : 'On-site',
+    salary,
+    desc: (job.description || '').replace(/<[^>]+>/g, '').substring(0, 220).trim() + '…',
+    url: job.redirect_url || '',
+    posted: job.created ? timeAgo(job.created) : '',
+    logo: '🏢',
+    category: [],
+    source: 'adzuna',
+  };
+}
+
+function timeAgo(dateStr) {
+  const ms = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(ms / 86400000);
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return `${days} days ago`;
+  if (days < 14) return '1 week ago';
+  return `${Math.floor(days/7)} weeks ago`;
+}
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-  if (!ANTHROPIC_API_KEY) {
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ results: [], source: 'no_key' }),
-    };
-  }
-
   let body;
+  try { body = JSON.parse(event.body || '{}'); } catch { body = {}; }
+
+  const { location = 'Fort Lauderdale, FL', compassType = 'connector' } = body;
+  const qmap = QUERY_MAP[compassType] || QUERY_MAP['connector'];
+
+  // Parse location into city + state
+  const locParts = location.split(',').map(s => s.trim());
+  const city = locParts[0] || 'Fort Lauderdale';
+  const stateRaw = (locParts[1] || 'FL').trim();
+  // Adzuna uses full state names for US
+  const STATE_NAMES = {
+    FL:'florida',TX:'texas',CA:'california',NY:'new_york',GA:'georgia',
+    IL:'illinois',PA:'pennsylvania',OH:'ohio',NC:'north_carolina',AZ:'arizona',
+    WA:'washington',MA:'massachusetts',CO:'colorado',VA:'virginia',TN:'tennessee',
+    NJ:'new_jersey',MI:'michigan',MN:'minnesota',MD:'maryland',WI:'wisconsin',
+  };
+  const stateCode = stateRaw.length === 2 ? stateRaw.toUpperCase() : stateRaw.toUpperCase().substring(0,2);
+  const adzunaState = STATE_NAMES[stateCode] || 'florida';
+
+  const ADZUNA_APP_ID  = process.env.ADZUNA_APP_ID;
+  const ADZUNA_APP_KEY = process.env.ADZUNA_APP_KEY;
+
+  const results = [];
+  const errors  = [];
+
+  // ── 1. Remotive (remote jobs, no key needed) ─────────────────────
   try {
-    body = JSON.parse(event.body || '{}');
-  } catch {
-    return { statusCode: 400, body: 'Invalid JSON' };
+    const remotiveQ = encodeURIComponent(qmap.remotive);
+    const remotiveUrl = `https://remotive.com/api/remote-jobs?search=${remotiveQ}&limit=6`;
+    const rData = await httpsGet(remotiveUrl);
+    if (rData.jobs && Array.isArray(rData.jobs)) {
+      rData.jobs.slice(0, 5).forEach(j => results.push(normalizeRemotive(j)));
+    }
+  } catch(e) {
+    errors.push('remotive: ' + e.message);
   }
 
-  const { query = 'Training Manager', location = 'Fort Lauderdale, FL', compassType = 'connector' } = body;
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-beta': 'mcp-client-2025-04-04',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2000,
-        mcp_servers: [
-          {
-            type: 'url',
-            url: 'https://mcp.indeed.com/claude/mcp',
-            name: 'indeed',
-          },
-        ],
-        system: `You are a job search assistant. Use the Indeed search tool to find relevant job listings, then respond ONLY with a valid JSON array. No markdown, no explanation, just the JSON array.
-
-Each item in the array must have these exact fields:
-- id: string (use the Indeed job key or a unique string)
-- title: string (job title)
-- company: string (company name)  
-- location: string (city, state or "Remote")
-- type: string (one of: "Full-time", "Part-time", "Contract", "Remote", "Hybrid", "On-site")
-- salary: string (salary range if available, otherwise "")
-- desc: string (2-sentence summary of the role)
-- url: string (the apply/job URL from Indeed)
-- posted: string (e.g. "Today", "2 days ago", "1 week ago")
-- logo: string (a single relevant emoji for the industry)
-- category: array of strings from this set: ["training","sales","leadership","remote","finance","tech","healthcare","nonprofit"]
-
-Return between 6 and 10 jobs. Only return jobs that are genuinely relevant to the query and location provided.`,
-        messages: [
-          {
-            role: 'user',
-            content: `Search Indeed for "${query}" jobs in "${location}". Return results as a JSON array exactly as described. No other text.`,
-          },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const err = await response.text();
-      console.error('Anthropic API error:', response.status, err);
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ results: [], source: 'api_error' }),
-      };
-    }
-
-    const data = await response.json();
-
-    // Extract text from response
-    const textBlock = (data.content || []).find(b => b.type === 'text');
-    if (!textBlock) {
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ results: [], source: 'no_text' }),
-      };
-    }
-
-    // Parse the JSON array
-    let jobs;
+  // ── 2. Adzuna (local + national) ────────────────────────────────
+  if (ADZUNA_APP_ID && ADZUNA_APP_KEY) {
     try {
-      const clean = textBlock.text.replace(/```json|```/g, '').trim();
-      jobs = JSON.parse(clean);
-      if (!Array.isArray(jobs)) throw new Error('Not an array');
-    } catch (e) {
-      console.error('JSON parse error:', e.message, textBlock.text.substring(0, 200));
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ results: [], source: 'parse_error' }),
-      };
+      const adzunaQ = encodeURIComponent(qmap.adzuna);
+      const adzunaCity = encodeURIComponent(city);
+      // Search by city first
+      const adzunaUrl = `https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&results_per_page=8&what=${adzunaQ}&where=${adzunaCity}%20${stateCode}&content-type=application/json&sort_by=date`;
+      const aData = await httpsGet(adzunaUrl);
+      if (aData.results && Array.isArray(aData.results)) {
+        aData.results.slice(0, 8).forEach(j => results.push(normalizeAdzuna(j, location)));
+      }
+    } catch(e) {
+      errors.push('adzuna: ' + e.message);
     }
 
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ results: jobs, source: 'indeed' }),
-    };
-  } catch (err) {
-    console.error('jobs-indeed error:', err);
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ results: [], source: 'fetch_error' }),
-    };
+    // Also search broader state if city returned few results
+    if (results.filter(r => r.source === 'adzuna').length < 3) {
+      try {
+        const adzunaQ = encodeURIComponent(qmap.adzuna);
+        const adzunaUrl2 = `https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&results_per_page=6&what=${adzunaQ}&where=${adzunaState}&content-type=application/json&sort_by=date`;
+        const aData2 = await httpsGet(adzunaUrl2);
+        if (aData2.results && Array.isArray(aData2.results)) {
+          aData2.results.slice(0, 5).forEach(j => {
+            const norm = normalizeAdzuna(j, location);
+            // Don't add duplicates
+            if (!results.some(r => r.title === norm.title && r.company === norm.company)) {
+              results.push(norm);
+            }
+          });
+        }
+      } catch(e) {
+        errors.push('adzuna-state: ' + e.message);
+      }
+    }
   }
+
+  if (errors.length) console.log('jobs-indeed errors:', errors.join('; '));
+
+  const source = results.length > 0 ? 'enhanced' : 'no_results';
+
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ results, source, debug: errors }),
+  };
 };
