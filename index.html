@@ -3178,61 +3178,31 @@ async function loadAndShowJobs() {
   document.getElementById('jobs-body').innerHTML=`<div class="jobs-loading"><div class="feedback-spinner"></div><div style="font-family:'Cormorant Garamond',serif; font-size:22px; color:var(--navy); margin-top:1.25rem; margin-bottom:6px;">Searching live listings...</div><div style="font-size:13px; color:var(--text-mid);">Matching open roles to your profile</div></div>`;
 
   const ct = compassType || 'connector';
-  const queryMap = {
-    navigator: 'Operations Manager OR Program Manager OR Director',
-    connector: 'Training Manager OR Corporate Trainer OR Learning Development',
-    catalyst:  'Sales Director OR Business Development OR Account Executive',
-    anchor:    'Finance Manager OR Operations Analyst OR Project Coordinator',
-    pioneer:   'Marketing Director OR Brand Strategist OR Creative Director',
-    builder:   'Product Manager OR Instructional Designer OR Engineering Lead',
-    diplomat:  'Nonprofit Director OR Education Administrator OR Policy Analyst',
-    pathfinder:'Research Analyst OR Data Scientist OR Strategy Consultant',
-  };
+
   // Strip street address — send city+state only
   const resumeLocRaw = (window._resumeData&&window._resumeData.location)||'';
   const manualLoc = ((document.getElementById('m-location')||{}).value)||'';
-  const rawLoc = resumeLocRaw || manualLoc || 'Fort Lauderdale FL';
+  const rawLoc = resumeLocRaw || manualLoc || 'Fort Lauderdale, FL';
   const locParts = rawLoc.split(',').map(s=>s.trim()).filter(Boolean);
-  const loc = locParts.length >= 3 ? locParts.slice(-2).join(' ') : rawLoc.replace(/\d{5}/,'').trim();
-  // First term only — multi-OR queries return 0 results from Adzuna
-  const query = (queryMap[ct]||queryMap['connector']).split(' OR ')[0];
+  const loc = locParts.length >= 3 ? locParts.slice(-2).join(', ') : rawLoc.replace(/\d{5}/,'').trim();
 
   let liveJobs = [];
-  let source = 'fallback';
+  let source = 'no_results';
 
-  // ── Try enhanced job search (Remotive + Adzuna with smarter queries) ──
   try {
-    const indeedResp = await fetch(API_BASE+'/jobs-indeed', {
+    const resp = await fetch(API_BASE+'/jobs-indeed', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ location:loc, compassType:ct })
     });
-    if (indeedResp.ok) {
-      const indeedData = await indeedResp.json();
-      if (indeedData.results && indeedData.results.length > 0 && indeedData.source === 'enhanced') {
-        liveJobs = indeedData.results;
-        source = 'enhanced';
-      }
-    }
-  } catch(e) {
-    console.warn('Enhanced job fetch failed, falling back:', e.message);
-  }
-
-  // ── Fall back to original Adzuna/Remotive/USAJobs aggregator ──────
-  if (liveJobs.length === 0) {
-    try {
-      const resp = await fetch(API_BASE+'/jobs', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({ query, location:loc })
-      });
+    if (resp.ok) {
       const data = await resp.json();
       liveJobs = data.results || [];
-      source = data.source || 'aggregator';
-      if (['api_error','fetch_error','no_key','no_results'].includes(source)) liveJobs = [];
-    } catch(e) {
-      console.error('Jobs fallback fetch error:', e);
+      source = data.source || 'no_results';
+      if (source === 'no_key' || source === 'no_results') liveJobs = [];
     }
+  } catch(e) {
+    console.error('Job fetch error:', e);
   }
 
   if (liveJobs.length > 0) {
@@ -3374,11 +3344,11 @@ function renderJobs(filter, source) {
 
   document.getElementById('jobs-match-count').textContent = filtered.length + ' live match' + (filtered.length!==1?'es':'');
 
-  const sourceBadge = (source === 'enhanced' || source === 'aggregator')
+  const sourceBadge = source === 'jooble'
     ? `<span style="font-size:10px;background:rgba(201,165,90,0.15);color:var(--gold);padding:2px 8px;border-radius:50px;margin-left:8px;">● Live</span>`
     : '';
 
-  const sourceLabel = source === 'enhanced' ? 'Remotive · Adzuna' : 'Remotive · Adzuna · USAJobs';
+  const sourceLabel = 'Jooble · Indeed · LinkedIn · ZipRecruiter';
 
   let html = `<div class="feedback-banner">
     <div class="feedback-banner-title">Live matches for you, ${name}${sourceBadge}</div>
