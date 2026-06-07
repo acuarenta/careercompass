@@ -1,80 +1,103 @@
 // netlify/functions/jobs-indeed.js
-// Enhanced job search: Remotive (free) + Adzuna with richer, role-specific queries
-// Falls through gracefully — always returns results or empty array, never throws to client.
+// Job search via Jooble API — aggregates Indeed, LinkedIn, ZipRecruiter, and 140k+ sources.
+// Set JOOBLE_API_KEY in Netlify environment variables (free key from jooble.org/api/about).
 
 const https = require('https');
 
-function httpsGet(url) {
+// Compass type → Jooble keyword sets (role-specific, local-friendly)
+const QUERY_MAP = {
+  navigator:  ['Operations Manager', 'Program Director', 'Director of Operations'],
+  connector:  ['Training Manager', 'Corporate Trainer', 'Learning Development Manager', 'HR Manager'],
+  catalyst:   ['Sales Manager', 'Business Development Manager', 'Sales Director', 'Account Executive'],
+  anchor:     ['Finance Manager', 'Financial Analyst', 'Operations Analyst', 'Compliance Manager'],
+  pioneer:    ['Marketing Manager', 'Brand Manager', 'Marketing Director', 'Creative Director'],
+  builder:    ['Product Manager', 'Instructional Designer', 'Project Manager', 'Systems Analyst'],
+  diplomat:   ['Program Manager', 'Nonprofit Manager', 'Education Administrator', 'Community Manager'],
+  pathfinder: ['Research Analyst', 'Strategy Consultant', 'Data Analyst', 'Business Analyst'],
+};
+
+function httpsPost(url, payload) {
   return new Promise((resolve, reject) => {
-    https.get(url, { headers: { 'User-Agent': 'CareerCompass/1.0' } }, (res) => {
+    const body = JSON.stringify(payload);
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+        'User-Agent': 'CareerCompass/1.0',
+      },
+    };
+    const req = https.request(url, options, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
         try { resolve(JSON.parse(data)); }
-        catch(e) { reject(new Error('JSON parse failed: ' + e.message)); }
+        catch (e) { reject(new Error('JSON parse failed: ' + e.message + ' body: ' + data.substring(0, 100))); }
       });
-    }).on('error', reject);
+    });
+    req.on('error', reject);
+    req.write(body);
+    req.end();
   });
 }
 
-// Compass-type → rich keyword sets for each API
-const QUERY_MAP = {
-  navigator:  { remotive: 'operations manager',      adzuna: 'Operations Manager Director',       category: 'management' },
-  connector:  { remotive: 'training manager',         adzuna: 'Training Manager Corporate Trainer', category: 'hr' },
-  catalyst:   { remotive: 'sales director',           adzuna: 'Sales Director Business Development', category: 'sales' },
-  anchor:     { remotive: 'finance manager',          adzuna: 'Finance Manager Analyst',            category: 'accounting' },
-  pioneer:    { remotive: 'marketing director',       adzuna: 'Marketing Director Brand Manager',   category: 'marketing' },
-  builder:    { remotive: 'product manager',          adzuna: 'Product Manager Instructional Designer', category: 'it-jobs' },
-  diplomat:   { remotive: 'program manager nonprofit',adzuna: 'Program Director Nonprofit Education', category: 'social-work' },
-  pathfinder: { remotive: 'data analyst',             adzuna: 'Research Analyst Data Scientist',    category: 'it-jobs' },
-};
-
-function normalizeRemotive(job) {
-  return {
-    id: 'rem_' + job.id,
-    title: job.title || '',
-    company: job.company_name || '',
-    location: job.candidate_required_location || 'Remote',
-    type: 'Remote',
-    salary: job.salary || '',
-    desc: (job.description || '').replace(/<[^>]+>/g, '').substring(0, 220).trim() + '…',
-    url: job.url || '',
-    posted: job.publication_date ? timeAgo(job.publication_date) : '',
-    logo: '💼',
-    category: ['remote'],
-    source: 'remotive',
-  };
-}
-
-function normalizeAdzuna(job, loc) {
-  const isRemote = (job.title + ' ' + (job.description||'')).toLowerCase().includes('remote');
-  const salary = job.salary_min && job.salary_max
-    ? `$${Math.round(job.salary_min/1000)}K – $${Math.round(job.salary_max/1000)}K`
-    : '';
-  return {
-    id: 'adz_' + job.id,
-    title: job.title || '',
-    company: (job.company && job.company.display_name) || '',
-    location: (job.location && job.location.display_name) || loc,
-    type: isRemote ? 'Remote' : 'On-site',
-    salary,
-    desc: (job.description || '').replace(/<[^>]+>/g, '').substring(0, 220).trim() + '…',
-    url: job.redirect_url || '',
-    posted: job.created ? timeAgo(job.created) : '',
-    logo: '🏢',
-    category: [],
-    source: 'adzuna',
-  };
-}
-
 function timeAgo(dateStr) {
+  if (!dateStr) return '';
   const ms = Date.now() - new Date(dateStr).getTime();
   const days = Math.floor(ms / 86400000);
+  if (isNaN(days) || days < 0) return '';
   if (days === 0) return 'Today';
   if (days === 1) return 'Yesterday';
   if (days < 7) return `${days} days ago`;
   if (days < 14) return '1 week ago';
-  return `${Math.floor(days/7)} weeks ago`;
+  return `${Math.floor(days / 7)} weeks ago`;
+}
+
+function guessType(job) {
+  const text = ((job.title || '') + ' ' + (job.type || '')).toLowerCase();
+  if (text.includes('remote')) return 'Remote';
+  if (text.includes('hybrid')) return 'Hybrid';
+  if (text.includes('part')) return 'Part-time';
+  if (text.includes('contract') || text.includes('freelance')) return 'Contract';
+  return 'Full-time';
+}
+
+function guessLogo(title) {
+  const t = (title || '').toLowerCase();
+  if (t.includes('sales') || t.includes('account')) return '💼';
+  if (t.includes('train') || t.includes('learn') || t.includes('coach')) return '🎓';
+  if (t.includes('market') || t.includes('brand') || t.includes('creative')) return '📣';
+  if (t.includes('finance') || t.includes('account') || t.includes('fiscal')) return '📊';
+  if (t.includes('data') || t.includes('analyst') || t.includes('research')) return '🔭';
+  if (t.includes('operations') || t.includes('director') || t.includes('manager')) return '🧭';
+  if (t.includes('nonprofit') || t.includes('education') || t.includes('program')) return '🌿';
+  if (t.includes('product') || t.includes('engineer') || t.includes('design')) return '🏗️';
+  return '💼';
+}
+
+function normalizeJooble(job) {
+  // Jooble fields: title, location, snippet, salary, type, link, company, updated
+  const salary = job.salary ? String(job.salary).trim() : '';
+  const desc = (job.snippet || '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ')
+    .substring(0, 240).trim();
+
+  return {
+    id: 'jbl_' + Math.random().toString(36).substring(2, 10),
+    title: (job.title || '').replace(/<[^>]+>/g, '').trim(),
+    company: (job.company || '').trim(),
+    location: (job.location || '').trim(),
+    type: guessType(job),
+    salary,
+    desc: desc ? desc + (desc.length >= 240 ? '…' : '') : '',
+    url: job.link || '',
+    posted: timeAgo(job.updated),
+    logo: guessLogo(job.title),
+    category: [],
+    source: 'jooble',
+  };
 }
 
 exports.handler = async (event) => {
@@ -82,87 +105,62 @@ exports.handler = async (event) => {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
+  const JOOBLE_API_KEY = process.env.JOOBLE_API_KEY;
+  if (!JOOBLE_API_KEY) {
+    console.warn('JOOBLE_API_KEY not set — returning empty results');
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ results: [], source: 'no_key' }),
+    };
+  }
+
   let body;
   try { body = JSON.parse(event.body || '{}'); } catch { body = {}; }
 
   const { location = 'Fort Lauderdale, FL', compassType = 'connector' } = body;
-  const qmap = QUERY_MAP[compassType] || QUERY_MAP['connector'];
+  const keywords = QUERY_MAP[compassType] || QUERY_MAP['connector'];
 
-  // Parse location into city + state
-  const locParts = location.split(',').map(s => s.trim());
-  const city = locParts[0] || 'Fort Lauderdale';
-  const stateRaw = (locParts[1] || 'FL').trim();
-  // Adzuna uses full state names for US
-  const STATE_NAMES = {
-    FL:'florida',TX:'texas',CA:'california',NY:'new_york',GA:'georgia',
-    IL:'illinois',PA:'pennsylvania',OH:'ohio',NC:'north_carolina',AZ:'arizona',
-    WA:'washington',MA:'massachusetts',CO:'colorado',VA:'virginia',TN:'tennessee',
-    NJ:'new_jersey',MI:'michigan',MN:'minnesota',MD:'maryland',WI:'wisconsin',
-  };
-  const stateCode = stateRaw.length === 2 ? stateRaw.toUpperCase() : stateRaw.toUpperCase().substring(0,2);
-  const adzunaState = STATE_NAMES[stateCode] || 'florida';
+  // Run two parallel searches: primary role title + secondary title
+  // Jooble works best with one clean keyword phrase per call
+  const searches = [keywords[0], keywords[1]].filter(Boolean);
 
-  const ADZUNA_APP_ID  = process.env.ADZUNA_APP_ID;
-  const ADZUNA_APP_KEY = process.env.ADZUNA_APP_KEY;
+  const allResults = [];
+  const seen = new Set();
+  const errors = [];
 
-  const results = [];
-  const errors  = [];
-
-  // ── 1. Remotive (remote jobs, no key needed) ─────────────────────
-  try {
-    const remotiveQ = encodeURIComponent(qmap.remotive);
-    const remotiveUrl = `https://remotive.com/api/remote-jobs?search=${remotiveQ}&limit=6`;
-    const rData = await httpsGet(remotiveUrl);
-    if (rData.jobs && Array.isArray(rData.jobs)) {
-      rData.jobs.slice(0, 5).forEach(j => results.push(normalizeRemotive(j)));
-    }
-  } catch(e) {
-    errors.push('remotive: ' + e.message);
-  }
-
-  // ── 2. Adzuna (local + national) ────────────────────────────────
-  if (ADZUNA_APP_ID && ADZUNA_APP_KEY) {
+  await Promise.all(searches.map(async (keyword) => {
     try {
-      const adzunaQ = encodeURIComponent(qmap.adzuna);
-      const adzunaCity = encodeURIComponent(city);
-      // Search by city first
-      const adzunaUrl = `https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&results_per_page=8&what=${adzunaQ}&where=${adzunaCity}%20${stateCode}&content-type=application/json&sort_by=date`;
-      const aData = await httpsGet(adzunaUrl);
-      if (aData.results && Array.isArray(aData.results)) {
-        aData.results.slice(0, 8).forEach(j => results.push(normalizeAdzuna(j, location)));
+      const payload = {
+        keywords: keyword,
+        location,
+        radius: '40',   // ~25 miles — keeps results local
+        page: 1,
+      };
+      const url = `https://jooble.org/api/${JOOBLE_API_KEY}`;
+      const data = await httpsPost(url, payload);
+
+      if (data && Array.isArray(data.jobs)) {
+        data.jobs.forEach(job => {
+          const key = (job.title + '|' + job.company + '|' + job.location).toLowerCase();
+          if (!seen.has(key) && job.title) {
+            seen.add(key);
+            allResults.push(normalizeJooble(job));
+          }
+        });
       }
-    } catch(e) {
-      errors.push('adzuna: ' + e.message);
+    } catch (e) {
+      errors.push(`${keyword}: ${e.message}`);
     }
+  }));
 
-    // Also search broader state if city returned few results
-    if (results.filter(r => r.source === 'adzuna').length < 3) {
-      try {
-        const adzunaQ = encodeURIComponent(qmap.adzuna);
-        const adzunaUrl2 = `https://api.adzuna.com/v1/api/jobs/us/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&results_per_page=6&what=${adzunaQ}&where=${adzunaState}&content-type=application/json&sort_by=date`;
-        const aData2 = await httpsGet(adzunaUrl2);
-        if (aData2.results && Array.isArray(aData2.results)) {
-          aData2.results.slice(0, 5).forEach(j => {
-            const norm = normalizeAdzuna(j, location);
-            // Don't add duplicates
-            if (!results.some(r => r.title === norm.title && r.company === norm.company)) {
-              results.push(norm);
-            }
-          });
-        }
-      } catch(e) {
-        errors.push('adzuna-state: ' + e.message);
-      }
-    }
-  }
+  if (errors.length) console.warn('Jooble search errors:', errors.join('; '));
 
-  if (errors.length) console.log('jobs-indeed errors:', errors.join('; '));
-
-  const source = results.length > 0 ? 'enhanced' : 'no_results';
+  const source = allResults.length > 0 ? 'jooble' : 'no_results';
 
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ results, source, debug: errors }),
+    body: JSON.stringify({ results: allResults, source }),
   };
 };
