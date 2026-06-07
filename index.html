@@ -2452,7 +2452,6 @@ function buildPreviewHTML(t, name, email, phone, location, summary, skills, expe
   // Wrap in a scaled-down container for the preview pane
   return `<div style="transform:scale(0.72);transform-origin:top left;width:139%;pointer-events:none;">${inner}<div style="margin-top:16px;padding-top:10px;border-top:1px solid #eee;font-size:9px;color:#bbb;text-align:center;letter-spacing:0.05em;">PREVIEW — your content will appear here after resume generation</div></div>`;
 }
-}
 
 function closeTemplatePreview() {
   const modal = document.getElementById('template-preview-modal');
