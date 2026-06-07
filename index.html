@@ -255,7 +255,28 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 .paywall-back-btn:hover { color:rgba(255,255,255,0.7); }
 .paywall-divider { height:1px; background:rgba(255,255,255,0.1); margin:1rem 0; }
 
-/* ── SESSION TOKEN SCREEN ───────────────────────────────────────────────────*/
+/* ── TEMPLATE PICKER SCREEN ─────────────────────────────────────────────────*/
+#screen-templates { background: var(--cream); flex-direction: column; }
+.templates-body { flex: 1; overflow-y: auto; padding: 1.25rem; -webkit-overflow-scrolling: touch; }
+.template-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+.template-card { background: var(--white); border-radius: var(--radius); border: 2px solid transparent; padding: 1rem 1.25rem; cursor: pointer; transition: all 0.18s; display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow-sm); }
+.template-card:hover { border-color: rgba(201,165,90,0.4); transform: translateY(-1px); }
+.template-card.selected { border-color: var(--gold); background: rgba(201,165,90,0.05); }
+.template-card.selected .template-radio { background: var(--gold); border-color: var(--gold); }
+.template-card.selected .template-radio::after { display: block; }
+.template-radio { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--cream-dark); flex-shrink: 0; position: relative; transition: all 0.15s; }
+.template-radio::after { content: ''; display: none; position: absolute; top: 4px; left: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--navy); }
+.template-swatch { width: 36px; height: 44px; border-radius: 6px; flex-shrink: 0; display: flex; flex-direction: column; gap: 3px; padding: 5px 4px; overflow: hidden; }
+.template-swatch-bar { border-radius: 2px; height: 4px; background: rgba(0,0,0,0.15); }
+.template-swatch-bar.accent { height: 7px; }
+.template-info { flex: 1; min-width: 0; }
+.template-name { font-size: 14px; font-weight: 500; color: var(--navy); margin-bottom: 2px; }
+.template-style { font-size: 11px; color: var(--text-light); margin-bottom: 4px; }
+.template-best { font-size: 11px; color: var(--text-mid); font-style: italic; }
+.template-badge { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 8px; border-radius: 50px; flex-shrink: 0; }
+.badge-recommended { background: rgba(201,165,90,0.15); color: #8a6d20; }
+.badge-ats { background: rgba(15,31,61,0.08); color: var(--navy); }
+.templates-footer { padding: 1rem 1.25rem; padding-bottom: max(1rem, env(safe-area-inset-bottom)); background: var(--cream); border-top: 1px solid var(--cream-dark); flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; }
 #screen-session { background: var(--navy); flex-direction: column; justify-content: center; align-items: center; padding: 2rem 1.5rem; }
 .session-wrap { width: 100%; max-width: 440px; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .session-logo { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--white); margin-bottom: 0.5rem; }
@@ -768,14 +789,43 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
         <div style="font-size:11px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-light); margin-bottom:0.75rem;">Your rewritten resume</div>
         <div id="resume-preview-wrap"></div>
       </div>
-      <div style="display:flex; gap:10px; margin-bottom:0.75rem;">
-        <button class="btn-next" style="flex:0 0 auto; background:transparent; color:var(--navy); border:1.5px solid rgba(15,31,61,0.2); padding:14px 18px;" onclick="downloadResumeAsWord()">⬇ Download Resume</button>
-        <button class="btn-next gold" style="flex:1;" onclick="goToPaywall('feedback')">Find Matching Jobs →</button>
+      <div style="margin-bottom:0.75rem;">
+        <button class="btn-next gold" style="width:100%; justify-content:center;" onclick="showScreen('templates')">
+          Choose a Resume Template →
+        </button>
       </div>
       <div style="background:var(--cream-dark); border-radius:var(--radius-sm); padding:0.875rem 1rem; margin-bottom:1.5rem; font-size:12px; color:var(--text-mid); line-height:1.6;">
-        💡 <strong style="color:var(--navy);">We know we're not perfect.</strong> Feel free to download your resume and make any edits you'd like — it's your document. The rewrite is a starting point, not the final word.
+        💡 <strong style="color:var(--navy);">We know we're not perfect.</strong> After you download your resume, feel free to make any edits you'd like — it's your document. The rewrite is a starting point, not the final word.
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════ TEMPLATE PICKER ═══════════ -->
+<div id="screen-templates" class="screen">
+  <div class="resume-header">
+    <button class="resume-header-back" onclick="showScreen('feedback')">←</button>
+    <div class="resume-header-info">
+      <div class="resume-header-title">Choose a Template</div>
+      <div class="resume-header-sub">Select the style that fits you best</div>
+    </div>
+    <div class="quiz-logo-sm" style="flex-shrink:0;">Career<span style="color:var(--gold);">Compass</span></div>
+  </div>
+  <div class="templates-body">
+    <div style="font-size:13px; color:var(--text-mid); line-height:1.6; margin-bottom:1.25rem;">
+      Each template applies a different visual style to your rewritten resume. Pick the one that feels like you — then download it as a Word document you can edit freely.
+    </div>
+    <div class="template-grid" id="template-grid">
+      <!-- Rendered by renderTemplates() -->
+    </div>
+  </div>
+  <div class="templates-footer">
+    <button class="btn-next gold" id="template-download-btn" style="width:100%; justify-content:center; opacity:0.4; pointer-events:none;" onclick="downloadWithTemplate()">
+      ⬇ Download Resume
+    </button>
+    <button class="btn-next" style="width:100%; justify-content:center; background:transparent; color:var(--text-mid); border:1.5px solid var(--cream-dark); font-size:13px;" onclick="goToDashboard()">
+      Skip — Go to Dashboard →
+    </button>
   </div>
 </div>
 
@@ -1343,6 +1393,8 @@ function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('exit'));
     const el = document.getElementById('screen-'+id);
     if(el) el.classList.add('active');
+    // Side effects on screen activation
+    if (id === 'templates') renderTemplates();
   }, 50);
 }
 
@@ -2221,16 +2273,17 @@ function renderFeedback(data, ctx) {
 // ─────────────────────────────────────────────────────────────────
 // DOWNLOAD RESUME AS WORD (.docx via HTML conversion)
 // ─────────────────────────────────────────────────────────────────
-function downloadResumeAsWord() {
+function downloadResumeAsWord(tmpl) {
   if (!requirePlan('starter')) return;
   const data = window._resumeData;
   const ctx = window._resumeCtx || buildResumeContext();
   if (!data) { showToast('Generate your resume first'); return; }
 
+  // Use provided template or fall back to True North
+  const t = tmpl || RESUME_TEMPLATES[0];
+
   const displayName = data.name || ctx.name || 'Your Name';
   const contact = [data.location || ctx.location, data.phone || ctx.phone, data.email || ctx.email].filter(Boolean).join('  |  ');
-  const scheme = COLOR_SCHEMES.find(c => c.id === (ctx.colorScheme || 'navy')) || COLOR_SCHEMES[0];
-  const accent = scheme.swatches[0];
 
   const expHtml = (data.experience || []).map(e =>
     `<p><b>${e.title}</b><br>${e.company} &nbsp;|&nbsp; ${e.dates}</p><ul>${(e.bullets||[]).map(b=>`<li>${b}</li>`).join('')}</ul>`
@@ -2240,18 +2293,17 @@ function downloadResumeAsWord() {
   ).join('');
   const skillsHtml = (data.skills || []).join(', ');
 
-  // Build an HTML document that Word can open natively
   const html = `
 <html xmlns:o="urn:schemas-microsoft-com:office:office"
       xmlns:w="urn:schemas-microsoft-com:office:word"
       xmlns="http://www.w3.org/TR/REC-html40">
 <head><meta charset="UTF-8">
 <style>
-  body { font-family: Calibri, sans-serif; font-size: 11pt; margin: 1in; color: #333; }
-  h1 { font-size: 20pt; color: ${accent}; margin-bottom: 2pt; }
+  body { font-family: ${t.bodyFont}; font-size: 11pt; margin: 1in; color: #333; }
+  h1 { font-family: ${t.headingFont}; font-size: ${t.headingSize}; ${t.nameStyle} margin-bottom: 2pt; }
   .contact { font-size: 10pt; color: #666; margin-bottom: 10pt; }
   .summary { font-size: 11pt; font-style: italic; margin-bottom: 14pt; color: #444; }
-  h2 { font-size: 12pt; color: ${accent}; border-bottom: 1pt solid ${accent}; padding-bottom: 2pt; margin-top: 14pt; margin-bottom: 6pt; text-transform: uppercase; letter-spacing: 1pt; }
+  h2 { font-family: ${t.headingFont}; font-size: 12pt; color: ${t.accentColor}; ${t.accentStyle} padding-bottom: 2pt; margin-top: 14pt; margin-bottom: 6pt; text-transform: uppercase; letter-spacing: 1pt; }
   p { margin: 4pt 0; }
   li { margin: 3pt 0; }
   .skills { font-size: 10pt; }
@@ -2276,11 +2328,248 @@ ${(data.certifications||[]).length>0?`<h2>Certifications &amp; Licenses</h2><p c
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('✅ Resume downloading as Word doc!');
+  showToast('✅ Resume downloading!');
+
+  // After download, show dashboard CTA in templates footer
+  const footer = document.querySelector('.templates-footer');
+  if (footer) {
+    footer.innerHTML = `
+      <div style="background:rgba(201,165,90,0.1); border:1px solid rgba(201,165,90,0.25); border-radius:var(--radius-sm); padding:0.875rem 1rem; font-size:12px; color:var(--text-mid); line-height:1.6; margin-bottom:8px;">
+        💡 <strong style="color:var(--navy);">We know we're not perfect.</strong> Your resume is downloading — feel free to open it and make any edits you'd like. It's your document.
+      </div>
+      <button class="btn-next gold" style="width:100%; justify-content:center;" onclick="goToDashboard()">
+        Go to My Dashboard →
+      </button>
+      <button class="btn-next" style="width:100%; justify-content:center; background:transparent; color:var(--text-mid); border:1.5px solid var(--cream-dark); font-size:13px;" onclick="downloadWithTemplate()">
+        ⬇ Download Again (different template)
+      </button>`;
+  }
 }
 function goToPaywall(source) {
   paywallSource = source || 'results';
   showScreen('paywall');
+}
+
+// ─────────────────────────────────────────────────────────────────
+// RESUME TEMPLATES
+// ─────────────────────────────────────────────────────────────────
+const RESUME_TEMPLATES = [
+  {
+    id: 'true-north',
+    name: 'True North',
+    style: 'Clean · Minimal · Single column',
+    bestFor: 'Any professional role',
+    badge: 'recommended',
+    swatchBg: '#0f1f3d',
+    accentColor: '#0f1f3d',
+    headingFont: 'Calibri, sans-serif',
+    bodyFont: 'Calibri, sans-serif',
+    headingSize: '22pt',
+    accentStyle: 'border-bottom: 2pt solid #0f1f3d;',
+    nameStyle: 'color:#0f1f3d;',
+  },
+  {
+    id: 'due-east',
+    name: 'Due East',
+    style: 'Bold header · Modern two-column',
+    bestFor: 'Sales, Marketing, Business Development',
+    badge: null,
+    swatchBg: '#1a3060',
+    accentColor: '#c9a55a',
+    headingFont: 'Arial, sans-serif',
+    bodyFont: 'Arial, sans-serif',
+    headingSize: '20pt',
+    accentStyle: 'border-bottom: 2pt solid #c9a55a;',
+    nameStyle: 'color:#1a3060;',
+  },
+  {
+    id: 'deep-south',
+    name: 'Deep South',
+    style: 'Warm · Relationship-forward',
+    bestFor: 'HR, Training, Nonprofit, Coaching',
+    badge: null,
+    swatchBg: '#3d5a3e',
+    accentColor: '#3d5a3e',
+    headingFont: 'Georgia, serif',
+    bodyFont: 'Palatino Linotype, serif',
+    headingSize: '21pt',
+    accentStyle: 'border-bottom: 2pt solid #3d5a3e;',
+    nameStyle: 'color:#3d5a3e;',
+  },
+  {
+    id: 'far-west',
+    name: 'Far West',
+    style: 'Conservative · Traditional',
+    bestFor: 'Finance, Legal, Compliance, Government',
+    badge: null,
+    swatchBg: '#2c2c2c',
+    accentColor: '#2c2c2c',
+    headingFont: 'Times New Roman, serif',
+    bodyFont: 'Times New Roman, serif',
+    headingSize: '20pt',
+    accentStyle: 'border-bottom: 1pt solid #2c2c2c;',
+    nameStyle: 'color:#2c2c2c;',
+  },
+  {
+    id: 'the-pioneer',
+    name: 'The Pioneer',
+    style: 'Creative sidebar · Color accent',
+    bestFor: 'Design, Marketing, Creative roles',
+    badge: null,
+    swatchBg: '#5b4db5',
+    accentColor: '#5b4db5',
+    headingFont: 'Arial, sans-serif',
+    bodyFont: 'Calibri, sans-serif',
+    headingSize: '22pt',
+    accentStyle: 'border-bottom: 3pt solid #5b4db5;',
+    nameStyle: 'color:#5b4db5;',
+  },
+  {
+    id: 'the-navigator',
+    name: 'The Navigator',
+    style: 'Executive · Gravitas-heavy',
+    bestFor: 'Director, VP, C-Suite',
+    badge: null,
+    swatchBg: '#0d2235',
+    accentColor: '#c9a55a',
+    headingFont: 'Palatino Linotype, serif',
+    bodyFont: 'Calibri, sans-serif',
+    headingSize: '24pt',
+    accentStyle: 'border-bottom: 2pt solid #c9a55a;',
+    nameStyle: 'color:#0d2235; letter-spacing:2pt;',
+  },
+  {
+    id: 'the-builder',
+    name: 'The Builder',
+    style: 'Skills-forward · Technical',
+    bestFor: 'IT, Engineering, Product, Instructional Design',
+    badge: 'ats',
+    swatchBg: '#1a5f7a',
+    accentColor: '#1a5f7a',
+    headingFont: 'Arial, sans-serif',
+    bodyFont: 'Courier New, monospace',
+    headingSize: '20pt',
+    accentStyle: 'border-bottom: 2pt solid #1a5f7a;',
+    nameStyle: 'color:#1a5f7a;',
+  },
+  {
+    id: 'federal-compass',
+    name: 'Federal Compass',
+    style: 'USAJobs-compliant · Detail-rich',
+    bestFor: 'Government positions',
+    badge: null,
+    swatchBg: '#003366',
+    accentColor: '#003366',
+    headingFont: 'Times New Roman, serif',
+    bodyFont: 'Times New Roman, serif',
+    headingSize: '18pt',
+    accentStyle: 'border-bottom: 1pt solid #003366;',
+    nameStyle: 'color:#003366;',
+  },
+  {
+    id: 'the-diplomat',
+    name: 'The Diplomat',
+    style: 'Elegant · Values-forward',
+    bestFor: 'Education, Nonprofit, Social Services',
+    badge: null,
+    swatchBg: '#4a7c59',
+    accentColor: '#4a7c59',
+    headingFont: 'Georgia, serif',
+    bodyFont: 'Georgia, serif',
+    headingSize: '22pt',
+    accentStyle: 'border-bottom: 2pt solid #4a7c59;',
+    nameStyle: 'color:#4a7c59;',
+  },
+  {
+    id: 'pathfinder',
+    name: 'Pathfinder',
+    style: 'ATS-optimized · No frills',
+    bestFor: 'Maximum ATS compatibility',
+    badge: 'ats',
+    swatchBg: '#555555',
+    accentColor: '#333333',
+    headingFont: 'Arial, sans-serif',
+    bodyFont: 'Arial, sans-serif',
+    headingSize: '18pt',
+    accentStyle: 'border-bottom: 1pt solid #555;',
+    nameStyle: 'color:#333;',
+  },
+];
+
+let selectedTemplateId = null;
+
+function renderTemplates() {
+  // Auto-recommend a template based on compass type
+  const compassRecommend = {
+    navigator: 'the-navigator',
+    connector: 'deep-south',
+    catalyst:  'due-east',
+    anchor:    'far-west',
+    pioneer:   'the-pioneer',
+    builder:   'the-builder',
+    diplomat:  'the-diplomat',
+    pathfinder:'pathfinder',
+  };
+  const recommended = compassRecommend[compassType] || 'true-north';
+
+  const grid = document.getElementById('template-grid');
+  if (!grid) return;
+  grid.innerHTML = RESUME_TEMPLATES.map(t => {
+    const isRec = t.id === recommended;
+    const badge = isRec
+      ? '<span class="template-badge badge-recommended">✦ Matches your type</span>'
+      : t.badge === 'ats'
+        ? '<span class="template-badge badge-ats">ATS-friendly</span>'
+        : '';
+    return `<div class="template-card${isRec ? ' selected' : ''}" id="tcard-${t.id}" onclick="selectTemplate('${t.id}')">
+      <div class="template-radio${isRec ? ' selected' : ''}" id="trad-${t.id}"></div>
+      <div class="template-swatch" style="background:${t.swatchBg}20; border:1.5px solid ${t.swatchBg}40;">
+        <div class="template-swatch-bar accent" style="background:${t.swatchBg};"></div>
+        <div class="template-swatch-bar" style="background:${t.swatchBg}60; width:80%;"></div>
+        <div class="template-swatch-bar" style="background:${t.swatchBg}40; width:60%;"></div>
+        <div class="template-swatch-bar" style="background:${t.swatchBg}40; width:70%;"></div>
+        <div class="template-swatch-bar" style="background:${t.swatchBg}40; width:50%;"></div>
+      </div>
+      <div class="template-info">
+        <div class="template-name">${t.name}</div>
+        <div class="template-style">${t.style}</div>
+        <div class="template-best">Best for: ${t.bestFor}</div>
+      </div>
+      ${badge}
+    </div>`;
+  }).join('');
+
+  // Pre-select compass-recommended template
+  selectedTemplateId = recommended;
+  enableTemplateDownload();
+}
+
+function selectTemplate(id) {
+  // Deselect all
+  document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+  document.querySelectorAll('.template-radio').forEach(r => r.classList.remove('selected'));
+  // Select chosen
+  const card = document.getElementById('tcard-'+id);
+  const radio = document.getElementById('trad-'+id);
+  if (card) card.classList.add('selected');
+  if (radio) radio.classList.add('selected');
+  selectedTemplateId = id;
+  enableTemplateDownload();
+}
+
+function enableTemplateDownload() {
+  const btn = document.getElementById('template-download-btn');
+  if (btn) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; }
+}
+
+function downloadWithTemplate() {
+  const tmpl = RESUME_TEMPLATES.find(t => t.id === selectedTemplateId) || RESUME_TEMPLATES[0];
+  downloadResumeAsWord(tmpl);
+}
+
+function goToDashboard() {
+  renderDashboard();
+  showScreen('dashboard');
 }
 function paywallGoBack() {
   if (paywallSource === 'resume' || paywallSource === 'feedback') {
