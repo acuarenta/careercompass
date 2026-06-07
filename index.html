@@ -255,7 +255,30 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 .paywall-back-btn:hover { color:rgba(255,255,255,0.7); }
 .paywall-divider { height:1px; background:rgba(255,255,255,0.1); margin:1rem 0; }
 
-/* ── QUIZ INTRO SCREEN ──────────────────────────────────────────────────────*/
+/* ── SESSION TOKEN SCREEN ───────────────────────────────────────────────────*/
+#screen-session { background: var(--navy); flex-direction: column; justify-content: center; align-items: center; padding: 2rem 1.5rem; }
+.session-wrap { width: 100%; max-width: 440px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.session-logo { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--white); margin-bottom: 0.5rem; }
+.session-logo span { color: var(--gold); }
+.session-heading { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--white); font-weight: 500; line-height: 1.2; margin-bottom: 0.75rem; }
+.session-sub { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.65; margin-bottom: 2rem; }
+.session-token-box { background: rgba(201,165,90,0.1); border: 1.5px solid rgba(201,165,90,0.35); border-radius: var(--radius); padding: 1.25rem; width: 100%; margin-bottom: 1.5rem; }
+.session-token-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+.session-token-url { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--gold-light); word-break: break-all; line-height: 1.5; margin-bottom: 12px; }
+.session-copy-btn { width: 100%; background: var(--gold); color: var(--navy); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; padding: 13px; border-radius: 50px; border: none; cursor: pointer; transition: all 0.2s; }
+.session-copy-btn:hover { background: var(--gold-light); }
+.session-note { font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.6; margin-bottom: 2rem; }
+.session-continue { width: 100%; background: transparent; border: 1.5px solid rgba(255,255,255,0.2); border-radius: 50px; color: rgba(255,255,255,0.7); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 13px; cursor: pointer; transition: all 0.2s; }
+.session-continue:hover { border-color: rgba(255,255,255,0.4); color: var(--white); }
+
+/* ── LINKEDIN SCREEN ────────────────────────────────────────────────────────*/
+#screen-linkedin { background: var(--cream); flex-direction: column; }
+.linkedin-body { flex: 1; overflow-y: auto; padding: 1.5rem; -webkit-overflow-scrolling: touch; }
+.linkedin-upload-zone { background: var(--white); border: 1.5px dashed rgba(15,31,61,0.2); border-radius: var(--radius); padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 1rem; }
+.linkedin-upload-zone:hover, .linkedin-upload-zone.has-file { border-color: var(--gold); background: rgba(201,165,90,0.04); border-style: solid; }
+.linkedin-skills-output { background: var(--white); border-radius: var(--radius); padding: 1.25rem; margin-top: 1rem; }
+.linkedin-skill-tag { display: inline-block; background: rgba(10,102,194,0.1); border: 1px solid rgba(10,102,194,0.2); border-radius: 50px; font-size: 12px; color: #0a66c2; padding: 4px 14px; margin: 3px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.linkedin-skill-tag:hover { background: rgba(10,102,194,0.18); }
 #screen-quiz-intro { background: var(--cream); flex-direction: column; }
 .quiz-intro-header { background: var(--navy); padding: 1.25rem; flex-shrink: 0; display: flex; align-items: center; gap: 12px; }
 .quiz-intro-body { flex: 1; overflow-y: auto; padding: 1.5rem; -webkit-overflow-scrolling: touch; }
@@ -611,11 +634,6 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
           <div class="pc-goal-value" id="pc-timeline-val">—</div>
         </div>
       </div>
-      <div class="pc-divider"></div>
-      <button class="pc-share" onclick="shareCompassResult()">
-        <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M10 1.5L13.5 5M13.5 5L10 8.5M13.5 5H5.5C3.84 5 2.5 6.34 2.5 8v5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Share my compass type
-      </button>
     </div>
 
     <!-- ── NATURAL STRENGTHS ──────────────────────────────── -->
@@ -667,7 +685,7 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
   <div class="resume-header">
     <button class="resume-header-back" onclick="showScreen('results')">←</button>
     <div class="resume-header-info">
-      <div class="resume-header-title">Your Resume</div>
+      <div class="resume-header-title">Let's build your resume</div>
       <div class="resume-header-sub">Upload or enter your experience</div>
     </div>
     <div class="quiz-logo-sm" style="flex-shrink:0;">Career<span style="color:var(--gold);">Compass</span></div>
@@ -750,9 +768,12 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
         <div style="font-size:11px; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-light); margin-bottom:0.75rem;">Your rewritten resume</div>
         <div id="resume-preview-wrap"></div>
       </div>
-      <div style="display:flex; gap:10px; margin-bottom:1.5rem;">
-        <button class="btn-next" style="flex:0 0 auto; background:transparent; color:var(--navy); border:1.5px solid rgba(15,31,61,0.2); padding:14px 18px;" onclick="downloadResumeAsWord()">⬇ Save</button>
+      <div style="display:flex; gap:10px; margin-bottom:0.75rem;">
+        <button class="btn-next" style="flex:0 0 auto; background:transparent; color:var(--navy); border:1.5px solid rgba(15,31,61,0.2); padding:14px 18px;" onclick="downloadResumeAsWord()">⬇ Download Resume</button>
         <button class="btn-next gold" style="flex:1;" onclick="goToPaywall('feedback')">Find Matching Jobs →</button>
+      </div>
+      <div style="background:var(--cream-dark); border-radius:var(--radius-sm); padding:0.875rem 1rem; margin-bottom:1.5rem; font-size:12px; color:var(--text-mid); line-height:1.6;">
+        💡 <strong style="color:var(--navy);">We know we're not perfect.</strong> Feel free to download your resume and make any edits you'd like — it's your document. The rewrite is a starting point, not the final word.
       </div>
     </div>
   </div>
@@ -808,6 +829,70 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
     <button class="paywall-cta" onclick="handlePaywallCTA()">Get Full Compass — $14.99 →</button>
     <button class="paywall-skip" onclick="continueAsTester()">🧪 Continue as Tester (skip payment)</button>
     <div class="paywall-fine">"90 days to your next role — or your next chapter."<br>Secure checkout via Stripe · One-time charge · No subscription</div>
+  </div>
+</div>
+
+<!-- ═══════════ SESSION TOKEN ═══════════ -->
+<div id="screen-session" class="screen">
+  <div class="session-wrap">
+    <div class="session-logo">Career<span>Compass</span></div>
+    <div class="session-heading">Save your link — access from any device</div>
+    <div class="session-sub">We've created a unique link for your session. Bookmark it or send it to yourself so you can pick up exactly where you left off — on any phone, tablet, or computer.</div>
+    <div class="session-token-box">
+      <div class="session-token-label">Your personal CareerCompass link</div>
+      <div class="session-token-url" id="session-token-url">https://careercompassxl.netlify.app/?s=loading...</div>
+      <button class="session-copy-btn" onclick="copySessionLink()">📋 Copy My Link</button>
+    </div>
+    <div class="session-note">This link is unique to you. Anyone with this link can view your session, so keep it private. Your data is stored only on this device — the link restores your quiz results and progress.</div>
+    <button class="session-continue" onclick="sessionContinue()">
+      Continue to Build My Resume →
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════ LINKEDIN ═══════════ -->
+<div id="screen-linkedin" class="screen">
+  <div class="resume-header">
+    <button class="resume-header-back" onclick="showScreen('dashboard')">←</button>
+    <div class="resume-header-info">
+      <div class="resume-header-title">LinkedIn Profile</div>
+      <div class="resume-header-sub">Skills & profile suggestions</div>
+    </div>
+    <div class="quiz-logo-sm" style="flex-shrink:0;">Career<span style="color:var(--gold);">Compass</span></div>
+  </div>
+  <div class="linkedin-body">
+    <div class="result-card" style="margin-bottom:1rem;">
+      <div class="result-card-label">How this works</div>
+      <div class="result-card-body">Upload your rewritten resume (or any version) and CareerCompass will suggest the most impactful LinkedIn skills to add — matched to your compass type and target roles.</div>
+    </div>
+    <div class="linkedin-upload-zone" id="li-upload-zone" onclick="document.getElementById('li-file-input').click()">
+      <div style="font-size:28px; margin-bottom:6px;" id="li-icon">📄</div>
+      <div style="font-size:14px; font-weight:500; color:var(--navy); margin-bottom:3px;" id="li-title">Upload your resume</div>
+      <div style="font-size:12px; color:var(--text-light);" id="li-sub">PDF or Word · We'll extract and analyze it</div>
+    </div>
+    <input type="file" id="li-file-input" accept=".pdf,.doc,.docx,.txt" style="display:none;" onchange="handleLinkedInUpload(this)">
+    <div id="li-loading" style="display:none; text-align:center; padding:2rem 0;">
+      <div class="feedback-spinner" style="margin:0 auto 12px;"></div>
+      <div style="font-size:13px; color:var(--text-mid);">Analyzing your resume...</div>
+    </div>
+    <div id="li-output" style="display:none;">
+      <div class="linkedin-skills-output">
+        <div style="font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:4px;">Your current skills on file</div>
+        <div id="li-current-skills" style="margin-bottom:1.25rem; font-size:13px; color:var(--text-mid); line-height:1.6;"></div>
+        <div style="font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--navy); margin-bottom:8px;">✦ Recommended skills to add to LinkedIn</div>
+        <div style="font-size:12px; color:var(--text-mid); margin-bottom:10px;">Tap a skill to copy it</div>
+        <div id="li-skill-tags"></div>
+        <div style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--cream-dark);">
+          <div style="font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px;">Profile headline suggestions</div>
+          <div id="li-headlines" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+        <div style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--cream-dark);">
+          <div style="font-size:10px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-light); margin-bottom:8px;">About section starter</div>
+          <div id="li-about" style="font-size:13px; color:var(--text-mid); line-height:1.7; background:var(--cream); border-radius:var(--radius-sm); padding:1rem;"></div>
+          <button class="btn-next" style="width:100%; justify-content:center; margin-top:10px; background:var(--cream-dark); color:var(--navy);" onclick="copyLinkedInAbout()">📋 Copy About Section</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -985,11 +1070,23 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
     <button class="resume-header-back" onclick="showScreen('dashboard')">←</button>
     <div class="resume-header-info">
       <div class="resume-header-title">Unemployment Report</div>
-      <div class="resume-header-sub">Weekly job search activity</div>
+      <div class="resume-header-sub">Job search activity log</div>
     </div>
     <div class="quiz-logo-sm" style="flex-shrink:0;">Career<span style="color:var(--gold);">Compass</span></div>
   </div>
-  <div class="report-body" id="report-body">
+  <!-- Date range filter -->
+  <div style="background:var(--white); border-bottom:1px solid var(--cream-dark); padding:1rem 1.25rem; flex-shrink:0; display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+    <div style="flex:1; min-width:110px;">
+      <div style="font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">From</div>
+      <input type="date" id="report-date-from" class="field-input" style="padding:8px 10px; font-size:13px; width:100%;">
+    </div>
+    <div style="flex:1; min-width:110px;">
+      <div style="font-size:11px; font-weight:600; color:var(--text-light); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">To</div>
+      <input type="date" id="report-date-to" class="field-input" style="padding:8px 10px; font-size:13px; width:100%;">
+    </div>
+    <button class="btn-next" style="background:var(--navy); color:var(--white); padding:10px 18px; font-size:13px; flex-shrink:0;" onclick="renderReport()">Generate</button>
+  </div>
+  <div class="report-body" id="report-body" style="flex:1; overflow-y:auto; padding:1.25rem; -webkit-overflow-scrolling:touch;">
     <!-- Rendered by renderReport() -->
   </div>
 </div>
@@ -1676,41 +1773,44 @@ function downloadCompassPDF() {
   const goal = goalMap[answers[2]] || '—';
   const timeline = tlMap[answers[3]] || '—';
   const date = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const hasResume = uploadedFileBase64.length > 0 || uploadedFileContent.length > 50;
 
-  // Build a printable HTML page and trigger browser print-to-PDF
+  // Grab any resume feedback that was rendered on results screen
+  const resumeFeedbackEl = document.getElementById('result-resume-feedback-body');
+  const resumeFeedback = (resumeFeedbackEl && resumeFeedbackEl.textContent && resumeFeedbackEl.textContent.length > 20)
+    ? resumeFeedbackEl.textContent.trim() : '';
+
   const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>${name}'s CareerCompass</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;600&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', sans-serif; background: #fff; color: #1a1a2e; padding: 40px; max-width: 680px; margin: 0 auto; }
-  .header { background: #0f1f3d; color: #fff; border-radius: 16px; padding: 32px; margin-bottom: 24px; position: relative; overflow: hidden; }
-  .header::after { content: ''; position: absolute; bottom: -30px; right: -30px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(201,165,90,0.2) 0%, transparent 70%); }
-  .logo { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: rgba(255,255,255,0.6); margin-bottom: 20px; }
+  body { font-family: 'DM Sans', sans-serif; background: #fff; color: #1a1a2e; padding: 40px; max-width: 700px; margin: 0 auto; }
+  .header { background: #0f1f3d; color: #fff; border-radius: 16px; padding: 32px; margin-bottom: 24px; }
+  .logo { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: rgba(255,255,255,0.5); margin-bottom: 16px; }
   .logo span { color: #c9a55a; }
-  .direction { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #c9a55a; margin-bottom: 6px; }
-  .type-name { font-family: 'Cormorant Garamond', serif; font-size: 42px; font-weight: 500; color: #fff; line-height: 1.1; margin-bottom: 12px; }
-  .type-icon { font-size: 36px; margin-bottom: 12px; }
-  .desc { font-size: 14px; color: rgba(255,255,255,0.72); line-height: 1.7; }
-  .meta-row { display: flex; gap: 24px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.12); }
-  .meta-item { }
-  .meta-label { font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 3px; }
+  .direction { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #c9a55a; margin-bottom: 5px; }
+  .type-icon { font-size: 32px; margin-bottom: 10px; }
+  .type-name { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 500; color: #fff; line-height: 1.1; margin-bottom: 10px; }
+  .desc { font-size: 13px; color: rgba(255,255,255,0.72); line-height: 1.7; }
+  .meta-row { display: flex; gap: 20px; margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.12); flex-wrap: wrap; }
+  .meta-label { font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 2px; }
   .meta-value { font-size: 13px; color: rgba(255,255,255,0.7); }
-  .section { margin-bottom: 20px; }
-  .section-title { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
+  .section { background: #f8f6f1; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .section-title { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 14px; }
   .trait-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
   .trait-label { font-size: 13px; color: #333; flex: 1; }
-  .trait-bar-track { width: 140px; height: 5px; background: #eee; border-radius: 3px; overflow: hidden; flex-shrink: 0; }
-  .trait-bar-fill { height: 100%; border-radius: 3px; background: #0f1f3d; }
-  .trait-bar-fill.gold { background: #c9a55a; }
+  .trait-bar-track { width: 160px; height: 5px; background: #ddd; border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+  .trait-fill { height: 100%; border-radius: 3px; background: #0f1f3d; }
+  .trait-fill.gold { background: #c9a55a; }
   .trait-pct { font-size: 12px; color: #888; width: 32px; text-align: right; flex-shrink: 0; }
-  .job-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-  .job-tag { background: #f0ede6; border-radius: 50px; font-size: 12px; color: #0f1f3d; padding: 5px 14px; font-weight: 500; }
-  .footer { margin-top: 32px; text-align: center; font-size: 11px; color: #aaa; }
-  .footer strong { color: #0f1f3d; }
-  @media print { body { padding: 20px; } }
-</style>
-</head><body>
+  .job-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+  .job-tag { background: #ede9e0; border-radius: 50px; font-size: 12px; color: #0f1f3d; padding: 5px 14px; font-weight: 500; }
+  .resume-section { background: #fff; border: 1.5px solid #c9a55a; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .resume-feedback { font-size: 13px; color: #444; line-height: 1.7; }
+  .footer { margin-top: 28px; text-align: center; font-size: 11px; color: #aaa; }
+  @media print { body { padding: 16px; } }
+</style></head><body>
 <div class="header">
   <div class="logo">Career<span>Compass</span></div>
   <div class="type-icon">${type.icon}</div>
@@ -1718,24 +1818,42 @@ function downloadCompassPDF() {
   <div class="type-name">${type.name}</div>
   <div class="desc">${type.desc(name)}</div>
   <div class="meta-row">
-    <div class="meta-item"><div class="meta-label">Name</div><div class="meta-value">${name}</div></div>
-    <div class="meta-item"><div class="meta-label">Goal</div><div class="meta-value">${goal}</div></div>
-    <div class="meta-item"><div class="meta-label">Timeline</div><div class="meta-value">${timeline}</div></div>
-    <div class="meta-item"><div class="meta-label">Date</div><div class="meta-value">${date}</div></div>
+    <div><div class="meta-label">Name</div><div class="meta-value">${name}</div></div>
+    <div><div class="meta-label">Goal</div><div class="meta-value">${goal}</div></div>
+    <div><div class="meta-label">Timeline</div><div class="meta-value">${timeline}</div></div>
+    <div><div class="meta-label">Generated</div><div class="meta-value">${date}</div></div>
   </div>
 </div>
+
 <div class="section">
   <div class="section-title">Natural Strengths</div>
   ${type.traits.map(t => {
     const pct = Math.min(96, Math.max(30, t.pct));
-    return `<div class="trait-row"><div class="trait-label">${t.label}</div><div class="trait-bar-track"><div class="trait-bar-fill${t.gold?' gold':''}" style="width:${pct}%"></div></div><div class="trait-pct">${pct}%</div></div>`;
+    return `<div class="trait-row"><div class="trait-label">${t.label}</div><div class="trait-bar-track"><div class="trait-fill${t.gold?' gold':''}" style="width:${pct}%"></div></div><div class="trait-pct">${pct}%</div></div>`;
   }).join('')}
 </div>
+
 <div class="section">
   <div class="section-title">Roles That Match Your Compass Type</div>
   <div class="job-tags">${type.jobs.map(j=>`<span class="job-tag">${j}</span>`).join('')}</div>
 </div>
-<div class="footer">Generated by <strong>CareerCompass</strong> · careercompassxl.netlify.app · ${date}</div>
+
+${hasResume && resumeFeedback ? `
+<div class="resume-section">
+  <div class="section-title" style="color:#c9a55a;">Resume Review Notes</div>
+  <div class="resume-feedback">${resumeFeedback}</div>
+</div>` : ''}
+
+<div class="section" style="background:#0f1f3d;">
+  <div class="section-title" style="color:rgba(255,255,255,0.4);">Suggested next steps</div>
+  <div style="font-size:13px; color:rgba(255,255,255,0.75); line-height:1.8;">
+    ${hasResume
+      ? '1. Review the resume notes above and make edits to your document.<br>2. Use CareerCompass to search for roles that match your compass type.<br>3. Generate a tailored cover letter for every application.'
+      : '1. Upload your resume in CareerCompass to get personalized feedback.<br>2. Search for roles that match your compass type.<br>3. Generate a tailored cover letter for every application.'}
+  </div>
+</div>
+
+<div class="footer">Generated by <strong style="color:#0f1f3d;">CareerCompass</strong> · careercompassxl.netlify.app · ${date}</div>
 </body></html>`;
 
   const win = window.open('','_blank');
@@ -1921,7 +2039,7 @@ function buildResumeContext() {
     hasUpload,hasPdf,
     uploadedFileBase64:uploadedFileBase64,
     uploadedFileType:uploadedFileType||'application/pdf',
-    uploadedFileContent:uploadedFileContent.substring(0,3000),
+    uploadedFileContent:uploadedFileContent.substring(0,12000),
     personalityType: compassT ? compassT.name : 'Professional',
     compassDirection: compassT ? compassT.direction : 'North',
     preferredEnv: compassT ? compassT.name : 'role that matches your strengths',
@@ -2183,13 +2301,121 @@ function handlePaywallCTA() {
   showToast('💳 Stripe checkout coming soon!', 3000);
 }
 
+// ─────────────────────────────────────────────────────────────────
+// SESSION TOKEN SCREEN
+// ─────────────────────────────────────────────────────────────────
+function generateSessionToken() {
+  // Build a compact session snapshot from localStorage-safe data
+  const token = btoa(JSON.stringify({
+    n: (answers[1]||'').split(' ')[0],
+    ct: compassType,
+    a2: answers[2],
+    a3: answers[3],
+    ts: Date.now()
+  })).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_').substring(0,24);
+  return token;
+}
+
+function showSessionScreen() {
+  const token = generateSessionToken();
+  const url = `https://careercompassxl.netlify.app/?s=${token}`;
+  const el = document.getElementById('session-token-url');
+  if (el) el.textContent = url;
+  // Store token
+  try { localStorage.setItem('cc_session_token', token); } catch(e) {}
+  showScreen('session');
+}
+
+function copySessionLink() {
+  const url = document.getElementById('session-token-url').textContent;
+  if (navigator.share) {
+    navigator.share({ title: 'My CareerCompass Session', url }).catch(()=>{
+      navigator.clipboard.writeText(url).then(()=>showToast('📋 Link copied!')).catch(()=>{});
+    });
+  } else {
+    navigator.clipboard.writeText(url).then(()=>showToast('📋 Link copied to clipboard!')).catch(()=>showToast('Copy this link: '+url));
+  }
+}
+
+function sessionContinue() {
+  // Route to resume build flow post-paywall
+  showScreen('resume');
+}
+
+// ─────────────────────────────────────────────────────────────────
+// LINKEDIN PROFILE BUILDER
+// ─────────────────────────────────────────────────────────────────
+async function handleLinkedInUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  const f = input.files[0];
+  const icon = document.getElementById('li-icon');
+  const title = document.getElementById('li-title');
+  const sub = document.getElementById('li-sub');
+  const zone = document.getElementById('li-upload-zone');
+  icon.textContent = '⏳'; title.textContent = 'Reading resume...'; sub.textContent = f.name;
+  let text = ''; let base64 = ''; let mime = ''; let isPdf = false;
+  try {
+    const name = f.name.toLowerCase();
+    base64 = await readFileAsBase64(f);
+    isPdf = f.type.includes('pdf') || name.endsWith('.pdf');
+    if (isPdf) { mime = 'application/pdf'; }
+    else if (name.endsWith('.docx') || name.endsWith('.doc')) {
+      if (window.mammoth) {
+        const ab = await f.arrayBuffer();
+        const r = await mammoth.extractRawText({arrayBuffer:ab});
+        text = r.value || '';
+      }
+    } else { text = atob(base64); }
+    icon.textContent = '✅'; title.textContent = 'Resume loaded!'; sub.textContent = f.name;
+    zone.classList.add('has-file');
+  } catch(e) {
+    icon.textContent = '❌'; title.textContent = 'Could not read file'; sub.textContent = 'Try a PDF or Word doc';
+    return;
+  }
+  document.getElementById('li-loading').style.display = 'block';
+  document.getElementById('li-output').style.display = 'none';
+  const ct = compassType || 'connector';
+  const type = COMPASS_TYPES[{navigator:'N',connector:'S',catalyst:'E',anchor:'W',pioneer:'NE',builder:'SE',diplomat:'SW',pathfinder:'NW'}[ct]||'S'];
+  const targetRoles = type ? type.jobs.slice(0,4).join(', ') : 'professional roles';
+  const systemPrompt = `You are a LinkedIn profile expert. Analyze resumes and suggest skills, headlines, and About section text optimized for LinkedIn. Never use the word "AI". Respond ONLY with valid JSON, no markdown.`;
+  const userPrompt = `Compass type: ${type ? type.name : 'Professional'} (${type ? type.direction : ''}). Target roles: ${targetRoles}.\n\nResume:\n${text||'(PDF uploaded — analyze based on compass type)'}\n\nReturn JSON:\n{"currentSkills":["skill1","skill2"...],"recommendedSkills":["skill1","skill2"...],"headlines":["headline1","headline2","headline3"],"about":"2-3 sentence LinkedIn About section"}`;
+  try {
+    let result;
+    if (isPdf && base64) {
+      result = await callClaudeWithDoc(systemPrompt, userPrompt, base64, mime, 1000);
+    } else {
+      result = await callClaudeText(systemPrompt, userPrompt, 1000);
+    }
+    const parsed = JSON.parse(result.replace(/```json|```/g,'').trim());
+    document.getElementById('li-loading').style.display = 'none';
+    document.getElementById('li-output').style.display = 'block';
+    document.getElementById('li-current-skills').textContent = (parsed.currentSkills||[]).join(' · ') || 'Not detected from upload';
+    document.getElementById('li-skill-tags').innerHTML = (parsed.recommendedSkills||[]).map(s =>
+      `<span class="linkedin-skill-tag" onclick="navigator.clipboard.writeText('${s.replace(/'/g,"\\'")}');showToast('📋 Copied: ${s.replace(/'/g,"\\'")}');">${s}</span>`
+    ).join('');
+    document.getElementById('li-headlines').innerHTML = (parsed.headlines||[]).map(h =>
+      `<div style="background:var(--cream);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--navy);line-height:1.5;cursor:pointer;" onclick="navigator.clipboard.writeText(this.textContent.trim());showToast('📋 Headline copied!');">${h}</div>`
+    ).join('');
+    document.getElementById('li-about').textContent = parsed.about || '';
+    window._liAboutText = parsed.about || '';
+  } catch(e) {
+    document.getElementById('li-loading').style.display = 'none';
+    document.getElementById('li-output').style.display = 'block';
+    document.getElementById('li-skill-tags').innerHTML = '<div style="font-size:13px;color:var(--text-mid);padding:1rem 0;">Could not analyze resume. Please try again.</div>';
+  }
+}
+
+function copyLinkedInAbout() {
+  const text = window._liAboutText || document.getElementById('li-about').textContent;
+  navigator.clipboard.writeText(text).then(()=>showToast('📋 About section copied!')).catch(()=>{});
+}
+
 function continueAsTester() {
   selectedPlan = 'paid';
   purchaseDate = new Date().toISOString();
   try { localStorage.setItem('cc_purchase_date', purchaseDate); } catch(e) {}
   showToast('🧪 Tester access granted — Full Compass enabled!', 3000);
-  renderDashboard();
-  showScreen('dashboard');
+  showSessionScreen();
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -3118,10 +3344,23 @@ function renderDashboard() {
   // Quick actions
   html += `<div class="dash-card animate-in delay-3">
     <div class="dash-card-label">Quick actions</div>
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <button class="btn-next" style="background:var(--cream-dark);color:var(--navy);justify-content:flex-start;gap:12px;" onclick="showScreen('tracker');renderTracker();">📋 View Application Tracker</button>
-      <button class="btn-next" style="background:var(--cream-dark);color:var(--navy);justify-content:flex-start;gap:12px;" onclick="loadAndShowJobs();">🔍 Search Jobs</button>
-      <button class="btn-next" style="background:var(--cream-dark);color:var(--navy);justify-content:flex-start;gap:12px;" onclick="renderReport();showScreen('report');">📄 Unemployment Report</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button class="btn-next" style="background:var(--navy);color:var(--white);justify-content:center;gap:8px;font-size:13px;padding:14px 10px;border-radius:var(--radius-sm);flex-direction:column;height:auto;" onclick="loadAndShowJobs();">
+        <span style="font-size:22px;">🔍</span>
+        Search Jobs
+      </button>
+      <button class="btn-next" style="background:var(--navy);color:var(--white);justify-content:center;gap:8px;font-size:13px;padding:14px 10px;border-radius:var(--radius-sm);flex-direction:column;height:auto;" onclick="showScreen('linkedin');">
+        <span style="font-size:22px;">💼</span>
+        LinkedIn Profile
+      </button>
+      <button class="btn-next" style="background:var(--cream-dark);color:var(--navy);justify-content:center;gap:8px;font-size:13px;padding:14px 10px;border-radius:var(--radius-sm);flex-direction:column;height:auto;" onclick="showScreen('tracker');renderTracker();">
+        <span style="font-size:22px;">📋</span>
+        Job Tracker
+      </button>
+      <button class="btn-next" style="background:var(--cream-dark);color:var(--navy);justify-content:center;gap:8px;font-size:13px;padding:14px 10px;border-radius:var(--radius-sm);flex-direction:column;height:auto;" onclick="renderReport();showScreen('report');">
+        <span style="font-size:22px;">📄</span>
+        Unemployment Report
+      </button>
     </div>
   </div>`;
 
@@ -3357,15 +3596,48 @@ function copySalaryScript(text) {
 // UNEMPLOYMENT REPORT
 // ─────────────────────────────────────────────────────────────────
 function renderReport() {
-  const apps = getApplications();
+  let apps = getApplications();
   if (apps.length === 0) {
     document.getElementById('report-body').innerHTML = `<div class="tracker-empty">
       <div class="tracker-empty-icon">📄</div>
       <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--navy);margin-bottom:8px;">No applications yet</div>
-      <div style="font-size:13px;color:var(--text-mid);">Add applications in the Tracker to generate your weekly report.</div>
+      <div style="font-size:13px;color:var(--text-mid);">Add applications in the Tracker to generate your activity report.</div>
     </div>`;
     return;
   }
+
+  // Date-range filter
+  const fromEl = document.getElementById('report-date-from');
+  const toEl = document.getElementById('report-date-to');
+  const fromDate = fromEl && fromEl.value ? new Date(fromEl.value+'T00:00:00') : null;
+  const toDate = toEl && toEl.value ? new Date(toEl.value+'T23:59:59') : null;
+
+  if (fromDate || toDate) {
+    apps = apps.filter(a => {
+      const d = a.dateApplied ? new Date(a.dateApplied) : new Date(a.createdAt||Date.now());
+      if (fromDate && d < fromDate) return false;
+      if (toDate && d > toDate) return false;
+      return true;
+    });
+  }
+
+  const rangeLabel = (fromDate || toDate)
+    ? `${fromDate ? fromDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'All time'} – ${toDate ? toDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Today'}`
+    : 'All time';
+
+  if (apps.length === 0) {
+    document.getElementById('report-body').innerHTML = `<div class="tracker-empty">
+      <div class="tracker-empty-icon">🔍</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--navy);margin-bottom:8px;">No applications in this date range</div>
+      <div style="font-size:13px;color:var(--text-mid);">Try adjusting the From/To dates above.</div>
+    </div>`;
+    return;
+  }
+
+  // Summary totals
+  const counts = {applied:0,inprocess:0,interview:0,offer:0,closed:0};
+  apps.forEach(a=>{if(counts[a.status]!==undefined)counts[a.status]++;});
+
   // Group by week
   const byWeek = {};
   apps.forEach(a => {
@@ -3376,10 +3648,23 @@ function renderReport() {
     if (!byWeek[key]) byWeek[key] = [];
     byWeek[key].push(a);
   });
+
   const sl = STATUS_LABELS;
-  let html = `<div style="display:flex;gap:8px;margin-bottom:1rem;">
-    <button class="btn-next" style="background:var(--navy);color:var(--white);font-size:13px;padding:10px 18px;" onclick="exportReport()">⬇ Export as Text</button>
+  let html = `
+  <div style="background:var(--navy);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;color:var(--white);">
+    <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px;">Report Period</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:18px;margin-bottom:12px;">${rangeLabel}</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      <div><div style="font-size:22px;font-weight:500;color:var(--gold);">${apps.length}</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">Applications</div></div>
+      <div><div style="font-size:22px;font-weight:500;color:var(--gold);">${counts.interview}</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">Interviews</div></div>
+      <div><div style="font-size:22px;font-weight:500;color:var(--gold);">${counts.offer}</div><div style="font-size:11px;color:rgba(255,255,255,0.5);">Offers</div></div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:1rem;">
+    <button class="btn-next" style="background:var(--navy);color:var(--white);font-size:13px;padding:10px 18px;flex:1;justify-content:center;" onclick="exportReport()">⬇ Export as Text</button>
+    <button class="btn-next" style="background:var(--cream-dark);color:var(--navy);font-size:13px;padding:10px 18px;flex:1;justify-content:center;" onclick="exportReportPDF()">🖨 Print / PDF</button>
   </div>`;
+
   Object.entries(byWeek).sort((a,b)=>new Date(b[0])-new Date(a[0])).forEach(([week, weekApps]) => {
     html += `<div class="report-week-header">Week of ${week} — ${weekApps.length} application${weekApps.length!==1?'s':''}</div>`;
     weekApps.forEach(a => {
@@ -3396,6 +3681,52 @@ function renderReport() {
     });
   });
   document.getElementById('report-body').innerHTML = html;
+}
+
+function exportReportPDF() {
+  const apps = getApplications();
+  const fromEl = document.getElementById('report-date-from');
+  const toEl = document.getElementById('report-date-to');
+  const fromDate = fromEl && fromEl.value ? new Date(fromEl.value+'T00:00:00') : null;
+  const toDate = toEl && toEl.value ? new Date(toEl.value+'T23:59:59') : null;
+  let filtered = apps;
+  if (fromDate || toDate) {
+    filtered = apps.filter(a => {
+      const d = a.dateApplied ? new Date(a.dateApplied) : new Date(a.createdAt||Date.now());
+      if (fromDate && d < fromDate) return false;
+      if (toDate && d > toDate) return false;
+      return true;
+    });
+  }
+  const name = (answers[1]||'').split(' ')[0] || 'Job Seeker';
+  const date = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const rangeLabel = (fromDate || toDate)
+    ? `${fromDate ? fromDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'All time'} – ${toDate ? toDate.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Today'}`
+    : 'All time';
+  const sl = STATUS_LABELS;
+  const rows = filtered.map((a,i) => `<tr style="border-bottom:1px solid #eee;">
+    <td style="padding:8px 6px;font-size:12px;">${i+1}</td>
+    <td style="padding:8px 6px;font-size:12px;">${a.dateApplied||'—'}</td>
+    <td style="padding:8px 6px;font-size:12px;font-weight:500;">${a.company||'—'}</td>
+    <td style="padding:8px 6px;font-size:12px;">${a.role||'—'}</td>
+    <td style="padding:8px 6px;font-size:12px;">${a.location||'—'}</td>
+    <td style="padding:8px 6px;font-size:12px;">${a.source||'—'}</td>
+    <td style="padding:8px 6px;font-size:12px;">${(sl[a.status]||{}).label||a.status}</td>
+    <td style="padding:8px 6px;font-size:12px;text-align:center;">${a.status==='offer'?'✓':''}</td>
+  </tr>`).join('');
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Job Search Report — ${name}</title>
+  <style>body{font-family:Arial,sans-serif;padding:32px;max-width:900px;margin:0 auto;color:#1a1a2e;}h1{font-size:22px;color:#0f1f3d;margin-bottom:4px;}h2{font-size:14px;font-weight:400;color:#666;margin-bottom:24px;}table{width:100%;border-collapse:collapse;}th{background:#0f1f3d;color:#fff;padding:8px 6px;font-size:11px;text-align:left;letter-spacing:0.05em;}@media print{body{padding:16px;}}</style>
+  </head><body>
+  <h1>Job Search Activity Report</h1>
+  <h2>${name} · ${rangeLabel} · Generated ${date}</h2>
+  <table><thead><tr>
+    <th>#</th><th>Date</th><th>Company</th><th>Position</th><th>Location</th><th>Source</th><th>Status</th><th>Offer</th>
+  </tr></thead><tbody>${rows}</tbody></table>
+  <div style="margin-top:24px;font-size:11px;color:#aaa;">Generated by CareerCompass · careercompassxl.netlify.app</div>
+  </body></html>`;
+  const win = window.open('','_blank');
+  if (win) { win.document.write(html); win.document.close(); setTimeout(()=>{win.focus();win.print();},400); }
+  else showToast('⚠️ Allow pop-ups to print your report.');
 }
 
 function exportReport() {
