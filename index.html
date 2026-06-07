@@ -955,7 +955,7 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
         <li>Your full CareerCompass personality results</li>
         <li>Download your compass graphic to save or share</li>
         <li>Personalized job-fit recommendations</li>
-        <li>Resume review and AI-powered feedback</li>
+        <li>Resume review with personalized written feedback</li>
       </ul>
     </div>
 
@@ -969,7 +969,7 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
       <div class="paywall-paid-price">$14.99 <span>one-time</span></div>
       <ul class="paywall-paid-list">
         <li>10 resume templates matched to your compass type (DOCX download)</li>
-        <li>Full AI resume rewrite</li>
+        <li>Full resume rewrite, tailored to your compass type</li>
         <li>Live job search — matched to your personality profile</li>
         <li>Unlimited cover letters, tailored to every role</li>
         <li>Application tracker with follow-up reminders</li>
@@ -2430,40 +2430,28 @@ function openTemplatePreview(id) {
 }
 
 function buildPreviewHTML(t, name, email, phone, location, summary, skills, experience, education) {
-  const contact = [location, phone, email].filter(Boolean).join('  ·  ');
+  const contact = [location, phone, email].filter(Boolean).join('  |  ');
   const expHtml = experience.map(e =>
-    `<div style="margin-bottom:12px;">
-      <div style="font-weight:600; color:${t.accentColor}; font-size:12.5px;">${e.title}</div>
-      <div style="font-size:11px; color:#666; margin-bottom:4px;">${e.company} &nbsp;|&nbsp; ${e.dates}</div>
-      <ul style="padding-left:16px; margin:0;">${(e.bullets||[]).map(b=>`<li style="margin-bottom:3px;">${b}</li>`).join('')}</ul>
+    `<div class="exp-block" style="margin-bottom:10px;">
+      <div class="exp-title" style="font-weight:600;">${e.title}</div>
+      <div class="exp-meta" style="color:#777;font-size:10pt;margin-bottom:3px;">${e.company} | ${e.dates}</div>
+      <ul style="padding-left:14px;margin:0;">${(e.bullets||[]).map(b=>`<li style="margin-bottom:2px;font-size:10pt;">${b}</li>`).join('')}</ul>
     </div>`
   ).join('');
   const eduHtml = education.map(e =>
-    `<div style="margin-bottom:8px;">
-      <div style="font-weight:600; font-size:12px;">${e.degree}</div>
-      <div style="font-size:11px; color:#666;">${e.school}${e.year ? ' · ' + e.year : ''}</div>
+    `<div class="edu-block" style="margin-bottom:6px;">
+      <div class="exp-title" style="font-weight:600;">${e.degree}</div>
+      <div class="exp-meta" style="color:#777;font-size:10pt;">${e.school}${e.year ? ' · ' + e.year : ''}</div>
     </div>`
   ).join('');
+  const skillsHtml = typeof skills === 'string' ? skills : skills.join(', ');
+  const certHtml = '';
 
-  const sectionHeading = (label) =>
-    `<div style="font-family:${t.headingFont}; font-size:11px; font-weight:700; letter-spacing:1.2pt; text-transform:uppercase; color:${t.accentColor}; ${t.accentStyle} padding-bottom:3px; margin:16px 0 8px;">${label}</div>`;
-
-  return `
-    <div style="font-family:${t.bodyFont}; color:#333; font-size:12px; line-height:1.55;">
-      <div style="margin-bottom:14px;">
-        <div style="font-family:${t.headingFont}; font-size:${t.headingSize}; ${t.nameStyle} margin-bottom:3px; line-height:1.1;">${name}</div>
-        <div style="font-size:10.5px; color:#777; letter-spacing:0.02em;">${contact}</div>
-      </div>
-      ${sectionHeading('Professional Summary')}
-      <p style="margin:0; font-size:11.5px; color:#444; line-height:1.65; font-style:italic;">${summary}</p>
-      ${sectionHeading('Experience')}
-      ${expHtml}
-      ${sectionHeading('Education')}
-      ${eduHtml}
-      ${sectionHeading('Core Skills')}
-      <p style="font-size:11px; color:#444;">${skills}</p>
-      <div style="margin-top:18px; padding-top:12px; border-top:1px solid #eee; font-size:9.5px; color:#bbb; text-align:center; letter-spacing:0.05em;">SAMPLE PREVIEW — Your content will appear here after resume upload</div>
-    </div>`;
+  // Use the template's own buildHTML — same as the real download
+  const inner = t.buildHTML(name, contact, summary, expHtml, eduHtml, certHtml, skillsHtml);
+  // Wrap in a scaled-down container for the preview pane
+  return `<div style="transform:scale(0.72);transform-origin:top left;width:139%;pointer-events:none;">${inner}<div style="margin-top:16px;padding-top:10px;border-top:1px solid #eee;font-size:9px;color:#bbb;text-align:center;letter-spacing:0.05em;">PREVIEW — your content will appear here after resume generation</div></div>`;
+}
 }
 
 function closeTemplatePreview() {
@@ -2520,47 +2508,13 @@ function downloadResumeAsWord(tmpl) {
     ? `<div class="section-heading">Certifications &amp; Licenses</div><p class="body-text">${(data.certifications||[]).join('<br>')}</p>`
     : '';
 
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-<title>${displayName} — Resume</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: ${t.bodyFont}; font-size: 11pt; background: #fff; color: #2a2a2a; padding: 0.75in 0.9in; max-width: 8.5in; margin: 0 auto; }
-  h1.candidate-name { font-family: ${t.headingFont}; font-size: ${t.headingSize}; ${t.nameStyle} margin-bottom: 4pt; line-height: 1.1; }
-  .contact-line { font-size: 10pt; color: #666; margin-bottom: 14pt; letter-spacing: 0.02em; }
-  .summary-text { font-size: 11pt; font-style: italic; color: #444; line-height: 1.7; margin-bottom: 16pt; }
-  .section-heading { font-family: ${t.headingFont}; font-size: 11pt; color: ${t.accentColor}; ${t.accentStyle} padding-bottom: 3pt; margin-top: 18pt; margin-bottom: 8pt; text-transform: uppercase; letter-spacing: 1.2pt; }
-  .exp-block { margin-bottom: 12pt; }
-  .exp-title { font-weight: 600; font-size: 11pt; color: #111; }
-  .exp-meta { font-size: 10pt; color: #777; margin-bottom: 4pt; }
-  ul { padding-left: 16pt; }
-  li { margin-bottom: 3pt; font-size: 10.5pt; line-height: 1.5; }
-  .edu-block { margin-bottom: 8pt; }
-  .body-text { font-size: 10.5pt; color: #444; line-height: 1.6; }
-  .footer-note { margin-top: 28pt; padding-top: 10pt; border-top: 0.5pt solid #eee; font-size: 8pt; color: #bbb; text-align: center; letter-spacing: 0.04em; }
-  @media print {
-    body { padding: 0.5in 0.7in; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .footer-note { display: none; }
-  }
-</style>
-</head><body>
-  <h1 class="candidate-name">${displayName}</h1>
-  <div class="contact-line">${contact}</div>
-  ${data.summary ? `<div class="summary-text">${data.summary}</div>` : ''}
-  <div class="section-heading">Experience</div>
-  ${expHtml}
-  <div class="section-heading">Education</div>
-  ${eduHtml}
-  ${certHtml}
-  <div class="section-heading">Skills</div>
-  <p class="body-text">${skillsHtml}</p>
-  <div class="footer-note">Generated by CareerCompass · careercompassxl.netlify.app &nbsp;·&nbsp; ${t.name} template</div>
-  <script>
-    window.addEventListener('load', function() {
-      setTimeout(function() { window.print(); }, 500);
-    });
-  <\/script>
-</body></html>`;
+  // Use the template's own buildHTML for a truly distinct layout
+  const innerHTML = t.buildHTML(displayName, contact, data.summary || '', expHtml, eduHtml, certHtml, skillsHtml);
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${displayName} — Resume</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0;}</style></head>
+  <body>${innerHTML}
+  <script>window.addEventListener('load',function(){setTimeout(function(){window.print();},500);});<\/script>
+  </body></html>`;
 
   const win = window.open('', '_blank');
   if (win) {
@@ -2595,145 +2549,402 @@ function goToPaywall(source) {
 // RESUME TEMPLATES
 // ─────────────────────────────────────────────────────────────────
 const RESUME_TEMPLATES = [
+  // ── 1. TRUE NORTH — clean single-column, navy ───────────────────
   {
     id: 'true-north',
     name: 'True North',
-    style: 'Clean · Minimal · Single column',
+    style: 'Classic single-column · Clean & minimal',
     bestFor: 'Any professional role',
     badge: 'recommended',
     swatchBg: '#0f1f3d',
     accentColor: '#0f1f3d',
-    headingFont: 'Calibri, sans-serif',
-    bodyFont: 'Calibri, sans-serif',
-    headingSize: '22pt',
-    accentStyle: 'border-bottom: 2pt solid #0f1f3d;',
-    nameStyle: 'color:#0f1f3d;',
+    layout: 'single',
+    buildHTML(name, contact, summary, expHtml, eduHtml, certHtml, skillsHtml) {
+      return `<style>
+        body{font-family:'Calibri',sans-serif;font-size:11pt;color:#222;padding:0.75in 0.9in;max-width:8.5in;margin:0 auto;}
+        h1{font-size:26pt;color:#0f1f3d;letter-spacing:-0.5pt;margin-bottom:4pt;font-weight:700;}
+        .contact{font-size:10pt;color:#666;border-bottom:2pt solid #0f1f3d;padding-bottom:8pt;margin-bottom:16pt;}
+        .summary{font-style:italic;color:#444;margin-bottom:16pt;line-height:1.65;}
+        h2{font-size:10pt;font-weight:700;text-transform:uppercase;letter-spacing:1.5pt;color:#0f1f3d;margin:18pt 0 6pt;border-bottom:0.75pt solid #ccd6e8;padding-bottom:3pt;}
+        .exp-block{margin-bottom:12pt;} .exp-title{font-weight:700;font-size:11pt;}
+        .exp-meta{color:#777;font-size:10pt;margin-bottom:4pt;}
+        ul{padding-left:14pt;margin:0;} li{margin-bottom:3pt;font-size:10.5pt;line-height:1.5;}
+        .skills-p{font-size:10.5pt;color:#333;line-height:1.6;}
+        .edu-block{margin-bottom:8pt;}
+        @media print{body{padding:0.5in 0.7in;-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+      </style>
+      <h1>${name}</h1><div class="contact">${contact}</div>
+      ${summary?`<p class="summary">${summary}</p>`:''}
+      <h2>Experience</h2>${expHtml}
+      <h2>Education</h2>${eduHtml}
+      ${certHtml}
+      <h2>Skills</h2><p class="skills-p">${skillsHtml}</p>`;
+    }
   },
+
+  // ── 2. DUE EAST — two-column: sidebar left, content right ───────
   {
     id: 'due-east',
     name: 'Due East',
-    style: 'Bold header · Modern two-column',
+    style: 'Two-column sidebar · Bold & modern',
     bestFor: 'Sales, Marketing, Business Development',
     badge: null,
     swatchBg: '#1a3060',
     accentColor: '#c9a55a',
-    headingFont: 'Arial, sans-serif',
-    bodyFont: 'Arial, sans-serif',
-    headingSize: '20pt',
-    accentStyle: 'border-bottom: 2pt solid #c9a55a;',
-    nameStyle: 'color:#1a3060;',
+    layout: 'two-col',
+    buildHTML(name, contact, summary, expHtml, eduHtml, certHtml, skillsHtml) {
+      return `<style>
+        *{box-sizing:border-box;}
+        body{font-family:'Arial',sans-serif;font-size:10.5pt;color:#222;margin:0;padding:0;max-width:8.5in;}
+        .wrapper{display:flex;min-height:100vh;}
+        .sidebar{width:2.4in;background:#1a3060;color:#fff;padding:0.6in 0.3in;flex-shrink:0;}
+        .main{flex:1;padding:0.6in 0.45in;}
+        .s-name{font-size:22pt;font-weight:700;color:#fff;line-height:1.15;margin-bottom:10pt;}
+        .s-contact{font-size:9pt;color:rgba(255,255,255,0.7);line-height:1.9;margin-bottom:18pt;border-bottom:1pt solid rgba(255,255,255,0.2);padding-bottom:14pt;}
+        .s-section-title{font-size:8pt;font-weight:700;letter-spacing:1.5pt;text-transform:uppercase;color:#c9a55a;margin:14pt 0 6pt;}
+        .s-skills{font-size:9.5pt;color:rgba(255,255,255,0.85);line-height:1.8;}
+        h2{font-size:10pt;font-weight:700;text-transform:uppercase;letter-spacing:1.2pt;color:#1a3060;border-bottom:2pt solid #c9a55a;padding-bottom:3pt;margin:16pt 0 8pt;}
+        .summary{font-style:italic;color:#444;margin-bottom:14pt;line-height:1.65;font-size:10.5pt;}
+        .exp-block{margin-bottom:12pt;} .exp-title{font-weight:700;font-size:11pt;color:#1a3060;}
+        .exp-meta{color:#888;font-size:9.5pt;margin-bottom:4pt;}
+        ul{padding-left:14pt;margin:0;} li{margin-bottom:3pt;line-height:1.5;}
+        .edu-block{margin-bottom:8pt;}
+        @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.wrapper{display:flex;}}
+      </style>
+      <div class="wrapper">
+        <div class="sidebar">
+          <div class="s-name">${name}</div>
+          <div class="s-contact">${contact.replace(/  \|  /g,'<br>')}</div>
+          <div class="s-section-title">Core Skills</div>
+          <div class="s-skills">${skillsHtml.split(', ').join('<br>')}</div>
+          <div class="s-section-title" style="margin-top:20pt;">Education</div>
+          <div style="font-size:9.5pt;color:rgba(255,255,255,0.8);line-height:1.7;">${eduHtml.replace(/<div class="exp-title">/g,'<div style="font-weight:700;color:#fff;">').replace(/<div class="exp-meta">/g,'<div style="color:rgba(255,255,255,0.6);font-size:9pt;">').replace(/<div class="edu-block">/g,'<div style="margin-bottom:8pt;">')}</div>
+        </div>
+        <div class="main">
+          ${summary?`<p class="summary">${summary}</p>`:''}
+          <h2>Experience</h2>${expHtml}
+          ${certHtml}
+        </div>
+      </div>`;
+    }
   },
+
+  // ── 3. DEEP SOUTH — warm serif, full-width header card ──────────
   {
     id: 'deep-south',
     name: 'Deep South',
-    style: 'Warm · Relationship-forward',
+    style: 'Header card · Warm serif · Relationship-forward',
     bestFor: 'HR, Training, Nonprofit, Coaching',
     badge: null,
     swatchBg: '#3d5a3e',
     accentColor: '#3d5a3e',
-    headingFont: 'Georgia, serif',
-    bodyFont: 'Palatino Linotype, serif',
-    headingSize: '21pt',
-    accentStyle: 'border-bottom: 2pt solid #3d5a3e;',
-    nameStyle: 'color:#3d5a3e;',
+    layout: 'card-header',
+    buildHTML(name, contact, summary, expHtml, eduHtml, certHtml, skillsHtml) {
+      return `<style>
+        body{font-family:'Georgia',serif;font-size:11pt;color:#2a2a2a;padding:0.75in 0.9in;max-width:8.5in;margin:0 auto;}
+        .header-card{background:#3d5a3e;color:#fff;border-radius:8pt;padding:24pt 28pt;margin-bottom:24pt;text-align:center;}
+        h1{font-size:28pt;font-weight:400;color:#fff;margin-bottom:6pt;letter-spacing:0.5pt;}
+        .contact-card{font-size:10pt;color:rgba(255,255,255,0.8);margin-bottom:10pt;}
+        .tagline{font-style:italic;font-size:11pt;color:rgba(255,255,255,0.7);}
+        h2{font-size:10.5pt;font-weight:700;text-transform:uppercase;letter-spacing:1.2pt;color:#3d5a3e;margin:18pt 0 7pt;padding-bottom:3pt;border-bottom:1.5pt solid #a8c5aa;}
+        .exp-block{margin-bottom:13pt;} .exp-title{font-weight:700;font-size:11.5pt;}
+        .exp-meta{color:#6a8c6b;font-size:10pt;margin-bottom:4pt;}
+        ul{padding-left:16pt;margin:0;} li{margin-bottom:4pt;line-height:1.55;}
+        .edu-block{margin-bottom:8pt;} .skills-p{line-height:1.75;color:#444;}
+        @media print{body{padding:0.5in;-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+      </style>
+      <div class="header-card">
+        <h1>${name}</h1>
+        <div class="contact-card">${contact}</div>
+        ${summary?`<div class="tagline">${summary.substring(0,120)}${summary.length>120?'…':''}</div>`:''}
+      </div>
+      <h2>Professional Summary</h2>
+      ${summary?`<p style="font-style:italic;color:#444;line-height:1.7;margin-bottom:14pt;">${summary}</p>`:''}
+      <h2>Experience</h2>${expHtml}
+      <h2>Education</h2>${eduHtml}
+      ${certHtml}
+      <h2>Skills</h2><p class="skills-p">${skillsHtml}</p>`;
+    }
   },
+
+  // ── 4. FAR WEST — traditional, double horizontal rule ───────────
   {
     id: 'far-west',
     name: 'Far West',
-    style: 'Conservative · Traditional',
-    bestFor: 'Finance, Legal, Compliance, Government',
+    style: 'Conservative · Traditional · Double-rule header',
+    bestFor: 'Finance, Legal, Compliance, Accounting',
     badge: null,
     swatchBg: '#2c2c2c',
     accentColor: '#2c2c2c',
-    headingFont: 'Times New Roman, serif',
-    bodyFont: 'Times New Roman, serif',
-    headingSize: '20pt',
-    accentStyle: 'border-bottom: 1pt solid #2c2c2c;',
-    nameStyle: 'color:#2c2c2c;',
+    layout: 'traditional',
+    buildHTML(name, contact, summary, expHtml, eduHtml, certHtml, skillsHtml) {
+      return `<style>
+        body{font-family:'Times New Roman',serif;font-size:11pt;color:#111;padding:1in;max-width:8.5in;margin:0 auto;}
+        .header{text-align:center;margin-bottom:16pt;padding-bottom:10pt;border-top:2.5pt solid #111;border-bottom:2.5pt solid #111;padding-top:10pt;}
+        h1{font-size:22pt;font-weight:700;letter-spacing:2pt;text-transform:uppercase;margin-bottom:5pt;}
+        .contact{font-size:10pt;color:#444;}
+        h2{font-size:10pt;font-weight:700;text-transform:uppercase;letter-spacing:1.5pt;border-bottom:1pt solid #111;padding-bottom:2pt;margin:16pt 0 7pt;}
+        .exp-block{margin-bottom:11pt;} .exp-title{font-weight:700;} .exp-meta{font-style:italic;color:#555;font-size:10pt;margin-bottom:4pt;}
+        ul{padding-left:16pt;margin:0;} li{margin-bottom:3pt;line-height:1.5;}
+        .edu-block{margin-bottom:8pt;} .skills-p{line-height:1.65;color:#333;}
+        @media print{body{padding:0.7in;-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+      </style>
+      <div class="header">
+        <h1>${name}</h1>
+        <div class="contact">${contact}</div>
+      </div>
+      ${summary?`<p style="font-style:italic;margin-bottom:14pt;line-height:1.65;">${summary}</p>`:''}
+      <h2>Experience</h2>${expHtml}
+      <h2>Education</h2>${eduHtml}
+      ${certHtml}
+      <h2>Skills &amp; Competencies</h2><p class="skills-p">${skillsHtml}</p>`;
+    }
   },
+
+  // ── 5. THE PIONEER — bold accent bar left, creative ─────────────
   {
     id: 'the-pioneer',
     name: 'The Pioneer',
-    style: 'Creative sidebar · Color accent',
-    bestFor: 'Design, Marketing, Creative roles',
+    style: 'Bold accent bar · Skills cards · Creative layout',
+    bestFor: 'Design, Marketing, Creative & Innovation roles',
     badge: null,
     swatchBg: '#5b4db5',
     accentColor: '#5b4db5',
-    headingFont: 'Arial, sans-serif',
-    bodyFont: 'Calibri, sans-serif',
-    headingSize: '22pt',
-    accentStyle: 'border-bottom: 3pt solid #5b4db5;',
-    nameStyle: 'color:#5b4db5;',
+    layout: 'accent-bar',
+    buildHTML(name, contact, summary, expHtml, eduHtml, certHtml, skillsHtml) {
+      const skillTags = skillsHtml.split(', ').map(s => `<span style="display:inline-block;background:#ede9fc;color:#5b4db5;border-radius:4pt;padding:2pt 9pt;font-size:9pt;margin:2pt 3pt 2pt 0;">${s}</span>`).join('');
+      return `<style>
+        *{box-sizing:border-box;}
+        body{font-family:'Arial',sans-serif;font-size:10.5pt;color:#222;margin:0;padding:0;max-width:8.5in;}
+        .wrapper{display:flex;min-height:100vh;}
+        .accent-bar{width:0.18in;background:#5b4db5;flex-shrink:0;}
+        .content{flex:1;padding:0.65in 0.7in;}
+        h1{font-size:26pt;font-weight:700;color:#5b4db5;margin-bottom:3pt;}
+        .contact{font-size:9.5pt;color:#666;margin-bottom:14pt;}
+        .summary{font-size:10.5pt;color:#444;line-height:1.65;margin-bottom:16pt;padding-left:12pt;border-left:3pt solid #5b4db5;font-style:italic;}
+        h2{font-size:9.5pt;font-weight:700;text-transform:uppercase;letter-spacing:1.5pt;color:#5b4db5;margin:16pt 0 7pt;}
+        .exp-block{margin-bottom:12pt;} .exp-title{font-weight:700;font-size:11pt;color:#333;}
+        .exp-meta{color:#888;font-size:9.5pt;margin-bottom:4pt;}
+        ul{padding-left:14pt;margin:0;} li{margin-bottom:3pt;line-height:1.5;}
+        .edu-block{margin-bottom:8pt;}
+        @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.wrapper{display:flex;}}
+      </style>
+      <div class="wrapper">
+        <div class="accent-bar"></div>
+        <div class="content">
+          <h1>${name}</h1>
+          <div class="contact">${contact}</div>
+          ${summary?`<p class="summary">${summary}</p>`:''}
+          <h2>Skills</h2>
+          <div style="margin-bottom:16pt;">${skillTags}</div>
+          <h2>Experience</h2>${expHtml}
+          <h2>Education</h2>${eduHtml}
+          ${certHtml}
+        </div>
+      </div>`;
+    }
   },
+
+  // ── 6. THE NAVIGATOR — executive, gold letterhead rule ───────────
   {
     id: 'the-navigator',
     name: 'The Navigator',
-    style: 'Executive · Gravitas-heavy',
+    style: 'Executive letterhead · Gold rule · Gravitas',
     bestFor: 'Director, VP, C-Suite',
     badge: null,
     swatchBg: '#0d2235',
     accentColor: '#c9a55a',
-    headingFont: 'Palatino Linotype, serif',
-    bodyFont: 'Calibri, sans-serif',
-    headingSize: '24pt',
-    accentStyle: 'border-bottom: 2pt solid #c9a55a;',
-    nameStyle: 'color:#0d2235; letter-spacing:2pt;',
+    layout: 'executive',
+    buildHTML(name, contact, summary, expHtml, eduHtml, certHtml, skillsHtml) {
+      return `<style>
+        body{font-family:'Palatino Linotype','Palatino',serif;font-size:11pt;color:#1a1a2e;padding:0.8in 0.9in;max-width:8.5in;margin:0 auto;}
+        .letterhead{display:flex;align-items:flex-end;justify-content:space-between;border-bottom:4pt solid #0d2235;padding-bottom:10pt;margin-bottom:6pt;}
+        h1{font-size:28pt;font-weight:400;letter-spacing:3pt;text-transform:uppercase;color:#0d2235;margin:0;}
+        .gold-rule{height:2pt;background:#c9a55a;margin-bottom:18pt;}
+        .contact{font-size:9.5pt;color:#555;text-align:right;}
+        .summary{font-style:italic;font-size:11.5pt;color:#3a3a50;margin-bottom:18pt;line-height:1.7;}
+        h2{font-size:9.5pt;font-weight:700;letter-spacing:2pt;text-transform:uppercase;color:#0d2235;padding-bottom:3pt;border-bottom:1pt solid #c9a55a;margin:18pt 0 8pt;}
+        .exp-block{margin-bottom:13pt;} .exp-title{font-weight:700;font-size:11.5pt;}
+        .exp-meta{color:#777;font-size:10pt;margin-bottom:5pt;}
+        ul{padding-left:16pt;margin:0;} li{margin-bottom:4pt;line-height:1.55;}
+        .edu-block{margin-bottom:9pt;} .skills-p{line-height:1.75;color:#444;}
+        @media print{body{padding:0.6in;-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+      </style>
+      <div class="letterhead">
+        <h1>${name}</h1>
+        <div class="contact">${contact.replace(/  \|  /g,'<br>')}</div>
+      </div>
+      <div class="gold-rule"></div>
+      ${summary?`<p class="summary">${summary}</p>`:''}
+      <h2>Career Experience</h2>${expHtml}
+      <h2>Education</h2>${eduHtml}
+      ${certHtml}
+      <h2>Leadership &amp; Core Competencies</h2><p class="skills-p">${skillsHtml}</p>`;
+    }
   },
+
+  // ── 7. THE BUILDER — two-col: skills panel top, experience below ─
   {
     id: 'the-builder',
     name: 'The Builder',
-    style: 'Skills-forward · Technical',
+    style: 'Skills grid panel · Two-zone layout · Technical',
     bestFor: 'IT, Engineering, Product, Instructional Design',
     badge: 'ats',
     swatchBg: '#1a5f7a',
     accentColor: '#1a5f7a',
-    headingFont: 'Arial, sans-serif',
-    bodyFont: 'Courier New, monospace',
-    headingSize: '20pt',
-    accentStyle: 'border-bottom: 2pt solid #1a5f7a;',
-    nameStyle: 'color:#1a5f7a;',
+    layout: 'skills-panel',
+    buildHTML(name, contact, summary, expHtml, eduHtml, certHtml, skillsHtml) {
+      const skillCols = skillsHtml.split(', ');
+      const half = Math.ceil(skillCols.length / 2);
+      const col1 = skillCols.slice(0, half).map(s=>`<div style="padding:2pt 0;border-bottom:0.5pt solid #dce8ed;font-size:9.5pt;">▸ ${s}</div>`).join('');
+      const col2 = skillCols.slice(half).map(s=>`<div style="padding:2pt 0;border-bottom:0.5pt solid #dce8ed;font-size:9.5pt;">▸ ${s}</div>`).join('');
+      return `<style>
+        *{box-sizing:border-box;}
+        body{font-family:'Arial',sans-serif;font-size:10.5pt;color:#1a1a1a;padding:0.65in 0.8in;max-width:8.5in;margin:0 auto;}
+        h1{font-size:22pt;font-weight:700;color:#1a5f7a;margin-bottom:3pt;}
+        .contact{font-size:9.5pt;color:#555;margin-bottom:16pt;}
+        .skills-panel{background:#edf4f7;border:1pt solid #b8d4de;border-radius:5pt;padding:14pt 16pt;margin-bottom:18pt;display:flex;gap:20pt;}
+        .skills-col{flex:1;}
+        .panel-title{font-size:8.5pt;font-weight:700;letter-spacing:1.5pt;text-transform:uppercase;color:#1a5f7a;margin-bottom:7pt;}
+        h2{font-size:9.5pt;font-weight:700;text-transform:uppercase;letter-spacing:1.5pt;color:#1a5f7a;margin:16pt 0 7pt;border-bottom:2pt solid #1a5f7a;padding-bottom:3pt;}
+        .summary{font-size:10.5pt;color:#444;line-height:1.65;margin-bottom:14pt;}
+        .exp-block{margin-bottom:12pt;} .exp-title{font-weight:700;font-size:11pt;}
+        .exp-meta{color:#777;font-size:9.5pt;margin-bottom:4pt;}
+        ul{padding-left:14pt;margin:0;} li{margin-bottom:3pt;line-height:1.5;}
+        .edu-block{margin-bottom:8pt;}
+        @media print{body{padding:0.5in;-webkit-print-color-adjust:exact;print-color-adjust:exact;}.skills-panel{display:flex;}}
+      </style>
+      <h1>${name}</h1>
+      <div class="contact">${contact}</div>
+      ${summary?`<p class="summary">${summary}</p>`:''}
+      <div class="skills-panel">
+        <div class="skills-col"><div class="panel-title">Technical Skills</div>${col1}</div>
+        <div class="skills-col"><div class="panel-title">Professional Skills</div>${col2}</div>
+      </div>
+      <h2>Experience</h2>${expHtml}
+      <h2>Education</h2>${eduHtml}
+      ${certHtml}`;
+    }
   },
+
+  // ── 8. FEDERAL COMPASS — USAJobs format, detailed ───────────────
   {
     id: 'federal-compass',
     name: 'Federal Compass',
-    style: 'USAJobs-compliant · Detail-rich',
-    bestFor: 'Government positions',
+    style: 'USAJobs-compliant · Detailed · KSA-ready',
+    bestFor: 'Federal & government positions',
     badge: null,
     swatchBg: '#003366',
     accentColor: '#003366',
-    headingFont: 'Times New Roman, serif',
-    bodyFont: 'Times New Roman, serif',
-    headingSize: '18pt',
-    accentStyle: 'border-bottom: 1pt solid #003366;',
-    nameStyle: 'color:#003366;',
+    layout: 'federal',
+    buildHTML(name, contact, summary, expHtml, eduHtml, certHtml, skillsHtml) {
+      return `<style>
+        body{font-family:'Times New Roman',serif;font-size:11pt;color:#000;padding:1in;max-width:8.5in;margin:0 auto;}
+        .fed-header{background:#003366;color:#fff;padding:18pt 22pt;margin-bottom:18pt;}
+        h1{font-size:20pt;font-weight:700;color:#fff;margin-bottom:5pt;}
+        .contact-fed{font-size:10pt;color:rgba(255,255,255,0.85);}
+        h2{font-size:10pt;font-weight:700;text-transform:uppercase;background:#003366;color:#fff;padding:4pt 8pt;margin:16pt 0 8pt;}
+        .exp-block{margin-bottom:14pt;}
+        .exp-title{font-weight:700;font-size:11pt;}
+        .exp-meta{font-size:10pt;color:#333;margin-bottom:6pt;}
+        ul{padding-left:16pt;margin:0;} li{margin-bottom:4pt;line-height:1.6;}
+        .edu-block{margin-bottom:10pt;} .skills-p{line-height:1.75;}
+        .ksas{font-size:10pt;color:#444;line-height:1.65;}
+        @media print{body{padding:0.75in;-webkit-print-color-adjust:exact;print-color-adjust:exact;}.fed-header{background:#003366;}}
+      </style>
+      <div class="fed-header">
+        <h1>${name}</h1>
+        <div class="contact-fed">${contact}</div>
+      </div>
+      ${summary?`<h2>Professional Summary</h2><p class="ksas">${summary}</p>`:''}
+      <h2>Work Experience</h2>${expHtml}
+      <h2>Education</h2>${eduHtml}
+      ${certHtml}
+      <h2>Knowledge, Skills &amp; Abilities</h2><p class="skills-p">${skillsHtml}</p>`;
+    }
   },
+
+  // ── 9. THE DIPLOMAT — two-col, right sidebar, elegant sage ──────
   {
     id: 'the-diplomat',
     name: 'The Diplomat',
-    style: 'Elegant · Values-forward',
-    bestFor: 'Education, Nonprofit, Social Services',
+    style: 'Right sidebar · Elegant sage · Values-forward',
+    bestFor: 'Education, Nonprofit, Social Services, Counseling',
     badge: null,
     swatchBg: '#4a7c59',
     accentColor: '#4a7c59',
-    headingFont: 'Georgia, serif',
-    bodyFont: 'Georgia, serif',
-    headingSize: '22pt',
-    accentStyle: 'border-bottom: 2pt solid #4a7c59;',
-    nameStyle: 'color:#4a7c59;',
+    layout: 'right-sidebar',
+    buildHTML(name, contact, summary, expHtml, eduHtml, certHtml, skillsHtml) {
+      return `<style>
+        *{box-sizing:border-box;}
+        body{font-family:'Georgia',serif;font-size:10.5pt;color:#222;margin:0;padding:0;max-width:8.5in;}
+        .wrapper{display:flex;min-height:100vh;}
+        .main{flex:1;padding:0.65in 0.4in 0.65in 0.75in;}
+        .sidebar{width:2.2in;background:#f0f5f1;border-left:3pt solid #4a7c59;padding:0.65in 0.3in;flex-shrink:0;}
+        h1{font-size:26pt;font-weight:400;color:#4a7c59;margin-bottom:4pt;}
+        .contact-main{font-size:9.5pt;color:#666;margin-bottom:14pt;font-style:italic;}
+        .summary{font-style:italic;color:#3a3a3a;line-height:1.7;margin-bottom:16pt;font-size:11pt;}
+        h2{font-size:10pt;font-weight:700;text-transform:uppercase;letter-spacing:1pt;color:#4a7c59;margin:16pt 0 7pt;border-bottom:1.5pt solid #a8c5aa;padding-bottom:3pt;}
+        .exp-block{margin-bottom:12pt;} .exp-title{font-weight:700;font-size:11pt;}
+        .exp-meta{color:#6a8c6b;font-size:9.5pt;margin-bottom:4pt;}
+        ul{padding-left:14pt;margin:0;} li{margin-bottom:4pt;line-height:1.55;}
+        .s-title{font-size:8.5pt;font-weight:700;letter-spacing:1.2pt;text-transform:uppercase;color:#4a7c59;margin:0 0 8pt;}
+        .s-skill{font-size:9.5pt;color:#333;padding:3pt 0;border-bottom:0.5pt solid #c8dece;line-height:1.5;}
+        .edu-block{margin-bottom:8pt;}
+        @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.wrapper{display:flex;}}
+      </style>
+      <div class="wrapper">
+        <div class="main">
+          <h1>${name}</h1>
+          <div class="contact-main">${contact}</div>
+          ${summary?`<p class="summary">${summary}</p>`:''}
+          <h2>Experience</h2>${expHtml}
+          ${certHtml}
+        </div>
+        <div class="sidebar">
+          <div class="s-title">Core Skills</div>
+          ${skillsHtml.split(', ').map(s=>`<div class="s-skill">${s}</div>`).join('')}
+          <div class="s-title" style="margin-top:18pt;">Education</div>
+          <div style="font-size:9.5pt;color:#333;line-height:1.6;">${eduHtml.replace(/<div class="exp-title">/g,'<div style="font-weight:700;">').replace(/<div class="exp-meta">/g,'<div style="color:#6a8c6b;">').replace(/<div class="edu-block">/g,'<div style="margin-bottom:10pt;">')}</div>
+        </div>
+      </div>`;
+    }
   },
+
+  // ── 10. PATHFINDER — ATS clean, skills badge grid ───────────────
   {
     id: 'pathfinder',
     name: 'Pathfinder',
-    style: 'ATS-optimized · No frills',
-    bestFor: 'Maximum ATS compatibility',
+    style: 'ATS-optimized · Skills badges · Max compatibility',
+    bestFor: 'Applicant tracking systems · Any industry',
     badge: 'ats',
     swatchBg: '#555555',
     accentColor: '#333333',
-    headingFont: 'Arial, sans-serif',
-    bodyFont: 'Arial, sans-serif',
-    headingSize: '18pt',
-    accentStyle: 'border-bottom: 1pt solid #555;',
-    nameStyle: 'color:#333;',
+    layout: 'ats',
+    buildHTML(name, contact, summary, expHtml, eduHtml, certHtml, skillsHtml) {
+      const badges = skillsHtml.split(', ').map(s=>`<span style="display:inline-block;border:1pt solid #aaa;border-radius:3pt;padding:2pt 8pt;font-size:9pt;margin:2pt 3pt 2pt 0;color:#333;">${s}</span>`).join('');
+      return `<style>
+        body{font-family:'Arial',sans-serif;font-size:11pt;color:#111;padding:0.8in 0.9in;max-width:8.5in;margin:0 auto;}
+        h1{font-size:22pt;font-weight:700;color:#111;margin-bottom:5pt;}
+        .contact{font-size:10pt;color:#555;margin-bottom:5pt;}
+        .divider{height:2pt;background:#111;margin-bottom:14pt;}
+        .summary{color:#333;line-height:1.65;margin-bottom:14pt;}
+        h2{font-size:10pt;font-weight:700;text-transform:uppercase;letter-spacing:1.5pt;color:#111;border-bottom:1pt solid #999;padding-bottom:3pt;margin:16pt 0 8pt;}
+        .exp-block{margin-bottom:12pt;} .exp-title{font-weight:700;} .exp-meta{color:#666;font-size:10pt;margin-bottom:4pt;}
+        ul{padding-left:15pt;margin:0;} li{margin-bottom:3pt;line-height:1.5;}
+        .edu-block{margin-bottom:8pt;}
+        @media print{body{padding:0.6in;-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+      </style>
+      <h1>${name}</h1>
+      <div class="contact">${contact}</div>
+      <div class="divider"></div>
+      ${summary?`<p class="summary">${summary}</p>`:''}
+      <h2>Experience</h2>${expHtml}
+      <h2>Education</h2>${eduHtml}
+      ${certHtml}
+      <h2>Skills</h2>
+      <div style="margin-bottom:8pt;">${badges}</div>`;
+    }
   },
 ];
 
@@ -2982,18 +3193,39 @@ async function loadAndShowJobs() {
   let liveJobs = [];
   let source = 'fallback';
 
+  // ── Try Indeed MCP first (most accurate) ──────────────────────
   try {
-    const resp = await fetch(API_BASE+'/jobs', {
+    const indeedResp = await fetch(API_BASE+'/jobs-indeed', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ query, location:loc })
+      body:JSON.stringify({ query, location:loc, compassType:ct })
     });
-    const data = await resp.json();
-    liveJobs = data.results || [];
-    source = data.source || 'aggregator';
-    if (['api_error','fetch_error','no_key','no_results'].includes(source)) liveJobs = [];
+    if (indeedResp.ok) {
+      const indeedData = await indeedResp.json();
+      if (indeedData.results && indeedData.results.length > 0 && indeedData.source === 'indeed') {
+        liveJobs = indeedData.results;
+        source = 'indeed';
+      }
+    }
   } catch(e) {
-    console.error('Jobs fetch error:', e);
+    console.warn('Indeed fetch failed, falling back:', e.message);
+  }
+
+  // ── Fall back to Adzuna/Remotive/USAJobs aggregator ───────────
+  if (liveJobs.length === 0) {
+    try {
+      const resp = await fetch(API_BASE+'/jobs', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ query, location:loc })
+      });
+      const data = await resp.json();
+      liveJobs = data.results || [];
+      source = data.source || 'aggregator';
+      if (['api_error','fetch_error','no_key','no_results'].includes(source)) liveJobs = [];
+    } catch(e) {
+      console.error('Jobs fallback fetch error:', e);
+    }
   }
 
   if (liveJobs.length > 0) {
@@ -3135,13 +3367,17 @@ function renderJobs(filter, source) {
 
   document.getElementById('jobs-match-count').textContent = filtered.length + ' live match' + (filtered.length!==1?'es':'');
 
-  const sourceBadge = source === 'aggregator'
+  const sourceBadge = source === 'indeed'
+    ? `<span style="font-size:10px;background:rgba(0,58,155,0.12);color:#003A9B;padding:2px 8px;border-radius:50px;margin-left:8px;font-weight:600;">● Indeed Live</span>`
+    : source === 'aggregator'
     ? `<span style="font-size:10px;background:rgba(201,165,90,0.15);color:var(--gold);padding:2px 8px;border-radius:50px;margin-left:8px;">● Live</span>`
     : '';
 
+  const sourceLabel = source === 'indeed' ? 'Indeed' : 'Remotive, Adzuna, USAJobs';
+
   let html = `<div class="feedback-banner">
     <div class="feedback-banner-title">Live matches for you, ${name}${sourceBadge}</div>
-    <div class="feedback-banner-body">Based on your ${typeLabel} compass profile, we found ${filtered.length} active listing${filtered.length!==1?'s':''} near ${resumeLoc}. Match scores reflect how closely each role aligns with your background. Sources: Remotive, Adzuna, USAJobs.</div>
+    <div class="feedback-banner-body">Based on your ${typeLabel} compass profile, we found ${filtered.length} active listing${filtered.length!==1?'s':''} near ${resumeLoc}. Match scores reflect how closely each role aligns with your background. Source: ${sourceLabel}.</div>
     <div class="feedback-actions">
       <button class="feedback-btn" onclick="writeCoverLetter(null)">✍️ Write a cover letter</button>
       <button class="feedback-btn outline" onclick="showScreen('feedback')">📄 My resume</button>
