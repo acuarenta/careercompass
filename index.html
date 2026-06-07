@@ -323,16 +323,14 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 }
 .tpm-close:hover { border-color: var(--navy); color: var(--navy); }
 .tpm-resume-wrap {
-  flex: 1; overflow-y: auto; padding: 1rem 1.25rem;
-  -webkit-overflow-scrolling: touch;
+  flex: 1; overflow: hidden; padding: 1rem 1.25rem;
+  min-height: 0;
 }
 .tpm-resume-paper {
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-  padding: 28px 24px;
-  font-size: 12px;
-  line-height: 1.55;
+  width: 100%; height: 100%;
 }
 .tpm-footer {
   padding: 0.875rem 1.25rem;
@@ -921,9 +919,7 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
       <button class="tpm-close" onclick="closeTemplatePreview()" aria-label="Close preview">✕</button>
     </div>
     <div class="tpm-resume-wrap">
-      <div class="tpm-resume-paper" id="tpm-resume-paper">
-        <!-- Rendered by openTemplatePreview() -->
-      </div>
+      <iframe id="tpm-resume-frame" style="width:100%;height:100%;border:none;display:block;background:#fff;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.12);" title="Resume preview"></iframe>
     </div>
     <div class="tpm-footer">
       <button class="tpm-btn-cancel" onclick="closeTemplatePreview()">Back</button>
@@ -2392,7 +2388,7 @@ function openTemplatePreview(id) {
   document.getElementById('tpm-template-name').textContent = t.name;
   document.getElementById('tpm-template-style').textContent = t.style + '  ·  Best for: ' + t.bestFor;
 
-  // Build sample resume HTML using real data if available, otherwise sample data
+  // Sample data — use real resume data if available
   const data = window._resumeData;
   const ctx  = window._resumeCtx || {};
   const sampleName     = (data && data.name)     || (ctx.name)     || 'Alexandra Rivera';
@@ -2411,7 +2407,7 @@ function openTemplatePreview(id) {
       }))
     : [
         { title: 'Senior Operations Manager', company: 'Meridian Group', dates: '2019–Present',
-          bullets: ['Led cross-functional team of 18 driving 34% YOY efficiency gains', 'Redesigned onboarding workflow, reducing ramp time by 6 weeks', 'Managed $2.4M annual operations budget with 98% on-target delivery'] },
+          bullets: ['Led cross-functional team of 18 driving 34% YOY efficiency gains', 'Redesigned onboarding workflow, reducing ramp time by 6 weeks', 'Managed $2.4M annual operations budget'] },
         { title: 'Operations Specialist', company: 'Trident Consulting', dates: '2015–2019',
           bullets: ['Coordinated 40+ client engagements across Southeast region', 'Built reporting dashboards adopted company-wide as standard tool'] }
       ];
@@ -2420,13 +2416,15 @@ function openTemplatePreview(id) {
     ? data.education.slice(0, 1)
     : [{ degree: 'B.S. Business Administration', school: 'University of Florida', year: '2015' }];
 
-  const paper = document.getElementById('tpm-resume-paper');
-  paper.innerHTML = buildPreviewHTML(t, sampleName, sampleEmail, samplePhone, sampleLocation, sampleSummary, sampleSkills, sampleExp, sampleEdu);
+  // Build full HTML document and inject into iframe (fully isolated — no layout bleed)
+  const doc = buildPreviewHTML(t, sampleName, sampleEmail, samplePhone, sampleLocation, sampleSummary, sampleSkills, sampleExp, sampleEdu);
+  const frame = document.getElementById('tpm-resume-frame');
+  frame.srcdoc = doc;
 
-  // Show modal
+  // Show modal — do NOT touch body.style.overflow (modal is position:fixed, doesn't need it,
+  // and resetting overflow causes layout shift and triggers browser extensions)
   const modal = document.getElementById('template-preview-modal');
   modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
 }
 
 function buildPreviewHTML(t, name, email, phone, location, summary, skills, experience, education) {
@@ -2447,16 +2445,26 @@ function buildPreviewHTML(t, name, email, phone, location, summary, skills, expe
   const skillsHtml = typeof skills === 'string' ? skills : skills.join(', ');
   const certHtml = '';
 
-  // Use the template's own buildHTML — same as the real download
+  // Get the template's full HTML body
   const inner = t.buildHTML(name, contact, summary, expHtml, eduHtml, certHtml, skillsHtml);
-  // Wrap in a scaled-down container for the preview pane
-  return `<div style="transform:scale(0.72);transform-origin:top left;width:139%;pointer-events:none;">${inner}<div style="margin-top:16px;padding-top:10px;border-top:1px solid #eee;font-size:9px;color:#bbb;text-align:center;letter-spacing:0.05em;">PREVIEW — your content will appear here after resume generation</div></div>`;
+
+  // Return a complete standalone HTML document for srcdoc — fully isolated rendering
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>*{box-sizing:border-box;margin:0;padding:0;}</style>
+</head><body style="background:#fff;">
+${inner}
+<div style="margin:20px 0 8px;padding-top:10px;border-top:1px solid #eee;font-size:9px;color:#bbb;text-align:center;letter-spacing:0.05em;font-family:sans-serif;">
+  PREVIEW — your content will appear here after resume generation
+</div>
+</body></html>`;
 }
 
 function closeTemplatePreview() {
   const modal = document.getElementById('template-preview-modal');
   modal.classList.remove('open');
-  document.body.style.overflow = '';
+  // Do NOT restore body.style.overflow — body already has overflow:hidden in CSS
+  // and resetting it to '' removes that rule, causing layout shift
   _previewTemplateId = null;
 }
 
@@ -3192,25 +3200,25 @@ async function loadAndShowJobs() {
   let liveJobs = [];
   let source = 'fallback';
 
-  // ── Try Indeed MCP first (most accurate) ──────────────────────
+  // ── Try enhanced job search (Remotive + Adzuna with smarter queries) ──
   try {
     const indeedResp = await fetch(API_BASE+'/jobs-indeed', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ query, location:loc, compassType:ct })
+      body:JSON.stringify({ location:loc, compassType:ct })
     });
     if (indeedResp.ok) {
       const indeedData = await indeedResp.json();
-      if (indeedData.results && indeedData.results.length > 0 && indeedData.source === 'indeed') {
+      if (indeedData.results && indeedData.results.length > 0 && indeedData.source === 'enhanced') {
         liveJobs = indeedData.results;
-        source = 'indeed';
+        source = 'enhanced';
       }
     }
   } catch(e) {
-    console.warn('Indeed fetch failed, falling back:', e.message);
+    console.warn('Enhanced job fetch failed, falling back:', e.message);
   }
 
-  // ── Fall back to Adzuna/Remotive/USAJobs aggregator ───────────
+  // ── Fall back to original Adzuna/Remotive/USAJobs aggregator ──────
   if (liveJobs.length === 0) {
     try {
       const resp = await fetch(API_BASE+'/jobs', {
@@ -3366,13 +3374,11 @@ function renderJobs(filter, source) {
 
   document.getElementById('jobs-match-count').textContent = filtered.length + ' live match' + (filtered.length!==1?'es':'');
 
-  const sourceBadge = source === 'indeed'
-    ? `<span style="font-size:10px;background:rgba(0,58,155,0.12);color:#003A9B;padding:2px 8px;border-radius:50px;margin-left:8px;font-weight:600;">● Indeed Live</span>`
-    : source === 'aggregator'
+  const sourceBadge = (source === 'enhanced' || source === 'aggregator')
     ? `<span style="font-size:10px;background:rgba(201,165,90,0.15);color:var(--gold);padding:2px 8px;border-radius:50px;margin-left:8px;">● Live</span>`
     : '';
 
-  const sourceLabel = source === 'indeed' ? 'Indeed' : 'Remotive, Adzuna, USAJobs';
+  const sourceLabel = source === 'enhanced' ? 'Remotive · Adzuna' : 'Remotive · Adzuna · USAJobs';
 
   let html = `<div class="feedback-banner">
     <div class="feedback-banner-title">Live matches for you, ${name}${sourceBadge}</div>
