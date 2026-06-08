@@ -579,17 +579,20 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 
 /* ── INTERVIEW PREP ─────────────────────────────────────────────────────────── */
 #screen-interview { background: var(--cream); flex-direction: column; }
-.interview-body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem 1.5rem; }
+.interview-body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem 1.5rem; -webkit-overflow-scrolling: touch; }
+.interview-tab { flex: 1; padding: 13px 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-mid); background: var(--white); border: none; border-bottom: 2.5px solid transparent; cursor: pointer; transition: all 0.15s; }
+.interview-tab.active { color: var(--navy); border-bottom-color: var(--gold); font-weight: 600; }
 .interview-question-card { background: var(--white); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; box-shadow: var(--shadow-sm); }
 .interview-q-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
 .interview-q-text { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--navy); line-height: 1.4; margin-bottom: 8px; }
 .interview-q-tip { font-size: 12px; color: var(--text-mid); font-style: italic; padding: 8px 12px; background: var(--cream); border-radius: 8px; }
 .star-step { background: var(--white); border-radius: var(--radius); margin-bottom: 10px; overflow: hidden; border: 1.5px solid var(--cream-dark); }
-.star-step-header { display: flex; align-items: center; gap: 12px; padding: 1rem 1.25rem; cursor: pointer; }
+.star-step-header { display: flex; align-items: center; gap: 12px; padding: 1rem 1.25rem; }
 .star-letter { width: 32px; height: 32px; border-radius: 50%; background: var(--navy); color: var(--gold); font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .star-label { font-weight: 500; color: var(--navy); font-size: 14px; }
 .star-hint { font-size: 12px; color: var(--text-mid); }
-.star-input-wrap { padding: 0 1.25rem 1rem; }
+.star-content { padding: 0 1.25rem 1rem; font-size: 13px; color: var(--text-mid); line-height: 1.7; font-style: italic; background: var(--cream); margin: 0 1.25rem 1rem; border-radius: var(--radius-sm); }
+.star-content strong { font-style: normal; color: var(--navy); font-weight: 500; }
 .rating-bar { display: flex; gap: 8px; margin: 8px 0; }
 .rating-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--cream-dark); border: 2px solid transparent; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; color: var(--text-mid); }
 .rating-dot.active { background: var(--gold); color: var(--navy); border-color: var(--gold-light); }
@@ -597,12 +600,22 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 
 /* ── SALARY NEGOTIATION ────────────────────────────────────────────────────── */
 #screen-salary { background: var(--cream); flex-direction: column; }
-.salary-body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem 1.5rem; }
+.salary-body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem 1.5rem; -webkit-overflow-scrolling: touch; }
 .salary-range-card { background: linear-gradient(135deg, var(--navy), var(--navy-light)); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; text-align: center; }
 .salary-range-label { font-size: 11px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
 .salary-range-value { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: var(--gold); font-weight: 500; }
 .salary-range-sub { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 4px; }
 .salary-script { background: var(--cream); border-left: 3px solid var(--gold); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 1rem; font-size: 13px; color: var(--text-mid); line-height: 1.7; font-style: italic; margin: 10px 0; }
+.sal-field-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-light); margin-bottom: 6px; }
+.comp-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--cream-dark); font-size: 14px; }
+.comp-row:last-child { border-bottom: none; }
+.comp-row-label { color: var(--text-mid); }
+.comp-row-value { font-weight: 500; color: var(--navy); }
+.comp-total-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0 0; margin-top: 6px; border-top: 2px solid var(--navy); font-size: 16px; font-weight: 700; color: var(--navy); }
+.value-gap-card { border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; text-align: center; }
+.value-gap-card.positive { background: linear-gradient(135deg, #1a5f3a, #2d7d52); }
+.value-gap-card.negative { background: linear-gradient(135deg, #5a1a1a, #8b2c2c); }
+.value-gap-card.neutral { background: linear-gradient(135deg, var(--navy), var(--navy-light)); }
 
 /* ── UNEMPLOYMENT REPORT ───────────────────────────────────────────────────── */
 #screen-report { background: var(--cream); flex-direction: column; }
@@ -1178,40 +1191,161 @@ body { min-height: 100%; min-height: -webkit-fill-available; font-family: 'DM Sa
 <!-- ═══════════ INTERVIEW PREP ═══════════ -->
 <div id="screen-interview" class="screen">
   <div class="resume-header">
-    <button class="resume-header-back" onclick="showScreen('tracker')">←</button>
+    <button class="resume-header-back" onclick="showScreen('dashboard')">←</button>
     <div class="resume-header-info">
       <div class="resume-header-title">Interview Prep</div>
       <div class="resume-header-sub" id="interview-header-sub">Preparing your coaching session</div>
     </div>
     <div class="quiz-logo-sm" style="flex-shrink:0;">Career<span style="color:var(--gold);">Compass</span></div>
   </div>
+  <!-- Mode selector tabs -->
+  <div style="display:flex;gap:0;border-bottom:2px solid var(--cream-dark);background:var(--white);flex-shrink:0;" id="interview-tabs">
+    <button class="interview-tab active" id="tab-typical" onclick="switchInterviewTab('typical')">Typical Questions</button>
+    <button class="interview-tab" id="tab-custom" onclick="switchInterviewTab('custom')">Ask Your Own</button>
+  </div>
   <div class="interview-body" id="interview-body">
-    <div style="display:flex;flex-direction:column;align-items:center;padding:3rem 1.5rem;text-align:center;" id="interview-loading">
-      <div class="feedback-spinner"></div>
-      <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--navy);margin-top:1.25rem;margin-bottom:6px;">Researching the role...</div>
-      <div style="font-size:13px;color:var(--text-mid);">Generating questions tailored to your background.</div>
+    <!-- TYPICAL QUESTIONS MODE -->
+    <div id="interview-typical-mode">
+      <div style="display:flex;flex-direction:column;align-items:center;padding:3rem 1.5rem;text-align:center;" id="interview-loading">
+        <div class="feedback-spinner"></div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--navy);margin-top:1.25rem;margin-bottom:6px;">Researching the role...</div>
+        <div style="font-size:13px;color:var(--text-mid);">Building questions from your background.</div>
+      </div>
+      <div id="interview-content" style="display:none;"></div>
     </div>
-    <div id="interview-content" style="display:none;"></div>
+    <!-- CUSTOM QUESTION MODE -->
+    <div id="interview-custom-mode" style="display:none;">
+      <div class="feedback-banner" style="margin-bottom:1rem;">
+        <div class="feedback-banner-title">Practice any question</div>
+        <div class="feedback-banner-body">Type a question you've been asked or expect to hear. We'll build you a STAR answer from your experience.</div>
+      </div>
+      <div style="background:var(--white);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;box-shadow:var(--shadow-sm);">
+        <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:8px;">Your question</div>
+        <textarea id="custom-question-input" class="modal-field-input" rows="3" style="resize:none;width:100%;margin-bottom:12px;" placeholder="e.g. Tell me about a time you had to manage a difficult stakeholder..."></textarea>
+        <button class="btn-next gold" style="width:100%;justify-content:center;" onclick="runCustomQuestion()">
+          Build My STAR Answer →
+        </button>
+      </div>
+      <div id="custom-question-loading" style="display:none;flex-direction:column;align-items:center;padding:2rem 1.5rem;text-align:center;">
+        <div class="feedback-spinner"></div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--navy);margin-top:1rem;">Building your answer...</div>
+      </div>
+      <div id="custom-question-result" style="display:none;"></div>
+    </div>
   </div>
 </div>
 
 <!-- ═══════════ SALARY NEGOTIATION ═══════════ -->
 <div id="screen-salary" class="screen">
   <div class="resume-header">
-    <button class="resume-header-back" onclick="showScreen('tracker')">←</button>
+    <button class="resume-header-back" onclick="showScreen('dashboard')">←</button>
     <div class="resume-header-info">
       <div class="resume-header-title">Salary Negotiation</div>
-      <div class="resume-header-sub" id="salary-header-sub">Analyzing your offer</div>
+      <div class="resume-header-sub" id="salary-header-sub">Know your worth</div>
     </div>
     <div class="quiz-logo-sm" style="flex-shrink:0;">Career<span style="color:var(--gold);">Compass</span></div>
   </div>
   <div class="salary-body" id="salary-body">
-    <div style="display:flex;flex-direction:column;align-items:center;padding:3rem 1.5rem;text-align:center;" id="salary-loading">
-      <div class="feedback-spinner"></div>
-      <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--navy);margin-top:1.25rem;margin-bottom:6px;">Analyzing your offer...</div>
-      <div style="font-size:13px;color:var(--text-mid);">Building your negotiation strategy.</div>
+    <!-- STEP 1: Role input (shown when no app context) -->
+    <div id="salary-role-input" style="display:none;">
+      <div class="feedback-banner" style="margin-bottom:1rem;">
+        <div class="feedback-banner-title">What role are you evaluating?</div>
+        <div class="feedback-banner-body">Tell us about the position and we'll research the market rate and calculate your value.</div>
+      </div>
+      <div style="background:var(--white);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow-sm);">
+        <div class="modal-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:6px;">Job Title *</div>
+            <input class="modal-field-input" id="sal-role-input" placeholder="e.g. Training Manager" type="text">
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:6px;">Company</div>
+            <input class="modal-field-input" id="sal-company-input" placeholder="e.g. Acme Corp" type="text">
+          </div>
+        </div>
+        <div class="modal-two-col" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:6px;">Location</div>
+            <input class="modal-field-input" id="sal-location-input" placeholder="e.g. Fort Lauderdale, FL" type="text">
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:6px;">Posted Salary (optional)</div>
+            <input class="modal-field-input" id="sal-posted-input" placeholder="e.g. $65K–$85K or leave blank" type="text">
+          </div>
+        </div>
+        <button class="btn-next gold" style="width:100%;justify-content:center;" onclick="runSalaryResearch()">
+          Research My Market Value →
+        </button>
+      </div>
     </div>
+    <!-- LOADING -->
+    <div style="display:none;flex-direction:column;align-items:center;padding:3rem 1.5rem;text-align:center;" id="salary-loading">
+      <div class="feedback-spinner"></div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--navy);margin-top:1.25rem;margin-bottom:6px;" id="salary-loading-msg">Researching market data...</div>
+      <div style="font-size:13px;color:var(--text-mid);" id="salary-loading-sub">Analyzing your value for this role.</div>
+    </div>
+    <!-- RESULTS -->
     <div id="salary-content" style="display:none;"></div>
+    <!-- STEP 2: Compensation input form (shown after market analysis) -->
+    <div id="salary-comp-form" style="display:none;">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:10px;padding:0 0 6px;border-bottom:1px solid var(--cream-dark);">Enter the Offer Details</div>
+      <div style="background:var(--white);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow-sm);margin-bottom:1rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <div class="sal-field-label">Base Salary (annual) *</div>
+            <input class="modal-field-input" id="comp-salary" placeholder="e.g. 75000" type="number" min="0">
+          </div>
+          <div>
+            <div class="sal-field-label">Annual Bonus / Commission</div>
+            <input class="modal-field-input" id="comp-bonus" placeholder="e.g. 5000" type="number" min="0">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <div class="sal-field-label">401K Match (%)</div>
+            <input class="modal-field-input" id="comp-401k" placeholder="e.g. 4" type="number" min="0" max="100" step="0.5">
+          </div>
+          <div>
+            <div class="sal-field-label">Paid Vacation Days</div>
+            <input class="modal-field-input" id="comp-pto" placeholder="e.g. 15" type="number" min="0">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <div class="sal-field-label">Health Insurance</div>
+            <select class="modal-field-input" id="comp-health" style="font-family:'DM Sans',sans-serif;">
+              <option value="0">Not offered</option>
+              <option value="3000">Partial — I pay some</option>
+              <option value="7000">Fully paid by employer</option>
+              <option value="14000">Family plan — fully paid</option>
+            </select>
+          </div>
+          <div>
+            <div class="sal-field-label">Remote / Hybrid Flexibility</div>
+            <select class="modal-field-input" id="comp-remote" style="font-family:'DM Sans',sans-serif;">
+              <option value="0">On-site only</option>
+              <option value="2000">Hybrid (some remote)</option>
+              <option value="5000">Fully remote</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <div class="sal-field-label">Professional Development Budget</div>
+            <input class="modal-field-input" id="comp-dev" placeholder="e.g. 1500" type="number" min="0">
+          </div>
+          <div>
+            <div class="sal-field-label">Other Benefits (est. annual value)</div>
+            <input class="modal-field-input" id="comp-other" placeholder="e.g. 1000" type="number" min="0">
+          </div>
+        </div>
+        <button class="btn-next gold" style="width:100%;justify-content:center;" onclick="calculateCompensation()">
+          Calculate My Total Package →
+        </button>
+      </div>
+    </div>
+    <!-- COUNTER OFFER RESULT -->
+    <div id="salary-counter-result" style="display:none;"></div>
   </div>
 </div>
 
@@ -3263,19 +3397,81 @@ function scoreJob(job) {
   return Math.min(98, Math.max(35, score));
 }
 
-function getLocalJobs() {
-  // URLs use Indeed's company+title search for direct targeting
-  // Format: q="Job Title" "Company Name" finds the exact posting far better than generic keyword search
-  return [
-    { id:'j1', title:'Senior Training & Development Manager', company:'AmeriHealth Caritas', location:'Fort Lauderdale, FL', type:'Hybrid', salary:'$85K – $105K', match:94, category:['training','leadership'], logo:'🏥', bg:'#e8f4fd', desc:'Lead enterprise-wide training programs. Ideal for someone who combines coaching skills with measurable program outcomes.', url:'https://www.indeed.com/jobs?q=%22Training+Development+Manager%22+%22AmeriHealth+Caritas%22&l=Fort+Lauderdale%2C+FL', posted:'2 days ago' },
-    { id:'j2', title:'Corporate Trainer — Sales & Service', company:'Marriott International', location:'Miami, FL (18 mi)', type:'On-site', salary:'$78K – $95K', match:91, category:['training','sales'], logo:'🏨', bg:'#fff3e0', desc:'Develop and facilitate sales training across multiple properties. Work closely with GMs to build high-performance teams.', url:'https://www.indeed.com/jobs?q=%22Corporate+Trainer%22+%22Marriott%22&l=Miami%2C+FL', posted:'4 days ago' },
-    { id:'j3', title:'Director of Learning & Development', company:'AutoNation', location:'Fort Lauderdale, FL', type:'Hybrid', salary:'$95K – $120K', match:89, category:['training','leadership'], logo:'🚗', bg:'#f3e5f5', desc:'Own the full L&D strategy for one of the nation\'s largest automotive retailers.', url:'https://www.indeed.com/jobs?q=%22Learning+Development%22+%22AutoNation%22&l=Fort+Lauderdale%2C+FL', posted:'1 week ago' },
-    { id:'j4', title:'Remote Training Specialist — Financial Services', company:'Fidelity Investments', location:'Remote (US)', type:'Remote', salary:'$80K – $98K', match:87, category:['training','remote'], logo:'📈', bg:'#e8f5e9', desc:'Create and deliver training for financial advisors nationwide. Financial sales background is a significant advantage.', url:'https://www.indeed.com/jobs?q=%22Training+Specialist%22+%22Fidelity+Investments%22&remotejob=032b3046-06a3-4876-8dfd-474eb5e7ed11', posted:'3 days ago' },
-    { id:'j5', title:'People Development Partner', company:'Spirit Airlines', location:'Miramar, FL (12 mi)', type:'Hybrid', salary:'$82K – $100K', match:85, category:['training','leadership'], logo:'✈️', bg:'#fffde7', desc:'Build training initiatives and succession programs across the airline. Industry knowledge highly valued.', url:'https://www.indeed.com/jobs?q=%22People+Development%22+%22Spirit+Airlines%22&l=Miramar%2C+FL', posted:'5 days ago' },
-    { id:'j6', title:'Sales Enablement Manager', company:'Chewy', location:'Plantation, FL (8 mi)', type:'Hybrid', salary:'$90K – $110K', match:83, category:['sales','leadership'], logo:'🐾', bg:'#fce4ec', desc:'Build tools, content, and training programs that help a high-growth sales team perform at its best.', url:'https://www.indeed.com/jobs?q=%22Sales+Enablement+Manager%22+%22Chewy%22&l=Plantation%2C+FL', posted:'1 week ago' },
-    { id:'j7', title:'Instructional Designer — Remote', company:'LinkedIn Learning', location:'Remote (US)', type:'Remote', salary:'$85K – $105K', match:81, category:['training','remote'], logo:'💼', bg:'#e3f2fd', desc:'Create compelling learning experiences for professionals worldwide.', url:'https://www.indeed.com/jobs?q=%22Instructional+Designer%22+%22LinkedIn%22&remotejob=032b3046-06a3-4876-8dfd-474eb5e7ed11', posted:'2 weeks ago' },
-    { id:'j8', title:'Regional Training Manager', company:'Bank of America', location:'Boca Raton, FL (22 mi)', type:'On-site', salary:'$88K – $108K', match:79, category:['training','sales','leadership'], logo:'🏦', bg:'#e8f4fd', desc:'Oversee training delivery for a multi-branch region. Financial services track record preferred.', url:'https://www.indeed.com/jobs?q=%22Training+Manager%22+%22Bank+of+America%22&l=Boca+Raton%2C+FL', posted:'1 week ago' }
-  ];
+// ── User value estimator — derives salary range from match, compass type, seniority, location ──
+function estimateUserValue(job, match) {
+  const ct = compassType || 'connector';
+  const resumeData = window._resumeData;
+
+  // Base market ranges by compass type (mid-career, South Florida market)
+  const baseMid = {
+    navigator:  85000, connector: 78000, catalyst:  90000, anchor:    72000,
+    pioneer:    82000, builder:   95000, diplomat:  68000, pathfinder: 88000,
+  };
+  let mid = baseMid[ct] || 78000;
+
+  // Seniority adjustment from job title
+  const title = (job.title || '').toLowerCase();
+  if (title.includes('director') || title.includes('vp') || title.includes('head of') || title.includes('chief')) mid *= 1.25;
+  else if (title.includes('senior') || title.includes('lead') || title.includes('principal')) mid *= 1.12;
+  else if (title.includes('specialist') || title.includes('coordinator') || title.includes('associate')) mid *= 0.88;
+  else if (title.includes('manager') || title.includes('partner')) mid *= 1.05;
+
+  // Match score adjustment — higher match = candidate is a stronger fit = can command more
+  const matchAdj = 1 + ((match - 75) / 100) * 0.15; // ±7.5% based on match
+  mid = Math.round(mid * matchAdj / 1000) * 1000;
+
+  // Location adjustment
+  const loc = (job.location || '').toLowerCase();
+  if (loc.includes('remote')) mid = Math.round(mid * 1.05 / 1000) * 1000;
+  else if (loc.includes('miami') || loc.includes('fort lauderdale') || loc.includes('boca') || loc.includes('fl')) {
+    // Florida: roughly at national average
+  }
+
+  // Experience adjustment from resume
+  const expYears = resumeData && resumeData.experience ? Math.min(resumeData.experience.length * 3, 20) : 8;
+  if (expYears >= 15) mid = Math.round(mid * 1.1 / 1000) * 1000;
+  else if (expYears >= 10) mid = Math.round(mid * 1.05 / 1000) * 1000;
+
+  const lo = Math.round((mid * 0.88) / 1000) * 1000;
+  const hi = Math.round((mid * 1.14) / 1000) * 1000;
+  return { lo, mid, hi };
+}
+
+// ── Salary fit label — compares user value range to job's posted salary ──
+function salaryFitLabel(userValue, jobSalaryStr) {
+  if (!jobSalaryStr) return null;
+
+  // Parse salary string — handles "$65K – $120K", "$85,000 - $105,000", "From $50,000", "$109k - $228k"
+  const clean = jobSalaryStr.replace(/,/g, '').toLowerCase();
+  const nums = [];
+  const matches = clean.match(/\$?([\d.]+)\s*k?/g);
+  if (matches) {
+    matches.forEach(m => {
+      const n = parseFloat(m.replace(/[$k]/gi, ''));
+      if (n > 0) nums.push(n < 1000 ? n * 1000 : n);
+    });
+  }
+  if (nums.length === 0) return null;
+
+  const jobLo = Math.min(...nums);
+  const jobHi = Math.max(...nums);
+  const jobMid = (jobLo + jobHi) / 2;
+  const { lo: userLo, hi: userHi, mid: userMid } = userValue;
+
+  // Determine fit
+  const gap = jobMid - userMid;
+  const gapPct = Math.abs(gap) / userMid;
+
+  if (gapPct <= 0.08) {
+    return { label: '✦ Perfect Match', color: '#2d7d52', bg: 'rgba(45,125,82,0.1)', border: 'rgba(45,125,82,0.25)' };
+  } else if (gap > 0) {
+    // Job pays more than user's value — great deal
+    return { label: '⬆ Above Your Range', color: '#1a5f7a', bg: 'rgba(26,95,122,0.1)', border: 'rgba(26,95,122,0.2)' };
+  } else if (gapPct <= 0.18) {
+    return { label: '↕ May Need Negotiation', color: '#c9a55a', bg: 'rgba(201,165,90,0.12)', border: 'rgba(201,165,90,0.3)' };
+  } else {
+    return { label: '⚠ Below Your Value', color: '#8b4a2c', bg: 'rgba(139,74,44,0.1)', border: 'rgba(139,74,44,0.2)' };
+  }
 }
 
 function renderJobs(filter, source) {
@@ -3367,6 +3563,21 @@ function renderJobs(filter, source) {
       ? `<img src="${job.employer_logo}" style="width:40px;height:40px;object-fit:contain;border-radius:8px;background:#fff;" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><div class="job-logo" style="background:${job.bg||'#f0f0f0'};display:none;">${job.logo||'💼'}</div>`
       : `<div class="job-logo" style="background:${job.bg||'#f0f0f0'};">${job.logo||'💼'}</div>`;
     const sourceBadgeSmall = job.source ? `<span class="job-meta-tag">🔗 ${job.source}</span>` : '';
+
+    // User value + salary fit
+    const userVal = estimateUserValue(job, match);
+    const fitLabel = salaryFitLabel(userVal, job.salary);
+    const userValueStr = `$${Math.round(userVal.lo/1000)}K – $${Math.round(userVal.hi/1000)}K`;
+
+    const valueFitHtml = `
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin:8px 0 10px;padding:9px 12px;background:var(--cream);border-radius:var(--radius-sm);border:1px solid var(--cream-dark);">
+        <div style="display:flex;flex-direction:column;">
+          <span style="font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);">Your value</span>
+          <span style="font-size:14px;font-weight:600;color:var(--navy);font-family:'Cormorant Garamond',serif;">${userValueStr}</span>
+        </div>
+        ${fitLabel ? `<span style="font-size:11px;font-weight:600;color:${fitLabel.color};background:${fitLabel.bg};border:1px solid ${fitLabel.border};padding:4px 10px;border-radius:50px;">${fitLabel.label}</span>` : `<span style="font-size:11px;color:var(--text-light);">No salary posted</span>`}
+      </div>`;
+
     html += `<div class="job-card" onclick="openJob('${job.id}')">
       <div class="job-card-top"><div style="display:flex;align-items:center;justify-content:center;flex-shrink:0;">${logoHtml}</div>
       <div><div class="job-title">${job.title}</div><div class="job-company">${job.company}</div></div></div>
@@ -3378,6 +3589,7 @@ function renderJobs(filter, source) {
         ${sourceBadgeSmall}
       </div>
       <div class="job-desc">${job.desc}</div>
+      ${valueFitHtml}
       <div class="job-card-footer">
         <div class="match-score"><span class="match-label">Match</span>
           <div class="match-bar"><div class="match-fill" style="width:${match}%;background:${mc};"></div></div>
@@ -3710,8 +3922,635 @@ function checkReminders() {
 // NEW GLOBAL STATE
 // ─────────────────────────────────────────────────────────────────
 let coverLetterCount = parseInt(localStorage.getItem('cc_cl_count_v1')||'0', 10);
+// ─────────────────────────────────────────────────────────────────
+// INTERVIEW PREP
+// ─────────────────────────────────────────────────────────────────
 let currentInterviewApp = null;
+let _salaryMarketData = null; // stored after research for use in comp calculator
+
+// Typical questions by compass type — shown before API call loads
+const TYPICAL_QUESTIONS = {
+  navigator:  ['Tell me about a time you led a team through a significant change.','How do you prioritize competing strategic initiatives?','Describe a situation where you had to make a difficult decision without all the information you needed.','How do you measure success in an operations or leadership role?','Tell me about the most complex project you\'ve managed.'],
+  connector:  ['Describe a time you helped someone grow professionally.','How do you handle a situation where an employee is underperforming?','Tell me about a training program you designed or delivered.','How do you build trust with a new team quickly?','Describe a time you resolved a conflict between team members.'],
+  catalyst:   ['Tell me about your most successful sale or business development win.','How do you handle rejection and keep your pipeline moving?','Describe a time you exceeded a revenue target.','How do you identify and qualify a new prospect?','Tell me about a time you turned a skeptical prospect into a client.'],
+  anchor:     ['How do you ensure accuracy when managing complex financial data?','Describe a time you identified a compliance risk before it became a problem.','How do you manage competing deadlines in a high-volume role?','Tell me about a process improvement you implemented.','How do you communicate financial information to non-financial stakeholders?'],
+  pioneer:    ['Describe a campaign or initiative you created from scratch.','How do you stay ahead of market and brand trends?','Tell me about a time a creative risk paid off.','How do you balance brand consistency with the need to innovate?','Describe a time you had to defend a bold creative decision.'],
+  builder:    ['Walk me through your process for launching a new product or feature.','How do you gather and prioritize stakeholder requirements?','Describe a time a project you built didn\'t go as planned — what happened?','How do you balance technical constraints with user needs?','Tell me about the most complex system or product you\'ve built.'],
+  diplomat:   ['What draws you to mission-driven work?','How do you build coalitions among stakeholders with competing interests?','Describe a program you managed that created measurable community impact.','How do you handle situations where organizational policy conflicts with what you believe is right?','Tell me about a time you advocated for a vulnerable or underserved group.'],
+  pathfinder: ['Walk me through how you approach a complex analytical problem.','Describe a time your research changed the direction of a project.','How do you communicate data-driven insights to non-technical audiences?','Tell me about a time you had to challenge a widely-held assumption with data.','How do you stay current in your area of expertise?'],
+};
+
+function switchInterviewTab(mode) {
+  document.getElementById('tab-typical').classList.toggle('active', mode === 'typical');
+  document.getElementById('tab-custom').classList.toggle('active', mode === 'custom');
+  document.getElementById('interview-typical-mode').style.display = mode === 'typical' ? 'block' : 'none';
+  document.getElementById('interview-custom-mode').style.display = mode === 'custom' ? 'block' : 'none';
+}
+
+function startInterviewPrep(app) {
+  if (!requirePlan('starter')) return;
+  currentInterviewApp = app;
+  const sub = app ? `${app.role} at ${app.company}` : 'General interview coaching';
+  document.getElementById('interview-header-sub').textContent = sub;
+  document.getElementById('interview-loading').style.display = 'flex';
+  document.getElementById('interview-content').style.display = 'none';
+  document.getElementById('interview-custom-mode').style.display = 'none';
+  document.getElementById('interview-typical-mode').style.display = 'block';
+  document.getElementById('tab-typical').classList.add('active');
+  document.getElementById('tab-custom').classList.remove('active');
+  showScreen('interview');
+  runInterviewPrep(app);
+}
+
+// Entry point from dashboard quick action (no specific app)
+function openInterviewPrep() {
+  if (!requirePlan('starter')) return;
+  currentInterviewApp = null;
+  const ct = compassType || 'connector';
+  const typeMap = { navigator:'Operations & Leadership', connector:'Training & HR', catalyst:'Sales & Business Development', anchor:'Finance & Operations', pioneer:'Marketing & Creative', builder:'Product & Engineering', diplomat:'Nonprofit & Education', pathfinder:'Research & Analytics' };
+  document.getElementById('interview-header-sub').textContent = typeMap[ct] || 'General interview coaching';
+  document.getElementById('interview-loading').style.display = 'flex';
+  document.getElementById('interview-content').style.display = 'none';
+  document.getElementById('interview-typical-mode').style.display = 'block';
+  document.getElementById('tab-typical').classList.add('active');
+  document.getElementById('tab-custom').classList.remove('active');
+  showScreen('interview');
+  runInterviewPrep(null);
+}
+
+async function runInterviewPrep(app) {
+  const resumeData = window._resumeData;
+  const ctx = window._resumeCtx || buildResumeContext();
+  const ct = compassType || 'connector';
+  const skills = resumeData ? resumeData.skills.slice(0, 8).join(', ') : 'leadership, communication, training';
+  const summary = resumeData ? (resumeData.summary || '').substring(0, 300) : '';
+  const expSnippet = resumeData && resumeData.experience && resumeData.experience.length
+    ? resumeData.experience.slice(0, 2).map(e => `${e.title} at ${e.company}: ${(e.bullets||[]).slice(0,2).join('; ')}`).join('\n')
+    : '';
+  const typicalQs = TYPICAL_QUESTIONS[ct] || TYPICAL_QUESTIONS['connector'];
+  const roleContext = app ? `${app.role} at ${app.company}${app.location ? ' in ' + app.location : ''}` : `a ${ct} role`;
+
+  const prompt = `Generate 5 targeted interview questions with STAR answers for this candidate.
+
+ROLE: ${roleContext}
+CANDIDATE SKILLS: ${skills}
+CANDIDATE SUMMARY: ${summary}
+RECENT EXPERIENCE: ${expSnippet}
+PERSONALITY TYPE: ${ct}
+
+For each of these 5 typical questions, provide a pre-written mock STAR answer using the candidate's actual experience:
+${typicalQs.slice(0, 5).map((q, i) => `${i + 1}. "${q}"`).join('\n')}
+
+Rules:
+- Use the candidate's real skills and experience in the answers
+- Never invent specific numbers — use [X%], [number], or [timeframe] as placeholders
+- Keep each STAR section to 2-3 sentences
+- Make answers sound natural and conversational, not robotic
+- Never use the word "AI"
+
+Respond ONLY with valid JSON (no markdown):
+{"questions":[
+  {
+    "question": "exact question text",
+    "why": "one sentence on why interviewers ask this",
+    "star": {
+      "S": "Situation paragraph — context and setting",
+      "T": "Task paragraph — your specific responsibility",
+      "A": "Action paragraph — what YOU specifically did",
+      "R": "Result paragraph — outcome, use [X%] or [number] placeholders"
+    },
+    "tip": "one coaching tip for delivering this answer well"
+  }
+]}`;
+
+  try {
+    const res = await fetch(API_BASE+'/claude', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-haiku-4-5-20251001', max_tokens:3000,
+        system:'You are CareerCompass interview coach. Generate realistic STAR answers from the candidate\'s actual experience. Respond ONLY with valid JSON.',
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const raw = (data.content||[]).map(b=>b.text||'').join('');
+    let parsed;
+    try { parsed = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+    catch(e) { parsed = getFallbackQuestions(app, ct); }
+    renderInterviewPrep(parsed, app);
+  } catch(err) {
+    console.error('Interview prep error:', err);
+    renderInterviewPrep(getFallbackQuestions(app, ct), app);
+  }
+}
+
+function getFallbackQuestions(app, ct) {
+  const qs = (TYPICAL_QUESTIONS[ct] || TYPICAL_QUESTIONS['connector']).slice(0,3);
+  return { questions: qs.map(q => ({
+    question: q,
+    why: 'This question helps interviewers assess your relevant experience and approach.',
+    star: {
+      S: 'Describe the context: what was the situation, when did it happen, and what was at stake?',
+      T: 'What was your specific role or responsibility in this situation?',
+      A: 'Walk through the specific steps YOU took — use "I" rather than "we."',
+      R: 'What was the outcome? Try to quantify with [X%] improvement or [number] result.'
+    },
+    tip: 'Practice saying your answer aloud — aim for 90–120 seconds per question.'
+  }))};
+}
+
+function renderInterviewPrep(data, app) {
+  document.getElementById('interview-loading').style.display = 'none';
+  document.getElementById('interview-content').style.display = 'block';
+  const qs = data.questions || [];
+  const roleName = app ? `${app.role} at ${app.company}` : 'your target role';
+
+  let html = `<div class="feedback-banner" style="margin-bottom:1rem;">
+    <div class="feedback-banner-title">5 questions for ${roleName}</div>
+    <div class="feedback-banner-body">Each question includes a pre-written STAR answer built from your background. Placeholders like [X%] or [number] are yours to fill in with real figures. Use the confidence rating after each to track what to practice more.</div>
+  </div>`;
+
+  qs.forEach((q, i) => {
+    const starLabels = { S:{l:'Situation',h:'Set the scene'}, T:{l:'Task',h:'Your responsibility'}, A:{l:'Action',h:'What you did'}, R:{l:'Result',h:'What happened'} };
+    const starHtml = ['S','T','A','R'].map(letter => {
+      const info = starLabels[letter];
+      const content = (q.star && q.star[letter]) ? q.star[letter] : '';
+      return `<div class="star-step animate-in">
+        <div class="star-step-header">
+          <div class="star-letter">${letter}</div>
+          <div><div class="star-label">${info.l}</div><div class="star-hint">${info.h}</div></div>
+        </div>
+        <div class="star-content">${content}</div>
+      </div>`;
+    }).join('');
+
+    html += `<div class="interview-question-card animate-in">
+      <div class="interview-q-label">Question ${i+1} of ${qs.length}</div>
+      <div class="interview-q-text">"${q.question}"</div>
+      ${q.why ? `<div class="interview-q-tip">💡 ${q.why}</div>` : ''}
+    </div>
+    <div style="margin-bottom:6px;">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:8px;">Your STAR Answer</div>
+      ${starHtml}
+    </div>
+    ${q.tip ? `<div style="background:rgba(201,165,90,0.1);border:1px solid rgba(201,165,90,0.25);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--navy);line-height:1.6;margin-bottom:8px;">
+      <strong>Delivery tip:</strong> ${q.tip}
+    </div>` : ''}
+    <div style="background:var(--white);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.5rem;border:1.5px solid var(--cream-dark);">
+      <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">How confident do you feel answering this?</div>
+      <div class="rating-bar">
+        ${[1,2,3,4,5].map(n=>`<div class="rating-dot" id="rating_${i}_${n}" onclick="setRating(${i},${n})">${n}</div>`).join('')}
+      </div>
+      <div class="rating-feedback" id="rating_feedback_${i}" style="display:none;"></div>
+    </div>`;
+  });
+
+  html += `<div style="background:var(--white);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;box-shadow:var(--shadow-sm);">
+    <div style="font-size:13px;font-weight:500;color:var(--navy);margin-bottom:6px;">Want to practice a different question?</div>
+    <div style="font-size:13px;color:var(--text-mid);margin-bottom:12px;">Switch to the "Ask Your Own" tab above to get a custom STAR answer for any question you type in.</div>
+    <button class="feedback-btn outline" onclick="switchInterviewTab('custom')">Try a custom question →</button>
+  </div>`;
+
+  document.getElementById('interview-content').innerHTML = html;
+}
+
+function setRating(qIdx, val) {
+  [1,2,3,4,5].forEach(n => {
+    const d = document.getElementById(`rating_${qIdx}_${n}`);
+    if (d) d.classList.toggle('active', n <= val);
+  });
+  const fb = document.getElementById(`rating_feedback_${qIdx}`);
+  if (fb) {
+    const msgs = {
+      1: 'Keep building. Write out your full STAR answer in your own words first, then practice saying it aloud.',
+      2: 'Good start. Strengthen your Action steps — be more specific about what YOU personally did.',
+      3: 'Solid foundation. Add one concrete result — even an estimated [X%] improvement makes it more compelling.',
+      4: 'Strong answer. Tighten your Situation setup so it\'s concise — 2 sentences max to set the scene.',
+      5: 'You\'re ready for this one. Have a second example ready in case they ask for another.'
+    };
+    fb.textContent = msgs[val] || '';
+    fb.style.display = 'block';
+  }
+}
+
+// ── CUSTOM QUESTION mode ───────────────────────────────────────────
+async function runCustomQuestion() {
+  const q = (document.getElementById('custom-question-input').value || '').trim();
+  if (!q) { showToast('Please enter a question first'); return; }
+
+  document.getElementById('custom-question-result').style.display = 'none';
+  document.getElementById('custom-question-loading').style.display = 'flex';
+
+  const resumeData = window._resumeData;
+  const ctx = window._resumeCtx || buildResumeContext();
+  const skills = resumeData ? resumeData.skills.slice(0, 8).join(', ') : 'leadership, communication';
+  const summary = resumeData ? (resumeData.summary || '').substring(0, 300) : '';
+  const expSnippet = resumeData && resumeData.experience && resumeData.experience.length
+    ? resumeData.experience.slice(0, 2).map(e => `${e.title} at ${e.company}: ${(e.bullets||[]).slice(0,2).join('; ')}`).join('\n')
+    : '';
+
+  const prompt = `Build a STAR answer for this interview question using the candidate's real experience.
+
+QUESTION: "${q}"
+
+CANDIDATE SKILLS: ${skills}
+CANDIDATE SUMMARY: ${summary}
+RECENT EXPERIENCE: ${expSnippet}
+
+Rules:
+- Use the candidate's real background — don't invent new experience
+- Never invent specific numbers — use [X%], [number], or [timeframe] placeholders
+- Keep each section to 2-3 natural, conversational sentences
+- Never use the word "AI"
+
+Respond ONLY with valid JSON (no markdown):
+{
+  "why": "one sentence on why interviewers ask this question",
+  "star": {
+    "S": "Situation — context and setting from their background",
+    "T": "Task — their specific responsibility",
+    "A": "Action — specific steps they took (use 'I' not 'we')",
+    "R": "Result — outcome with [X%] or [number] placeholders"
+  },
+  "tip": "one delivery coaching tip"
+}`;
+
+  try {
+    const res = await fetch(API_BASE+'/claude', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-haiku-4-5-20251001', max_tokens:1000,
+        system:'You are CareerCompass interview coach. Build realistic STAR answers from the candidate\'s actual experience. Respond ONLY with valid JSON.',
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const raw = (data.content||[]).map(b=>b.text||'').join('');
+    let parsed;
+    try { parsed = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+    catch(e) { parsed = { why:'This question assesses your relevant experience and judgment.', star:{S:'Describe the context and setting.',T:'Explain your specific responsibility.',A:'Walk through the steps you personally took.',R:'Share the outcome — quantify with [X%] or [number] if possible.'}, tip:'Aim for 90–120 seconds. Practice aloud at least twice.' }; }
+    renderCustomQuestion(q, parsed);
+  } catch(err) {
+    console.error('Custom question error:', err);
+    showToast('Something went wrong — please try again');
+    document.getElementById('custom-question-loading').style.display = 'none';
+  }
+}
+
+function renderCustomQuestion(question, data) {
+  document.getElementById('custom-question-loading').style.display = 'none';
+  const starLabels = { S:{l:'Situation',h:'Set the scene'}, T:{l:'Task',h:'Your responsibility'}, A:{l:'Action',h:'What you did'}, R:{l:'Result',h:'What happened'} };
+  const starHtml = ['S','T','A','R'].map(letter => {
+    const info = starLabels[letter];
+    const content = (data.star && data.star[letter]) ? data.star[letter] : '';
+    return `<div class="star-step">
+      <div class="star-step-header">
+        <div class="star-letter">${letter}</div>
+        <div><div class="star-label">${info.l}</div><div class="star-hint">${info.h}</div></div>
+      </div>
+      <div class="star-content">${content}</div>
+    </div>`;
+  }).join('');
+
+  const el = document.getElementById('custom-question-result');
+  el.innerHTML = `<div class="interview-question-card">
+    <div class="interview-q-label">Your question</div>
+    <div class="interview-q-text">"${question}"</div>
+    ${data.why ? `<div class="interview-q-tip">💡 ${data.why}</div>` : ''}
+  </div>
+  <div style="margin-bottom:8px;">
+    <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:8px;">Your STAR Answer</div>
+    ${starHtml}
+  </div>
+  ${data.tip ? `<div style="background:rgba(201,165,90,0.1);border:1px solid rgba(201,165,90,0.25);border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--navy);line-height:1.6;margin-bottom:12px;">
+    <strong>Delivery tip:</strong> ${data.tip}
+  </div>` : ''}
+  <button class="btn-next" style="width:100%;justify-content:center;background:transparent;color:var(--text-mid);border:1.5px solid var(--cream-dark);font-size:13px;margin-bottom:1rem;" onclick="document.getElementById('custom-question-input').value='';document.getElementById('custom-question-result').style.display='none';">
+    ← Try another question
+  </button>`;
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ─────────────────────────────────────────────────────────────────
+// SALARY NEGOTIATION
+// ─────────────────────────────────────────────────────────────────
 let currentSalaryApp = null;
+
+function startSalaryNegotiation(app) {
+  if (!requirePlan('starter')) return;
+  currentSalaryApp = app;
+  _salaryMarketData = null;
+  document.getElementById('salary-header-sub').textContent = app ? `${app.role} at ${app.company}` : 'Know your worth';
+  document.getElementById('salary-role-input').style.display = 'none';
+  document.getElementById('salary-loading').style.display = 'flex';
+  document.getElementById('salary-content').style.display = 'none';
+  document.getElementById('salary-comp-form').style.display = 'none';
+  document.getElementById('salary-counter-result').style.display = 'none';
+  showScreen('salary');
+  // Pre-fill form if we have app data, then run research
+  if (app && app.salary) {
+    document.getElementById('comp-salary').value = '';
+  }
+  runSalaryResearch(app);
+}
+
+// Entry point from dashboard with no specific app
+function openSalaryNegotiation() {
+  if (!requirePlan('starter')) return;
+  currentSalaryApp = null;
+  _salaryMarketData = null;
+  document.getElementById('salary-header-sub').textContent = 'Know your worth';
+  // Pre-fill location from resume if available
+  const loc = (window._resumeData && window._resumeData.location) || '';
+  if (loc && document.getElementById('sal-location-input')) {
+    document.getElementById('sal-location-input').value = loc;
+  }
+  document.getElementById('salary-role-input').style.display = 'block';
+  document.getElementById('salary-loading').style.display = 'none';
+  document.getElementById('salary-content').style.display = 'none';
+  document.getElementById('salary-comp-form').style.display = 'none';
+  document.getElementById('salary-counter-result').style.display = 'none';
+  showScreen('salary');
+}
+
+async function runSalaryResearch(app) {
+  const resumeData = window._resumeData;
+  const ctx = window._resumeCtx || buildResumeContext();
+  const ct = compassType || 'connector';
+
+  // Get role details from app or from the manual input form
+  let role, company, location, postedSalary;
+  if (app) {
+    role = app.role || '';
+    company = app.company || '';
+    location = app.location || (resumeData && resumeData.location) || 'Fort Lauderdale, FL';
+    postedSalary = app.salary || 'not provided';
+  } else {
+    role = (document.getElementById('sal-role-input') && document.getElementById('sal-role-input').value) || '';
+    company = (document.getElementById('sal-company-input') && document.getElementById('sal-company-input').value) || '';
+    location = (document.getElementById('sal-location-input') && document.getElementById('sal-location-input').value) || (resumeData && resumeData.location) || 'Fort Lauderdale, FL';
+    postedSalary = (document.getElementById('sal-posted-input') && document.getElementById('sal-posted-input').value) || 'not provided';
+  }
+
+  if (!role) { showToast('Please enter a job title first'); return; }
+
+  currentSalaryApp = currentSalaryApp || { role, company, location, salary: postedSalary };
+  document.getElementById('salary-header-sub').textContent = company ? `${role} at ${company}` : role;
+  document.getElementById('salary-role-input').style.display = 'none';
+  document.getElementById('salary-loading').style.display = 'flex';
+  document.getElementById('salary-loading-msg').textContent = 'Researching market data...';
+  document.getElementById('salary-loading-sub').textContent = 'Analyzing your value for this role.';
+
+  const skills = resumeData ? resumeData.skills.slice(0, 8).join(', ') : 'leadership, communication';
+  const yearsExp = resumeData && resumeData.experience ? resumeData.experience.length * 3 : 8; // rough estimate
+  const summary = resumeData ? (resumeData.summary || '').substring(0, 200) : '';
+
+  const prompt = `Provide salary market analysis for this candidate and role.
+
+ROLE: ${role}${company ? ' at ' + company : ''}
+LOCATION: ${location}
+POSTED SALARY: ${postedSalary}
+CANDIDATE SKILLS: ${skills}
+CANDIDATE SUMMARY: ${summary}
+COMPASS TYPE: ${ct}
+
+Provide:
+1. A market salary range for this role and location (low, mid, high)
+2. The candidate's estimated market value based on their skills and background, with specific reasons
+3. 3–5 specific value statements — reasons this candidate commands the higher end of the range
+4. Whether the posted salary (if provided) is below, at, or above market
+5. Talking points — 3 lines the candidate can say in a negotiation conversation
+
+Never fabricate specific figures you are not confident about — use ranges.
+Never use the word "AI".
+
+Respond ONLY with valid JSON (no markdown):
+{
+  "marketLow": 65000,
+  "marketMid": 78000,
+  "marketHigh": 95000,
+  "candidateValue": 82000,
+  "currency": "USD",
+  "marketContext": "2-sentence explanation of this salary range and why",
+  "postedAssessment": "below market | at market | above market | no salary posted",
+  "valueReasons": ["reason 1 tied to their skills","reason 2","reason 3"],
+  "talkingPoints": ["line 1 to say in negotiation","line 2","line 3"],
+  "locationNote": "brief note about cost of living or market conditions in this location"
+}`;
+
+  try {
+    const res = await fetch(API_BASE+'/claude', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-haiku-4-5-20251001', max_tokens:1500,
+        system:'You are CareerCompass salary research assistant. Provide accurate salary market data and personalized value analysis. Respond ONLY with valid JSON.',
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const raw = (data.content||[]).map(b=>b.text||'').join('');
+    let parsed;
+    try { parsed = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+    catch(e) { parsed = getFallbackSalaryMarket(role, location); }
+    _salaryMarketData = parsed;
+    renderSalaryMarket(parsed, { role, company, location, postedSalary });
+  } catch(err) {
+    console.error('Salary research error:', err);
+    _salaryMarketData = getFallbackSalaryMarket(role, location);
+    renderSalaryMarket(_salaryMarketData, { role, company, location, postedSalary });
+  }
+}
+
+function getFallbackSalaryMarket(role, location) {
+  return {
+    marketLow: 60000, marketMid: 75000, marketHigh: 95000, candidateValue: 80000, currency:'USD',
+    marketContext: `Salaries for ${role} roles vary by company size, industry, and location. Research sites like Glassdoor, LinkedIn Salary, and the Bureau of Labor Statistics provide current market data for ${location}.`,
+    postedAssessment: 'no salary posted',
+    valueReasons: ['Your cross-functional experience positions you above entry-level range','Your demonstrated leadership and coaching skills command a premium','Your background aligns well with the strategic needs of this role'],
+    talkingPoints: [
+      '"Based on my research and the value I bring, I\'m targeting a base in the [X–Y] range."',
+      '"I\'m excited about the total package — can we talk about what flexibility exists on the base?"',
+      '"Given my [specific skill], I\'m confident I can deliver results quickly — I\'d love for the compensation to reflect that."'
+    ],
+    locationNote: `${location} is a competitive market for this type of role.`
+  };
+}
+
+function formatSalary(n) {
+  if (!n || isNaN(n)) return 'N/A';
+  return '$' + Math.round(n / 1000) + 'K';
+}
+
+function renderSalaryMarket(d, jobInfo) {
+  document.getElementById('salary-loading').style.display = 'none';
+  document.getElementById('salary-content').style.display = 'block';
+
+  const assessmentColor = { 'below market':'#c9a55a', 'at market':'#2d7d52', 'above market':'#2d7d52', 'no salary posted':'rgba(255,255,255,0.5)' };
+  const assessmentIcon  = { 'below market':'⚠️ ', 'at market':'✓ ', 'above market':'✓ ', 'no salary posted':'' };
+  const asmt = (d.postedAssessment || 'no salary posted').toLowerCase();
+
+  let html = `
+  <!-- Market range card -->
+  <div class="salary-range-card animate-in">
+    <div class="salary-range-label">Market range for ${jobInfo.role} · ${jobInfo.location}</div>
+    <div style="display:flex;justify-content:space-around;margin:12px 0 8px;">
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Entry</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:rgba(255,255,255,0.7);">${formatSalary(d.marketLow)}</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Mid</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:30px;color:var(--gold);">${formatSalary(d.marketMid)}</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Senior</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:rgba(255,255,255,0.7);">${formatSalary(d.marketHigh)}</div>
+      </div>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,0.1);margin:10px 0;"></div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Your estimated market value</div>
+    <div class="salary-range-value">${formatSalary(d.candidateValue)}</div>
+    ${jobInfo.postedSalary && jobInfo.postedSalary !== 'not provided' ? `<div style="margin-top:8px;font-size:12px;color:${assessmentColor[asmt]||'rgba(255,255,255,0.5)'};">${assessmentIcon[asmt]||''}Posted salary is ${d.postedAssessment}</div>` : ''}
+  </div>
+
+  <!-- Market context -->
+  <div class="dash-card animate-in delay-1">
+    <div class="dash-card-label">Market context</div>
+    <div style="font-size:14px;color:var(--text-mid);line-height:1.7;margin-bottom:8px;">${d.marketContext}</div>
+    ${d.locationNote ? `<div style="font-size:12px;color:var(--text-light);font-style:italic;">${d.locationNote}</div>` : ''}
+  </div>
+
+  <!-- Value reasons -->
+  <div class="dash-card animate-in delay-1">
+    <div class="dash-card-label">Why you command the higher range</div>
+    ${(d.valueReasons||[]).map(r => `<div class="dash-alert"><div style="font-size:18px;color:var(--gold);">✦</div><div style="font-size:14px;color:var(--text-mid);line-height:1.6;">${r}</div></div>`).join('')}
+  </div>
+
+  <!-- Talking points -->
+  <div class="dash-card animate-in delay-2">
+    <div class="dash-card-label">Lines to use in your conversation</div>
+    ${(d.talkingPoints||[]).map(t => `<div class="salary-script">${t}</div>`).join('')}
+  </div>
+
+  <!-- CTA to compensation calculator -->
+  <div style="background:var(--white);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;box-shadow:var(--shadow-sm);">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--navy);margin-bottom:6px;">Have an offer in hand?</div>
+    <div style="font-size:13px;color:var(--text-mid);line-height:1.6;margin-bottom:14px;">Enter the full benefits package below and we'll calculate whether the total compensation matches your value — and build a counter-offer script if it doesn't.</div>
+    <button class="btn-next gold" style="width:100%;justify-content:center;" onclick="showCompForm()">
+      Enter My Offer Details →
+    </button>
+  </div>`;
+
+  document.getElementById('salary-content').innerHTML = html;
+}
+
+function showCompForm() {
+  document.getElementById('salary-comp-form').style.display = 'block';
+  document.getElementById('salary-comp-form').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function calculateCompensation() {
+  const baseSalary   = parseFloat(document.getElementById('comp-salary').value) || 0;
+  if (!baseSalary) { showToast('Please enter a base salary'); return; }
+
+  const bonus        = parseFloat(document.getElementById('comp-bonus').value) || 0;
+  const match401k    = parseFloat(document.getElementById('comp-401k').value) || 0;
+  const ptoDays      = parseFloat(document.getElementById('comp-pto').value) || 0;
+  const healthVal    = parseFloat(document.getElementById('comp-health').value) || 0;
+  const remoteVal    = parseFloat(document.getElementById('comp-remote').value) || 0;
+  const devBudget    = parseFloat(document.getElementById('comp-dev').value) || 0;
+  const otherBenefits = parseFloat(document.getElementById('comp-other').value) || 0;
+
+  // PTO value: daily rate × days
+  const dailyRate    = baseSalary / 260;
+  const ptoValue     = Math.round(dailyRate * ptoDays);
+
+  // 401K match dollar value
+  const match401kVal = Math.round((match401k / 100) * baseSalary);
+
+  const totalPackage = baseSalary + bonus + match401kVal + ptoValue + healthVal + remoteVal + devBudget + otherBenefits;
+  const candidateValue = (_salaryMarketData && _salaryMarketData.candidateValue) ? _salaryMarketData.candidateValue : 0;
+  const gap = candidateValue > 0 ? candidateValue - totalPackage : 0;
+  const gapPct = candidateValue > 0 ? Math.round((gap / candidateValue) * 100) : 0;
+
+  renderCompCalculator({ baseSalary, bonus, match401kVal, ptoValue, ptoDays, healthVal, remoteVal, devBudget, otherBenefits, totalPackage, candidateValue, gap, gapPct });
+}
+
+function renderCompCalculator(c) {
+  const { baseSalary, bonus, match401kVal, ptoValue, ptoDays, healthVal, remoteVal, devBudget, otherBenefits, totalPackage, candidateValue, gap, gapPct } = c;
+  const needsCounter = gap > 3000; // counter only if gap is meaningful
+  const neutral = candidateValue === 0;
+  const cardClass = neutral ? 'neutral' : (needsCounter ? 'positive' : 'neutral');
+  const app = currentSalaryApp || {};
+
+  let html = `
+  <!-- Package breakdown -->
+  <div class="dash-card animate-in" style="margin-top:1rem;">
+    <div class="dash-card-label">Your total compensation breakdown</div>
+    <div class="comp-row"><span class="comp-row-label">Base Salary</span><span class="comp-row-value">${formatSalary(baseSalary)}</span></div>
+    ${bonus > 0 ? `<div class="comp-row"><span class="comp-row-label">Bonus / Commission</span><span class="comp-row-value">${formatSalary(bonus)}</span></div>` : ''}
+    ${match401kVal > 0 ? `<div class="comp-row"><span class="comp-row-label">401K Match (est.)</span><span class="comp-row-value">${formatSalary(match401kVal)}</span></div>` : ''}
+    ${ptoValue > 0 ? `<div class="comp-row"><span class="comp-row-label">PTO Value (${ptoDays} days)</span><span class="comp-row-value">${formatSalary(ptoValue)}</span></div>` : ''}
+    ${healthVal > 0 ? `<div class="comp-row"><span class="comp-row-label">Health Insurance</span><span class="comp-row-value">${formatSalary(healthVal)}</span></div>` : ''}
+    ${remoteVal > 0 ? `<div class="comp-row"><span class="comp-row-label">Remote Flexibility</span><span class="comp-row-value">${formatSalary(remoteVal)}</span></div>` : ''}
+    ${devBudget > 0 ? `<div class="comp-row"><span class="comp-row-label">Professional Development</span><span class="comp-row-value">${formatSalary(devBudget)}</span></div>` : ''}
+    ${otherBenefits > 0 ? `<div class="comp-row"><span class="comp-row-label">Other Benefits</span><span class="comp-row-value">${formatSalary(otherBenefits)}</span></div>` : ''}
+    <div class="comp-total-row"><span>Total Package</span><span>${formatSalary(totalPackage)}</span></div>
+  </div>`;
+
+  if (!neutral && candidateValue > 0) {
+    html += `
+    <!-- Value gap card -->
+    <div class="value-gap-card ${needsCounter ? 'positive' : 'neutral'} animate-in delay-1" style="margin-top:1rem;">
+      <div class="salary-range-label">${needsCounter ? 'Gap between your value and this offer' : 'Offer assessment'}</div>
+      ${needsCounter
+        ? `<div class="salary-range-value">–${formatSalary(gap)}</div>
+           <div class="salary-range-sub">This offer is about ${gapPct}% below your estimated market value of ${formatSalary(candidateValue)}</div>`
+        : `<div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold);">✓ Fair offer</div>
+           <div class="salary-range-sub">This package is at or above your estimated value of ${formatSalary(candidateValue)}</div>`
+      }
+    </div>`;
+  }
+
+  if (needsCounter) {
+    const counterBase = Math.round((baseSalary + gap) / 1000) * 1000;
+    const counterRange = `${formatSalary(baseSalary + Math.round(gap * 0.7))}–${formatSalary(counterBase + 2000)}`;
+    const reasons = (_salaryMarketData && _salaryMarketData.valueReasons) || ['your cross-functional experience','your demonstrated track record','the skills you bring from day one'];
+    const name = (window._resumeData && window._resumeData.name) || (answers && answers[1]) || '[Your Name]';
+    const hiringManager = app.company ? `the hiring team at ${app.company}` : 'the hiring team';
+    const script = `Dear [Hiring Manager],\n\nThank you so much for the offer — I'm genuinely excited about this opportunity and ${hiringManager}.\n\nI've carefully reviewed the full compensation package and, based on my research into market rates for ${app.role || 'this role'} in ${app.location || 'this area'}, I was hoping we could discuss adjusting the base salary to ${counterRange}.\n\nThis reflects the value I bring: ${reasons.slice(0,2).join(', and ')}. I'm confident I can make an impact from day one and I want to ensure the compensation reflects that mutual commitment.\n\nI'm very enthusiastic about joining the team and I hope we can find a number that works for both of us. Thank you again for the opportunity.\n\nWarm regards,\n${name}`;
+
+    html += `
+    <div class="dash-card animate-in delay-2" style="margin-top:1rem;">
+      <div class="dash-card-label">Your counter-offer script</div>
+      <div style="font-size:13px;color:var(--text-mid);line-height:1.6;margin-bottom:10px;">Suggested counter range: <strong style="color:var(--navy);">${counterRange}</strong></div>
+      <div class="salary-script">${script.replace(/\n/g,'<br>')}</div>
+      <button class="btn-next gold" style="margin-top:10px;width:100%;justify-content:center;" onclick="copySalaryScript(${JSON.stringify(script)})">
+        📋 Copy Script
+      </button>
+    </div>`;
+  } else if (!neutral) {
+    html += `<div class="dash-card animate-in delay-2" style="margin-top:1rem;">
+      <div class="dash-card-label">Our recommendation</div>
+      <div style="font-size:14px;color:var(--text-mid);line-height:1.7;">This offer appears fair relative to your market value. You may still want to negotiate — even a fair offer often has flexibility on PTO, remote days, or professional development budget. Use the talking points above as your opening.</div>
+    </div>`;
+  }
+
+  const counterEl = document.getElementById('salary-counter-result');
+  counterEl.innerHTML = html;
+  counterEl.style.display = 'block';
+  counterEl.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function copySalaryScript(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(()=>showToast('✅ Script copied!')).catch(()=>showToast('Select the text to copy manually'));
+  }
+}
 let editingAppId = null;
 let trackerFilter = 'all';
 let pendingStatusAppId = null;
@@ -4098,6 +4937,14 @@ function renderDashboard() {
         <span style="font-size:22px;">💼</span>
         LinkedIn Profile
       </button>
+      <button class="btn-next" style="background:var(--navy);color:var(--white);justify-content:center;gap:8px;font-size:13px;padding:14px 10px;border-radius:var(--radius-sm);flex-direction:column;height:auto;" onclick="openInterviewPrep();">
+        <span style="font-size:22px;">🎯</span>
+        Interview Prep
+      </button>
+      <button class="btn-next" style="background:var(--navy);color:var(--white);justify-content:center;gap:8px;font-size:13px;padding:14px 10px;border-radius:var(--radius-sm);flex-direction:column;height:auto;" onclick="openSalaryNegotiation();">
+        <span style="font-size:22px;">💰</span>
+        Salary Coach
+      </button>
       <button class="btn-next" style="background:var(--cream-dark);color:var(--navy);justify-content:center;gap:8px;font-size:13px;padding:14px 10px;border-radius:var(--radius-sm);flex-direction:column;height:auto;" onclick="showScreen('tracker');renderTracker();">
         <span style="font-size:22px;">📋</span>
         Job Tracker
@@ -4110,231 +4957,6 @@ function renderDashboard() {
   </div>`;
 
   document.getElementById('dashboard-body').innerHTML = html;
-}
-
-// ─────────────────────────────────────────────────────────────────
-// INTERVIEW PREP (Pro)
-// ─────────────────────────────────────────────────────────────────
-function startInterviewPrep(app) {
-  if (!requirePlan('pro')) return;
-  currentInterviewApp = app;
-  document.getElementById('interview-header-sub').textContent = app.role+' at '+app.company;
-  document.getElementById('interview-loading').style.display='flex';
-  document.getElementById('interview-content').style.display='none';
-  showScreen('interview');
-  runInterviewPrep(app);
-}
-
-async function runInterviewPrep(app) {
-  const resumeData = window._resumeData;
-  const ctx = window._resumeCtx || buildResumeContext();
-  const name = ctx.name||(answers[1]||'');
-  const skills = resumeData ? resumeData.skills.join(', ') : 'leadership, training, communication';
-  const summary = resumeData ? resumeData.summary : '';
-  const prompt = `Generate 3 targeted interview questions for this candidate and role.
-
-ROLE: ${app.role} at ${app.company}${app.location?' in '+app.location:''}
-CANDIDATE SKILLS: ${skills}
-CANDIDATE SUMMARY: ${summary}
-PERSONALITY: ${ctx.personalityType||'connector'}
-
-For each question, also suggest which experience from their resume to draw from and a STAR coaching tip.
-
-Never invent specific numbers or percentages. Use [X%] or [number] as placeholders the user fills in.
-
-Respond ONLY with valid JSON (no markdown):
-{"questions":[
-  {"question":"...","why":"Why this question matters for this role","tip":"Which resume experience to draw from and how to structure the answer","starFocus":"Which STAR element (S,T,A,R) to emphasize most"},
-  {"question":"...","why":"...","tip":"...","starFocus":"..."},
-  {"question":"...","why":"...","tip":"...","starFocus":"..."}
-]}`;
-  try {
-    const res = await fetch(API_BASE+'/claude', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:1500,
-        system:'You are CareerCompass interview coach. Generate targeted questions and STAR coaching. Respond ONLY with valid JSON.',
-        messages:[{role:'user',content:prompt}] })
-    });
-    const data = await res.json();
-    if(data.error) throw new Error(data.error);
-    const raw = (data.content||[]).map(b=>b.text||'').join('');
-    let parsed;
-    try { parsed = JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) { parsed = getFallbackQuestions(app); }
-    renderInterviewPrep(parsed, app);
-  } catch(err) {
-    console.error('Interview prep error:',err);
-    renderInterviewPrep(getFallbackQuestions(app), app);
-  }
-}
-
-function getFallbackQuestions(app) {
-  return { questions: [
-    { question:`Tell me about a time you had to quickly learn something new to deliver results in a role like ${app.role}.`, why:'Tests adaptability and growth mindset.', tip:'Draw from a specific experience where you acquired a new skill under pressure.', starFocus:'A' },
-    { question:'Describe a situation where you led a project or initiative that had a measurable impact.', why:'Assesses leadership and ownership.', tip:'Choose an example with clear before/after outcomes — even if exact numbers need to be filled in.', starFocus:'R' },
-    { question:'How do you handle competing priorities when everything feels urgent?', why:'Tests organizational and communication skills.', tip:'Focus on your system or process, not just the outcome.', starFocus:'T' }
-  ]};
-}
-
-function renderInterviewPrep(data, app) {
-  document.getElementById('interview-loading').style.display='none';
-  document.getElementById('interview-content').style.display='block';
-  const qs = data.questions||[];
-  let html = `<div class="feedback-banner" style="margin-bottom:1rem;">
-    <div class="feedback-banner-title">Your ${app.role} interview prep</div>
-    <div class="feedback-banner-body">3 likely questions, STAR coaching for each, and a self-rating tool to help you practice until you feel ready.</div>
-  </div>`;
-  qs.forEach((q,i) => {
-    html += `<div class="interview-question-card animate-in">
-      <div class="interview-q-label">Question ${i+1}</div>
-      <div class="interview-q-text">"${q.question}"</div>
-      <div class="interview-q-tip">${q.why}</div>
-    </div>
-    <div style="margin-bottom:1.5rem;">
-      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-light);margin-bottom:8px;">STAR Framework — ${q.starFocus ? 'Focus on '+q.starFocus : 'All steps'}</div>
-      ${['S','T','A','R'].map(letter => {
-        const labels={S:{l:'Situation',h:'Set the context — where, when, what was happening'},T:{l:'Task',h:'What was your specific responsibility?'},A:{l:'Action',h:'What did YOU do? Use "I" not "we"'},R:{l:'Result',h:'What happened? Quantify if possible with [X%] or [number]'}};
-        const info = labels[letter];
-        return `<div class="star-step">
-          <div class="star-step-header">
-            <div class="star-letter">${letter}</div>
-            <div><div class="star-label">${info.l}</div><div class="star-hint">${info.h}</div></div>
-          </div>
-          <div class="star-input-wrap">
-            <textarea class="modal-field-input" id="star_${i}_${letter}" placeholder="Write your ${info.l.toLowerCase()} here..." rows="3" style="resize:none;width:100%;"></textarea>
-          </div>
-        </div>`;
-      }).join('')}
-      <div style="background:var(--white);border-radius:var(--radius);padding:1.25rem;margin-top:8px;border:1.5px solid var(--cream-dark);">
-        <div style="font-size:13px;font-weight:500;color:var(--navy);margin-bottom:8px;">💡 ${q.tip}</div>
-        <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;">Rate your answer confidence:</div>
-        <div class="rating-bar">
-          ${[1,2,3,4,5].map(n=>`<div class="rating-dot" id="rating_${i}_${n}" onclick="setRating(${i},${n})">${n}</div>`).join('')}
-        </div>
-        <div class="rating-feedback" id="rating_feedback_${i}" style="display:none;"></div>
-      </div>
-    </div>`;
-  });
-  document.getElementById('interview-content').innerHTML = html;
-}
-
-function setRating(qIdx, val) {
-  [1,2,3,4,5].forEach(n=>{
-    const d=document.getElementById(`rating_${qIdx}_${n}`);
-    if(d) d.classList.toggle('active', n<=val);
-  });
-  const fb = document.getElementById(`rating_feedback_${qIdx}`);
-  if(fb) {
-    const msgs={1:'Keep practicing — write out your STAR steps in full first, then practice saying them aloud.',2:'Good start. Focus on your Action steps — be more specific about what YOU did.',3:'Solid answer. Try to add one concrete result, even an estimated [number] or [X%] improvement.',4:'Strong! Review your Situation setup — make sure it is concise and sets context quickly.',5:'Excellent! You are ready. Consider having a backup example in case the interviewer asks for another.'};
-    fb.textContent = msgs[val]||'';
-    fb.style.display = 'block';
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────
-// SALARY NEGOTIATION (Pro)
-// ─────────────────────────────────────────────────────────────────
-function startSalaryNegotiation(app) {
-  if (!requirePlan('pro')) return;
-  currentSalaryApp = app;
-  document.getElementById('salary-header-sub').textContent = app.role+' at '+app.company;
-  document.getElementById('salary-loading').style.display='flex';
-  document.getElementById('salary-content').style.display='none';
-  showScreen('salary');
-  runSalaryNegotiation(app);
-}
-
-async function runSalaryNegotiation(app) {
-  const ctx = window._resumeCtx || buildResumeContext();
-  const resumeData = window._resumeData;
-  const offered = app.salary||'not specified';
-  const prompt = `Provide salary negotiation coaching for this job offer.
-
-ROLE: ${app.role} at ${app.company}${app.location?' in '+app.location:''}
-OFFERED SALARY RANGE: ${offered}
-CANDIDATE EXPERIENCE: ${ctx.personalityType||'experienced professional'}
-CANDIDATE SKILLS: ${resumeData?resumeData.skills.join(', '):'leadership, training, communication'}
-
-Provide:
-1. Market analysis for this role and location
-2. A suggested counter-offer range with reasoning
-3. 3 negotiation tactics specific to this situation
-4. A verbatim professional response script
-5. 2-3 red flags to watch for
-
-Never fabricate specific salary numbers you are not sure about — use ranges like "[market rate for this role in this city]" if uncertain.
-
-Respond ONLY with valid JSON (no markdown):
-{"marketAnalysis":"2 sentence market context","counterRange":"$X–$Y (or range guidance)","counterRationale":"why this counter makes sense","tactics":["tactic 1","tactic 2","tactic 3"],"script":"Dear [Name],\\n\\nThank you for the offer... [full email script]","redFlags":["flag 1","flag 2"]}`;
-
-  try {
-    const res = await fetch(API_BASE+'/claude', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:1500,
-        system:'You are CareerCompass salary coach. Provide negotiation strategy. Respond ONLY with valid JSON.',
-        messages:[{role:'user',content:prompt}] })
-    });
-    const data = await res.json();
-    if(data.error) throw new Error(data.error);
-    const raw = (data.content||[]).map(b=>b.text||'').join('');
-    let parsed;
-    try { parsed = JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(e) { parsed = getFallbackSalary(app); }
-    renderSalaryNegotiation(parsed, app);
-  } catch(err) {
-    console.error('Salary negotiation error:',err);
-    renderSalaryNegotiation(getFallbackSalary(app), app);
-  }
-}
-
-function getFallbackSalary(app) {
-  return {
-    marketAnalysis: `For a ${app.role} role, compensation varies by company size, location, and experience. Research sites like Glassdoor, Levels.fyi, and Bureau of Labor Statistics provide current market ranges for your area.`,
-    counterRange: '[Research market rate for this role and location on Glassdoor or LinkedIn Salary]',
-    counterRationale: 'Counteroffers of 10–15% above the initial offer are common and typically expected in professional hiring.',
-    tactics: [
-      'Let the employer make the first specific number — then anchor your counter above it.',
-      'Negotiate the full package: base, bonus, PTO, remote flexibility, and professional development budget.',
-      'Express genuine enthusiasm for the role first, then pivot to compensation — "I am very excited about this opportunity, and I want to make sure the compensation works for both of us."'
-    ],
-    script: `Dear [Hiring Manager Name],\n\nThank you so much for the offer — I am genuinely excited about this opportunity and the team at ${app.company}.\n\nI have reviewed the offer carefully and, after researching the market for ${app.role} roles in this area, I was hoping we could discuss bringing the base salary closer to [your counter amount]. This reflects my [X years] of experience and the specific skills I would bring from day one.\n\nI am fully committed to joining the team and making an impact quickly. I hope we can find a number that works for both sides.\n\nThank you again for the opportunity. I look forward to your response.\n\nWarm regards,\n[Your Name]`,
-    redFlags: [
-      'Pressure to decide immediately without time to review — a legitimate employer will give you at least 24–48 hours.',
-      'Vague or missing details about benefits, equity, or bonus structure in writing.'
-    ]
-  };
-}
-
-function renderSalaryNegotiation(data, app) {
-  document.getElementById('salary-loading').style.display='none';
-  document.getElementById('salary-content').style.display='block';
-  let html = `<div class="salary-range-card animate-in">
-    <div class="salary-range-label">Suggested counter-offer range</div>
-    <div class="salary-range-value">${data.counterRange}</div>
-    <div class="salary-range-sub">${data.counterRationale}</div>
-  </div>
-  <div class="dash-card animate-in delay-1">
-    <div class="dash-card-label">Market context</div>
-    <div style="font-size:14px;color:var(--text-mid);line-height:1.7;">${data.marketAnalysis}</div>
-  </div>
-  <div class="dash-card animate-in delay-2">
-    <div class="dash-card-label">Your negotiation tactics</div>
-    ${(data.tactics||[]).map((t,i)=>`<div class="dash-alert"><div style="font-size:20px;font-family:'Cormorant Garamond',serif;color:var(--gold);">${i+1}</div><div style="font-size:14px;color:var(--text-mid);line-height:1.6;">${t}</div></div>`).join('')}
-  </div>
-  <div class="dash-card animate-in delay-2">
-    <div class="dash-card-label">Your response script</div>
-    <div class="salary-script">${(data.script||'').replace(/\n/g,'<br>')}</div>
-    <button class="btn-next gold" style="margin-top:8px;" onclick="copySalaryScript(${JSON.stringify((data.script||'')).replace(/</g,'&lt;')})">📋 Copy Script</button>
-  </div>
-  ${(data.redFlags||[]).length>0?`<div class="dash-card animate-in delay-3">
-    <div class="dash-card-label">⚠️ Watch out for</div>
-    ${data.redFlags.map(f=>`<div class="dash-alert"><div style="font-size:20px;">🚩</div><div style="font-size:13px;color:var(--text-mid);line-height:1.6;">${f}</div></div>`).join('')}
-  </div>`:''}`;
-  document.getElementById('salary-content').innerHTML = html;
-}
-
-function copySalaryScript(text) {
-  if(navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(()=>showToast('✅ Script copied!')).catch(()=>showToast('Select text to copy'));
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────
